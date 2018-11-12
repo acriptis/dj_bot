@@ -1,78 +1,24 @@
+
 from django.db import models
-# Create your models here.
-from polls.models import Question
-from components.matchers.matchers import TrainigPhrasesMatcher
 import django.dispatch
 
-# just constant for system responses:
-SYSTEM_USER_NAME = 'sys'
-
-class UserDialog(models.Model):
-    def __init__(self,*args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # each message is here:
-        self.dialog_acts = []
-        # parallel list with authors of each dialog act
-        self.dialog_speakers = []
-
-        self.last_message = ""
-
-        self.memory = {}
-
-        self.active_user_interactions = []
-
-        # list of QuestionInteractions waiting for response
-        self.questions_under_discussion = []
-
-    def _push_dialog_act(self, author, message):
-        """
-        :param author:
-        :param message:
-        :return:
-        """
-        self.dialog_acts.append(message)
-        self.dialog_speakers.append(author)
-        self.last_message = message
-        return self
-
-    def print_dialog(self):
-        zipped_messages = list(zip(self.dialog_speakers, self.dialog_acts))
-        for each_author, each_message in zipped_messages:
-            print("%10s: %s" % (each_author, each_message ))
-
-    def send_message_to_user(self, message):
-        """
-        Interface to send messages to User (via Telegram or any other DialogBroker)
-        :return: self
-        """
-        if not message:
-            import ipdb; ipdb.set_trace()
-            print("empty message?")
-        return self._push_dialog_act(SYSTEM_USER_NAME, message)
-
-    def show_latest_sys_responses(self):
-        # import ipdb; ipdb.set_trace()
-        # find highest non sys index:
-        user_indexes = [i for i, x in enumerate(self.dialog_speakers) if x != SYSTEM_USER_NAME]
-        # import ipdb; ipdb.set_trace()
-
-        max_user_index = max(user_indexes)
-
-        # find system responses after latest user input:
-        latest_sys_indexes = [i for i, x in enumerate(self.dialog_speakers) if (x == SYSTEM_USER_NAME and i>max_user_index)]
-        sys_answers = [self.dialog_acts[i] for i in latest_sys_indexes]
-        return sys_answers
 
 
 class AbstractInteraction():
+    """
+    Specification of Interaction That announces its exit to those who may be concerned
 
+    Signal is available after initialization...
+    """
+    EXIT_GATE_OK = "ExitGate_Ok"
+    #
+    # def __init__(self, *args, **kwargs):
+    #     self.exit_gate_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
+    #     # signal sent on completion? of interaction:
+    #
+    # def connect_exit_gate_with_fn(self, callback_fn):
+    #     self.exit_gate_signal.connect(callback_fn)
 
-    def __init__(self, *args, **kwargs):
-        self.exit_gate_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
-        # signal sent on completion? of interaction:
-
-    def connect_exit_gate_with_fn(self, callback_fn):
-        self.exit_gate_signal.connect(callback_fn)
 
 
 class Interaction(models.Model):
@@ -81,102 +27,83 @@ class Interaction(models.Model):
     """
     name = models.CharField(max_length=200)
 
+    # Exit Gates declaration:
+    EXIT_GATE_OK = "ExitGate_Ok"
 
-class SendTextOperation(Interaction):
-    # send to send:
-    text = models.CharField(max_length=200)
+    EXIT_GATES_NAMES_LIST = [
+        EXIT_GATE_OK
+    ]
 
-    # TODO add support of templates and variables filling
+    # list of connectable Signal objects for each named ExitGate
+    EXIT_GATES_SIGNALS = {}
+    # signals are created at stage of Interaction class initialization
 
-    def do(self, ic=None):
+    def class_router(self):
+        # given a name of interaction restores a BehaviourClass
+        # returns polymorphic object of concrete interaction class
+        pass
+
+    @classmethod
+    def initialize(cls, ic, name=None, *args, **kwargs):
         """
-        Actual implementation of behaviour
+        Interaction initialization requres:
+        1. specify its name (And register it in the Interactions Registry)
+        2. initilize EXIT GATES of the interaction.
+            EXIT GATES are declared in implementation class, if not then default set of exit gates is assumed
+            (the only: ExitGate_Ok)
+
+        :param ic:
+        :param name:
+        :param args:
+        :param kwargs:
         :return:
         """
-        # TODO
-        # then user interaction sets its state to completed
-        return self.text
+        if not name:
+            # default name is a name of class
+            name = cls.__name__
 
-    # def __init__(self, text):
-    #     self.text = text
+        intrctn, _ = cls.objects.get_or_create(name=name)
 
+        intrctn.ic = ic
 
-class UserInteraction(models.Model):
-    interaction = models.ForeignKey(Interaction, on_delete=models.CASCADE)
-    # # user no user now)
-    #
-    INIT = 'Init'
-    ACTIVE = 'Active'
-    CANCELLED = 'Cancelled'
-    COMPLETED = 'Completed'
-    IGNORED = 'Ignored'
-    INTERACTION_STATES = (
-        (INIT, 'init'),
-        (ACTIVE, 'Active'),
-        (IGNORED, 'Ignored'),
-        (CANCELLED, 'Cancelled'),
-        (COMPLETED, 'Completed'),
-    )
+        # # Exit Signal Declaration
+        # intrctn.exit_gate_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
 
-    state = models.CharField(
-        max_length=2,
-        choices=INTERACTION_STATES,
-        default=INIT
-    )
+        # Signals Initialization:
+        for each_exit_gate_name in intrctn.EXIT_GATES_NAMES_LIST:
+            # create a signal object for each exit gate
+            intrctn.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
 
-    userdialog = models.ForeignKey(UserDialog, on_delete=models.CASCADE)
+        return intrctn
 
-    # def __init__(self, interaction, user, userdialog):
-    #     self.interaction = interaction
-    #     # if not status:
-    #     #     status = self.INIT
-    #     # self.status=status
-    #
-    #     # pointer to the node of latest_completed interaction of the graph:
-    #     self.state_pointer=self.interaction.input_gate
-    #     self.user=user
-    #     self.state =
-    #
-    # def start_scenario_process(self, *args, **kwargs):
-    #     """
-    #     Input Gate is here
-    #     :param args:
-    #     :param kwargs:
-    #     :return:
-    #     """
-    #     self.state = self.ACTIVE
-    #     # what we return here?
-    #     do_results_deferred = self.interaction.do(*args, **kwargs)
-    #     # if done
-    #     self.state = self.COMPLETED
-    #     return do_results_deferred
-    #
-    # @classmethod
-    # def activate(cls, interaction):
-    #     uiprocess = UserInteraction(interaction=interaction,
-    #                     # user=user,
-    #                     state=UserInteraction.INIT
-    #                     )
-    #     return uiprocess
-    #
-    # @classmethod
-    # def resume_or_init(self, interaction):
-    #     # TODO
-    #     pass
-    #
-    # def _resume(self):
-    #     if self.state_pointer:
-    #         # TODO multiouts?
-    #         self.interaction.graph[self.state_pointer].out
+    def start(self, *args, **kwargs):
+        """
+        if start method called then we need to create a UserInteraction(Process) and then we may start logic
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        print("Start of Interaction(Base class)")
+        from interactions.models import UserInteraction
+        # TODO check state?
+        ui, _ = UserInteraction.objects.get_or_create(interaction=self, userdialog=self.ic.userdialog)
+        return ui
 
+    def connect_exit_gate_with_fn(self, callback_fn, exit_gate=None):
+        if not exit_gate:
+            # if exit gate is not provided assert that the default exit gate is used:
+            exit_gate = self.EXIT_GATE_OK
+        print("connecting Exit Gate: %s, cb_fn: %s" % (self, callback_fn))
+        # self.exit_gate_signal.connect(callback_fn)
+        # import ipdb; ipdb.set_trace()
 
-
-#############################################################################################################
-#############################################################################################################
-
+        self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn)
 
 class QuestionInteractionFactory(Interaction, AbstractInteraction):
+    # TODO allow generative template (GenericField)
     question = models.CharField(max_length=200)
+
+    # URI?
     slot_name = models.CharField(max_length=200)
 
     # TODO generate random signal id per object?
@@ -211,10 +138,10 @@ class QuestionInteractionFactory(Interaction, AbstractInteraction):
     #     # G.add_edge(self.user_wait_op, self.response_receptor, object="then")
     #     #
     #     # self.scenario_graph = G
+
     def __init__(self, *args, **kwargs):
         super(Interaction, self).__init__(*args, **kwargs)
         super(AbstractInteraction, self).__init__()
-
 
     def connect_to_dataflow(self, ic):
         """
@@ -273,6 +200,7 @@ class QuestionInteractionFactory(Interaction, AbstractInteraction):
             print("NOT disconnected")
 
         print("response receptor of QuestionAnswerer")
+
         def percept_matched_message(message, *args):
             """
             Dummy extractor
@@ -303,12 +231,17 @@ class QuestionInteractionFactory(Interaction, AbstractInteraction):
             # import ipdb; ipdb.set_trace()
 
             self.ic.userdialog.send_message_to_user("Nice to know you %s" % extract[self.slot_name])
+            import ipdb; ipdb.set_trace()
+            # TODO unworking part:
             # emit signal of completion:
-            self.exit_gate_signal.send(sender=self, userdialog=userdialog)
+            # self.exit_gate_signal.send(sender=self, userdialog=userdialog)
+            # # TODO migrate to:
+            # self.EXIT_GATES_SIGNALS[exit_gate].send(sender=self, userdialog=self.ic.userdialog)
             return True
         else:
             self.ic.userdialog.send_message_to_user("So what is your name?")
             return False
+
 
 
 #############################################################################################################
@@ -317,6 +250,8 @@ class QuestionInteractionFactory(Interaction, AbstractInteraction):
 # TODO move into sep module
 class GreetInteraction(Interaction, AbstractInteraction):
 
+    class Meta:
+        proxy = True
     # exit_gate_signal = Signal()
 
     def __init__(self, *args, **kwargs):
@@ -353,8 +288,8 @@ class GreetInteraction(Interaction, AbstractInteraction):
         # TODO make hypotheses queues?
         self.ic.userdialog.send_message_to_user(self.out_text)
 
-        self.exit_gate_signal.send(sender=self.__class__, userdialog=self.ic.userdialog)
-
+        # self.exit_gate_signal.send(sender=self.__class__, userdialog=self.ic.userdialog)
+        self.EXIT_GATES_SIGNALS[self.EXIT_GATE_OK].send(sender=self, userdialog=self.ic.userdialog)
         # import ipdb; ipdb.set_trace()
         # TODO refactor:
         # TODO send signal scenario completion
@@ -369,6 +304,9 @@ class GreetInteraction(Interaction, AbstractInteraction):
 
 
 class ByeInteraction(Interaction, AbstractInteraction):
+    class Meta:
+        proxy = True
+
     def __init__(self, *args, **kwargs):
         super(Interaction, self).__init__(*args, **kwargs)
         super(AbstractInteraction, self).__init__()
@@ -407,7 +345,22 @@ class ByeInteraction(Interaction, AbstractInteraction):
 
         self.do(*args, **kwargs)
 
-# class ExceptionInteraction():
-#     def do(self,  *args, **kwargs):
-#         sto = SendTextOperation(text="I don't know what you mean!")
-#         sto.do(self.ic)
+
+# TODO:
+class FormFillingInteraction():
+    """
+    # TODO make Factory abstraction!
+    FormValidation in Django:
+    https://docs.djangoproject.com/en/2.1/ref/forms/validation/#validating-fields-with-clean
+    """
+    pass
+
+    def start(self):
+        pass
+
+    def _get_form_slots(self):
+        """
+        Abstract method for receiving list of all slots
+        :return:
+        """
+        pass

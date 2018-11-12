@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'polls',
     'interactions.apps.InteractionsConfig',
+    'bank_interactions.apps.BankInteractionsConfig',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+###################################################################################
+# just constant of author for system responses in chats:
+SYSTEM_USER_NAME = 'sys'

@@ -1,6 +1,7 @@
 from deeppavlov.core.models.component import Component
 from interactions.models import GreetInteraction, ByeInteraction
 from interactions.models import QuestionInteractionFactory, UserDialog
+from components.information_controller import InformationController
 
 
 class AbstractSkill(Component):
@@ -17,23 +18,10 @@ class AbstractSkill(Component):
 # #########################################################################################
 # interactions
 
-# END #########################################################################################
-class InformationController():
-    # TODO design structure
-    def __init__(self):
-        # list of callables which are called at each utterance
-        # self.receptors = []
-        # here is user-specific receptors!
-        # initilize receptors registry
-        self.active_receptors = []
-
-        self.global_memory = {}
-
-        # list of responses from interactions:
-        self.responses_list = []
-
-import django.dispatch
 class MonopolyAgentSkill(AbstractSkill):
+    """
+        Agent that is a skill as well
+    """
     # signal emmitted when user message comes:
     # user_message_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
 
@@ -54,24 +42,21 @@ class MonopolyAgentSkill(AbstractSkill):
         # create user dialog and push the message
         self.userdialog = UserDialog.objects.create()
 
-        # signal emmitted when user message comes:
-        self.ic.user_message_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
-
         # store userdialog in information controller
         self.ic.userdialog = self.userdialog
 
         # interaction for greeting
         self.greet_intrctn, created = GreetInteraction.objects.get_or_create()
+        self.farewell_intrctn, created = ByeInteraction.objects.get_or_create()
+
+        # TODO templatize question
+        self.what_is_ur_name_intrctn, _ = QuestionInteractionFactory.objects.get_or_create(question="What is your name?", slot_name="user_name")
+
+        # connecting interactions to informationController
         # interaction connects itself to global receptors
         self.greet_intrctn.connect_to_dataflow(self.ic)
-
-        self.farewell_intrctn, created = ByeInteraction.objects.get_or_create()
         self.farewell_intrctn.connect_to_dataflow(self.ic)
-
-        # TODO templatize
-        self.what_is_ur_name_intrctn, _ = QuestionInteractionFactory.objects.get_or_create(question="What is your name?", slot_name="user_name")
         self.what_is_ur_name_intrctn.connect_to_dataflow(self.ic)
-
         self.greet_intrctn.connect_exit_gate_with_fn(self.what_is_ur_name_intrctn.start)
         self.what_is_ur_name_intrctn.connect_exit_gate_with_fn(self.farewell_intrctn.start)
 
