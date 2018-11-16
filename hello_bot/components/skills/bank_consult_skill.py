@@ -7,7 +7,8 @@ import django.dispatch
 from interactions.models.user_slot_process import UserSlotProcess
 
 from bank_interactions.models import DocumentsListSupplyInteraction, IntentRetrievalInteraction, \
-    BusinessOfferingInteraction, ConsideringSelfServiceInteraction
+    BusinessOfferingInteraction, ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, \
+    OfficeRecommendationInteraction, DialogTerminationInteraction, OperatorSwitchInteraction
 from bank_interactions.models.greeting import GreetingInteraction
 from bank_interactions.models.interactions import DesiredCurrencyInteraction
 
@@ -29,25 +30,37 @@ class Scenario():
         # self.greet_intrctn = GreetingInteraction.initialize(ic=ic)
 
         # 1. intent
-        self.intent_clarificator = self.ic.im.get_or_create_instance_by_class(IntentRetrievalInteraction)
+        self.s1_intent_clarificator = self.ic.im.get_or_create_instance_by_class(IntentRetrievalInteraction)
         # self.intent_clarificator = IntentRetrievalInteraction.initialize(ic=ic)
 
         # TODO intent clarificator internally calls DesiredCurrencyInteraction!!
         # TODO intent clarificator internally calls BusinessOfferingInteraction!!
         # 2. desired currency
-        self.desired_currency_interaction = self.ic.im.get_or_create_instance_by_class(DesiredCurrencyInteraction)
+        self.s2_desired_currency_interaction = self.ic.im.get_or_create_instance_by_class(DesiredCurrencyInteraction)
         # self.desired_currency_interaction = DesiredCurrencyInteraction.initialize(ic=ic)
 
         # 3.
-        self.doc_list_supply_interaction = self.ic.im.get_or_create_instance_by_class(DocumentsListSupplyInteraction)
+        self.s3_doc_list_supply_interaction = self.ic.im.get_or_create_instance_by_class(DocumentsListSupplyInteraction)
         # self.doc_list_supply_interaction = DocumentsListSupplyInteraction.initialize(ic=ic)
 
         # 4.BusinessOfferingInteraction
-        self.business_offering_interaction = self.ic.im.get_or_create_instance_by_class(BusinessOfferingInteraction)
+        self.s4_business_offering_interaction = self.ic.im.get_or_create_instance_by_class(BusinessOfferingInteraction)
         # self.business_offering_interaction = BusinessOfferingInteraction.initialize(ic=ic)
 
         # 5.
-        self.consideringselfserviceinteraction = self.ic.im.get_or_create_instance_by_class(ConsideringSelfServiceInteraction)
+        self.s5_consideringselfserviceinteraction = self.ic.im.get_or_create_instance_by_class(ConsideringSelfServiceInteraction)
+
+        # 6.
+        self.s6_onlinereservingfinalizationinteraction = self.ic.im.get_or_create_instance_by_class(OnlineReservingFinalizationInteraction)
+
+        # 7.
+        self.s7_officerecommendationinteraction = self.ic.im.get_or_create_instance_by_class(OfficeRecommendationInteraction)
+
+        # 8. Termination of dialog
+        self.s8_dialogterminationinteraction = self.ic.im.get_or_create_instance_by_class(DialogTerminationInteraction)
+
+        # 9. Operator Switch
+        self.s9_operatorswitchinteraction = self.ic.im.get_or_create_instance_by_class(OperatorSwitchInteraction)
         # END Initialize interaction objects:
         # ########################################################################################
 
@@ -57,30 +70,56 @@ class Scenario():
 
         # connect greeting with intent clarificator
         self.greet_intrctn.connect_exit_gate_with_fn(
-            callback_fn=self.intent_clarificator.start)
+            callback_fn=self.s1_intent_clarificator.start)
 
         # intent clarification with desired_currency_interaction
         # comment it if intent_clarificator internally calls the desired currency interaction:
         # self.intent_clarificator.connect_exit_gate_with_fn(
         #     callback_fn=self.desired_currency_interaction.start)
 
-        self.desired_currency_interaction.connect_exit_gate_with_fn(
-            callback_fn=self.doc_list_supply_interaction.start)
+        self.s2_desired_currency_interaction.connect_exit_gate_with_fn(
+            callback_fn=self.s3_doc_list_supply_interaction.start)
 
         # import ipdb; ipdb.set_trace()
+        # TODO add priorities support
+        # TODO unify interface of scenario planning with Agenda
+        # 3.EXIT_GATE_3_1 -> 4.start
+        self.s3_doc_list_supply_interaction.connect_exit_gate_with_fn(
+            exit_gate=self.s3_doc_list_supply_interaction.EXIT_GATE_3_1,
+            callback_fn=self.s4_business_offering_interaction.start)
 
+        # 4.Exit -> 5.start
+        self.s4_business_offering_interaction.connect_exit_gate_with_fn(
+            callback_fn=self.s5_consideringselfserviceinteraction.start)
 
-        self.doc_list_supply_interaction.connect_exit_gate_with_fn(
-            exit_gate=self.doc_list_supply_interaction.EXIT_GATE_3_1,
-            callback_fn=self.business_offering_interaction.start)
+        # 5.Exit -> 6.start
+        self.s5_consideringselfserviceinteraction.connect_exit_gate_with_fn(
+            callback_fn=self.s6_onlinereservingfinalizationinteraction.start)
 
-        self.business_offering_interaction.connect_exit_gate_with_fn(
-            callback_fn=self.consideringselfserviceinteraction.start)
+        # 6 Exits: ###########################################
+        # 6.ExitGate_6_NONRUB_RESERVATION_OFFLINE -> 7.start
+        self.s6_onlinereservingfinalizationinteraction.connect_exit_gate_with_fn(
+            exit_gate=self.s6_onlinereservingfinalizationinteraction.EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE,
+            callback_fn=self.s7_officerecommendationinteraction.start)
+        # 6.EXIT_GATE_6_RUB_READY -> 9.start
+        self.s6_onlinereservingfinalizationinteraction.connect_exit_gate_with_fn(
+            exit_gate=self.s6_onlinereservingfinalizationinteraction.EXIT_GATE_6_RUB_READY,
+            callback_fn=self.s9_operatorswitchinteraction.start)
+        # 6.EXIT_GATE_6_RUB_UNREADY -> 8.start
+        self.s6_onlinereservingfinalizationinteraction.connect_exit_gate_with_fn(
+            exit_gate=self.s6_onlinereservingfinalizationinteraction.EXIT_GATE_6_RUB_UNREADY,
+            callback_fn=self.s8_dialogterminationinteraction.start)
+        #####################################################
+
+        # 7.Exit -> 8.start
+        self.s7_officerecommendationinteraction.connect_exit_gate_with_fn(
+            callback_fn=self.s8_dialogterminationinteraction.start)
 
         # import ipdb; ipdb.set_trace()
         # print("lkk")
         # END Specify linking between interaction ExitGates:
         # ########################################################################################
+
 
 class BankConsulterAgentSkill(AbstractSkill):
     """

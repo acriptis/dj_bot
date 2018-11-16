@@ -279,3 +279,22 @@ class ClientIsReadyToGiveDocsSlot(BaseSlotField, YesNoSlotReceptorMixin):
         # TODO move into abstract
         def asker_fn(self):
             return self.questioner
+
+
+class ClientWantsNearestOfficeRecomendation(BaseSlotField, YesNoSlotReceptorMixin):
+        """
+        Slot for requesting user step7's question
+
+        """
+        name = 'ClientWantsNearestOfficeRecomendation'
+
+        questioner = "Подобрать для Вас ближайший к Вам офис Банка, который работает с юридическими лицами?"
+
+        ######################################################
+        # Slot's Values Domain Specification
+        # Don't need it because we use YesNo Receptors'
+        ################################################################################################
+
+        # TODO move into abstract
+        def asker_fn(self):
+            return self.questioner

@@ -45,6 +45,11 @@ class UserSlotProcessesManager():
         return usp, created
 
     def find_user_slot_process(self, curr_slot_obj):
+        """
+        Returns related UserSlotProcess (if exist) or None
+        :param curr_slot_obj: Slot instance
+        :return:
+        """
         if curr_slot_obj.get_name() in self.user_slot_processes:
             return self.user_slot_processes[curr_slot_obj.get_name()]
         else:

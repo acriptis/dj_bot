@@ -2,7 +2,7 @@
 from interactions.models import Interaction, AbstractInteraction, SendTextOperation, UserInteraction
 from bank_interactions.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
     ClientIsResidentRFSlot, ClientServiceRegionSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot, \
-    ClientOkToSelfServiceSlot, ClientIsReadyToGiveDocsSlot
+    ClientOkToSelfServiceSlot, ClientIsReadyToGiveDocsSlot, ClientWantsNearestOfficeRecomendation
 
 
 class IntentRetrievalInteraction(Interaction, AbstractInteraction):
@@ -596,10 +596,10 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
     TEXT_6_RUB_READY_REDIRECT = "TEXT_6_RUB_READY_REDIRECT"
     TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER = "TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER"
 
-    EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE = "ExitGate_6_NONRUB_RESERVATION_OFFLINE"
+    EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE = "EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE"
     # ExitGate(EXIT_GATE_3_1)
-    EXIT_GATE_6_RUB_UNREADY = "ExitGate_6_RUB_UNREADY"
-    EXIT_GATE_6_RUB_READY = "ExitGate_6_RUB_READY"
+    EXIT_GATE_6_RUB_UNREADY = "EXIT_GATE_6_RUB_UNREADY"
+    EXIT_GATE_6_RUB_READY = "EXIT_GATE_6_RUB_READY"
 
     # Custom exit gates must be declared explicitly
     EXIT_GATES_NAMES_LIST = [
@@ -659,3 +659,79 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
             self.ic.DialogPlanner.sendText(self.TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER)
             self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_6_RUB_UNREADY)
 
+
+class OfficeRecommendationInteraction(Interaction, AbstractInteraction):
+    """
+        Step 7
+        Сообщи Клиенту: «Подобрать для Вас ближайший
+        к Вам офис Банка, который работает с юридическими лицами?»
+        При необходимости предоставь клиенту
+        адрес, телефон и режим работы соответствующего офиса.*
+
+        *в офис по адресу г. Москва,
+        ул. Вавилова, 19 не направлять!
+        При поступлении вопросов
+        проконсультируй Клиента в соответствии с действующими процедурами.
+        Перейди к шагу 8
+
+    """
+
+    TEXT_ADDRESS_RECOMENDATION = "Советую вам не идти по адресу ул. Вавилова, 19"
+
+    class Meta:
+        proxy = True
+
+    def start(self, *args, **kwargs):
+        print("Ready to go: OfficeRecommendationInteraction.start")
+        super(self.__class__, self).start(*args, **kwargs)
+        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.ic.DialogPlanner.plan_process_retrieve_slot_value(ClientWantsNearestOfficeRecomendation,
+                                                               callback_fn=self.on_answer_about_nearest_office_recomendation)
+
+    def on_answer_about_nearest_office_recomendation(self, *args, **kwargs):
+        """
+        event handler which
+        triggers rule checks
+        and precompletion behaviour
+        before completing the state of the interaction
+        """
+        print("OfficeRecommendationInteraction.on_answer_about_nearest_office_recomendation(")
+
+        answer = kwargs['user_slot_process'].result.value
+        answer = self.ic.MemoryManager.put_slot_value(ClientWantsNearestOfficeRecomendation.name,
+                                                      answer)
+        if ClientWantsNearestOfficeRecomendation.ANSWER_YES in answer:
+            # really we need to do here interaction with
+            # 1. locatioon retrieval
+            # 2. search of knwoledge base of addresses of the offices
+            # 3. find the nearest
+            # 4. verbose results
+            self.ic.DialogPlanner.sendText(self.TEXT_ADDRESS_RECOMENDATION)
+
+            self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
+
+        elif ClientWantsNearestOfficeRecomendation.ANSWER_NO in answer:
+
+            self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
+
+
+class DialogTerminationInteraction(Interaction, AbstractInteraction):
+    class Meta:
+        proxy = True
+
+    def start(self, *args, **kwargs):
+        print("Ready to go: DialogTerminationInteraction.start")
+        super(self.__class__, self).start(*args, **kwargs)
+        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.ic.DialogPlanner.sendText("На этом завершим разговор.")
+
+
+class OperatorSwitchInteraction(Interaction, AbstractInteraction):
+    class Meta:
+        proxy = True
+
+    def start(self, *args, **kwargs):
+        print("Ready to go: OperatorSwitchInteraction.start")
+        super(self.__class__, self).start(*args, **kwargs)
+        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.ic.DialogPlanner.sendText("Переключаю Вас на оператора...")

@@ -1,6 +1,7 @@
 from bank_interactions.models import IntentRetrievalInteraction, DesiredCurrencyInteraction, \
     DocumentsListSupplyInteraction, PrivateInfoFormInteraction, BusinessOfferingInteraction, GreetingInteraction, \
-    ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction
+    ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, OfficeRecommendationInteraction, \
+    DialogTerminationInteraction, OperatorSwitchInteraction
 
 
 class InteractionsManager():
@@ -29,6 +30,9 @@ class InteractionsManager():
             "BusinessOfferingInteraction": BusinessOfferingInteraction,
             "ConsideringSelfServiceInteraction": ConsideringSelfServiceInteraction,
             "OnlineReservingFinalizationInteraction": OnlineReservingFinalizationInteraction,
+            "OfficeRecommendationInteraction": OfficeRecommendationInteraction,
+            "DialogTerminationInteraction": DialogTerminationInteraction,
+            "OperatorSwitchInteraction": OperatorSwitchInteraction,
         }
 
         # interactions instances registry
