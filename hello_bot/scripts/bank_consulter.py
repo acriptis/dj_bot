@@ -3,9 +3,10 @@ import sys
 import os
 SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SELF_DIR)
+PREROOT_DIR = os.path.dirname(ROOT_DIR)
 print(ROOT_DIR)
 sys.path.append(ROOT_DIR)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hello_bot.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 # #####################################################
 import django
 django.setup()
@@ -37,8 +38,14 @@ def main2():
     # user_messages_sequence = ["Приветик, Роботишка", "Рубли", "Пока"]
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "Пока"]
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "Пока"]
-    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ"]
-    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "Тудудудуду!"]
+    # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ"]
+    # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!"]
+    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
+                              "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов"]
+    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
+                              "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "ДА", "Пока"]
+    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
+                              "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ"]
     # ####################################################################################################
     # TODO make tests!
@@ -51,11 +58,17 @@ def main2():
     # ####################################################################################################
 
     for line in user_messages_sequence:
-        print(">>>")
+        print(">>>"*30)
         agent.ic.userdialog.print_dialog()
-        print(agent(line), flush=True)
-        print("^^^")
+        print("New Message: %s" % line)
+        print("VVV"*45)
 
+        print(agent(line), flush=True)
+        print("^^^"*30)
+        # import ipdb; ipdb.set_trace()
+
+
+    print("="*80)
     print("Final Dialog Content:")
     agent.ic.userdialog.print_dialog()
 

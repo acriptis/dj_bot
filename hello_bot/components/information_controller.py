@@ -2,7 +2,10 @@
 import django.dispatch
 
 from components.dialog_planner import DialogPlanner
+from components.interactions_manager import InteractionsManager
 from components.memory_manager import MemoryManager
+from components.slots_manager import SlotsManager
+from components.user_slot_processes_manager import UserSlotProcessesManager
 
 
 class InformationController():
@@ -36,4 +39,13 @@ class InformationController():
         self.DialogPlanner = DialogPlanner(self)
 
         self.MemoryManager = MemoryManager(self)
+
+        # helper for interactions
+        self.im = InteractionsManager(self)
+
+        # slot specifications:
+        self.sm = SlotsManager(self)
+
+        # slot + user data management:
+        self.uspm = UserSlotProcessesManager(self)
 

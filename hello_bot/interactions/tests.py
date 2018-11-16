@@ -11,7 +11,7 @@ SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SELF_DIR)
 print(ROOT_DIR)
 sys.path.append(ROOT_DIR)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hello_bot.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 # #####################################################
 import django
 django.setup()

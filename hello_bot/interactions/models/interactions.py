@@ -2,6 +2,7 @@
 from django.db import models
 import django.dispatch
 
+from interactions.models.exit_gates import ExitGate
 
 
 class AbstractInteraction():
@@ -20,28 +21,46 @@ class AbstractInteraction():
     #     self.exit_gate_signal.connect(callback_fn)
 
 
-
 class Interaction(models.Model):
     """
     Base ORM model for interaction specification
     """
     name = models.CharField(max_length=200)
 
-    # Exit Gates declaration:
     EXIT_GATE_OK = "ExitGate_Ok"
 
-    EXIT_GATES_NAMES_LIST = [
+    ##################################################################
+    # Exit Gates declaration:
+    # default_exit_gate = ExitGate(EXIT_GATE_OK)
+
+    #
+    base_EXIT_GATES_NAMES_LIST = [
         EXIT_GATE_OK
     ]
+    # Exit Gates Specification Problem: how to specify exit gates?
+    # requirements:
+    # 1. derived classes should inherit base exit gates
+    # 2. derived classes can use default exit gate specification
+    # 3. each instance of interaction has its own exit gates instances
+    #  need to initialize signals registry dynamically to avoid crossing of signals between interaction instances
+
+    # Solution approaches:
+    # 1. for custom Interaction class descriptor set list attribute  with names of all exit gates
+    #       problem: if class inherits from some base class it must redefine all exit gates
+    #           (even if it does not affect related functionality )
+    # 2. for custom Interaction class descriptor set list attribute with names of added (to base class) exit gates
+    #       problem: need to introspect explicitly all parents with default ExitGates
+    # 3. for custom Interaction class descriptor set list of attributes with type ExitGate
+    #       problem: need to introspect attributes of the class by type to find ExitGates attributes
+    #
 
     # list of connectable Signal objects for each named ExitGate
-    EXIT_GATES_SIGNALS = {}
+    # EXIT_GATES_SIGNALS = {}
     # signals are created at stage of Interaction class initialization
 
-    def class_router(self):
-        # given a name of interaction restores a BehaviourClass
-        # returns polymorphic object of concrete interaction class
-        pass
+    @classmethod
+    def get_name(cls):
+        return cls.__name__
 
     @classmethod
     def initialize(cls, ic, name=None, *args, **kwargs):
@@ -66,13 +85,26 @@ class Interaction(models.Model):
 
         intrctn.ic = ic
 
-        # # Exit Signal Declaration
-        # intrctn.exit_gate_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
+        # #########################################################################################
+        # # Exit Gate Signals and Registry initialization
+        intrctn.EXIT_GATES_SIGNALS = {}
 
-        # Signals Initialization:
+        if not hasattr(intrctn,'EXIT_GATES_NAMES_LIST'):
+            # TODO fix to support inheritance of ExitGates!
+            # then import default Gates :
+            intrctn.EXIT_GATES_NAMES_LIST = cls.base_EXIT_GATES_NAMES_LIST
+
+        # now init signal objects for each exit gate:
         for each_exit_gate_name in intrctn.EXIT_GATES_NAMES_LIST:
             # create a signal object for each exit gate
             intrctn.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
+
+
+        intrctn._anti_garbage_collector_callbacks_list = []
+        # END ExitGate Signals Initialization
+
+        ########################################################################################
+
 
         return intrctn
 
@@ -83,7 +115,7 @@ class Interaction(models.Model):
         :param kwargs:
         :return:
         """
-        print("Start of Interaction(Base class)")
+        print("Start of Interaction: %s" % self)
         from interactions.models import UserInteraction
         # TODO check state?
         ui, _ = UserInteraction.objects.get_or_create(interaction=self, userdialog=self.ic.userdialog)
@@ -97,7 +129,15 @@ class Interaction(models.Model):
         # self.exit_gate_signal.connect(callback_fn)
         # import ipdb; ipdb.set_trace()
 
+        # to avoid garbage collecting the functions we make hacky list:
+        # self.ic.DialogPlanner._callbacks_storage.append(callback_fn)
+        self._anti_garbage_collector_callbacks_list.append(callback_fn)
         self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn)
+
+    def class_router(self):
+        # given a name of interaction restores a BehaviourClass
+        # returns polymorphic object of concrete interaction class
+        pass
 
 class QuestionInteractionFactory(Interaction, AbstractInteraction):
     # TODO allow generative template (GenericField)

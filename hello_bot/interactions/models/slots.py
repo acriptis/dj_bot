@@ -4,7 +4,13 @@ class BaseSlotField():
     """
     Base class for SlotFields
     """
-    pass
+    def asker_fn(self):
+        return self.questioner
+
+    @classmethod
+    def get_name(cls):
+        return cls.__name__
+
 
 class DictionarySlotReceptorMixin():
     """
@@ -48,7 +54,7 @@ class DictionarySlotReceptorMixin():
 
         if results:
             # we have something in results
-            print("We have results!")
+            print("DictionarySlotReceptorMixin.recept: %s grasped results: %s" % (self, results))
             # TODO make productions signals?
         return results
 

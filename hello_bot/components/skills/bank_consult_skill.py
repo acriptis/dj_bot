@@ -7,7 +7,7 @@ import django.dispatch
 from interactions.models.user_slot_process import UserSlotProcess
 
 from bank_interactions.models import DocumentsListSupplyInteraction, IntentRetrievalInteraction, \
-    DesiredCurrencyInteraction, BusinessOfferingInteraction
+    BusinessOfferingInteraction, ConsideringSelfServiceInteraction
 from bank_interactions.models.greeting import GreetingInteraction
 from bank_interactions.models.interactions import DesiredCurrencyInteraction
 
@@ -20,33 +20,67 @@ class Scenario():
     def __init__(self, ic):
 
         self.ic = ic
+        # ########################################################################################
+        # Initialize interaction objects:
 
         # 0. interaction for greeting
-        self.greet_intrctn = GreetingInteraction.initialize(ic=ic)
+        self.greet_intrctn = self.ic.im.get_or_create_instance_by_class(GreetingInteraction)
+        # old approach:
+        # self.greet_intrctn = GreetingInteraction.initialize(ic=ic)
 
-        # 1.
-        self.intent_clarificator = IntentRetrievalInteraction.initialize(ic=ic)
-        # TODO intent clarificator internally calls DesiredCurrencyInteraction and
+        # 1. intent
+        self.intent_clarificator = self.ic.im.get_or_create_instance_by_class(IntentRetrievalInteraction)
+        # self.intent_clarificator = IntentRetrievalInteraction.initialize(ic=ic)
 
-        # connect greeting with intent clarificator
-        self.greet_intrctn.connect_exit_gate_with_fn(self.intent_clarificator.start)
-
-        # 2.
-        self.desired_currency_interaction = DesiredCurrencyInteraction.initialize(ic=ic)
-        self.intent_clarificator.connect_exit_gate_with_fn(self.desired_currency_interaction.start)
+        # TODO intent clarificator internally calls DesiredCurrencyInteraction!!
+        # TODO intent clarificator internally calls BusinessOfferingInteraction!!
+        # 2. desired currency
+        self.desired_currency_interaction = self.ic.im.get_or_create_instance_by_class(DesiredCurrencyInteraction)
+        # self.desired_currency_interaction = DesiredCurrencyInteraction.initialize(ic=ic)
 
         # 3.
-        self.doc_list_supply_interaction = DocumentsListSupplyInteraction.initialize(ic=ic)
-        self.desired_currency_interaction.connect_exit_gate_with_fn(self.doc_list_supply_interaction.start)
+        self.doc_list_supply_interaction = self.ic.im.get_or_create_instance_by_class(DocumentsListSupplyInteraction)
+        # self.doc_list_supply_interaction = DocumentsListSupplyInteraction.initialize(ic=ic)
 
-        import ipdb; ipdb.set_trace()
-
-        # # 4.BusinessOfferingInteraction
+        # 4.BusinessOfferingInteraction
+        self.business_offering_interaction = self.ic.im.get_or_create_instance_by_class(BusinessOfferingInteraction)
         # self.business_offering_interaction = BusinessOfferingInteraction.initialize(ic=ic)
-        # self.doc_list_supply_interaction.connect_exit_gate_with_fn(
-        #     exit_gate=self.doc_list_supply_interaction.EXIT_GATE_3_1, callback_fn=self.business_offering_interaction.start)
-        # self.desired_currency_interaction.connect_exit_gate_with_fn(self.doc_list_supply_interaction.start)
 
+        # 5.
+        self.consideringselfserviceinteraction = self.ic.im.get_or_create_instance_by_class(ConsideringSelfServiceInteraction)
+        # END Initialize interaction objects:
+        # ########################################################################################
+
+
+        # ########################################################################################
+        # Specify linking between interaction ExitGates:
+
+        # connect greeting with intent clarificator
+        self.greet_intrctn.connect_exit_gate_with_fn(
+            callback_fn=self.intent_clarificator.start)
+
+        # intent clarification with desired_currency_interaction
+        # comment it if intent_clarificator internally calls the desired currency interaction:
+        # self.intent_clarificator.connect_exit_gate_with_fn(
+        #     callback_fn=self.desired_currency_interaction.start)
+
+        self.desired_currency_interaction.connect_exit_gate_with_fn(
+            callback_fn=self.doc_list_supply_interaction.start)
+
+        # import ipdb; ipdb.set_trace()
+
+
+        self.doc_list_supply_interaction.connect_exit_gate_with_fn(
+            exit_gate=self.doc_list_supply_interaction.EXIT_GATE_3_1,
+            callback_fn=self.business_offering_interaction.start)
+
+        self.business_offering_interaction.connect_exit_gate_with_fn(
+            callback_fn=self.consideringselfserviceinteraction.start)
+
+        # import ipdb; ipdb.set_trace()
+        # print("lkk")
+        # END Specify linking between interaction ExitGates:
+        # ########################################################################################
 
 class BankConsulterAgentSkill(AbstractSkill):
     """
@@ -134,63 +168,23 @@ class BankConsulterAgentSkill(AbstractSkill):
         # # exceptional case:
         if not responses_list:
             # no interactions have responded to the utterance...
+            print("no interactions have responded to the latest utterance...")
             # no responses from system:
             # else scenario
             ########################### Check Pending Interactions Plan ##############################################
             # Alternative else scenario:
             # check if we have queue of actions in plan
-            print("self.ic.DialogPlanner.queue")
-
-
-            print(self.ic.DialogPlanner.queue)
-            if len(self.ic.DialogPlanner.queue)>0:
+            print("self.ic.DialogPlanner.agenda.queue_of_tasks")
+            print(self.ic.DialogPlanner.agenda.queue_of_tasks)
+            if len(self.ic.DialogPlanner.agenda.queue_of_tasks)>0:
                 # import ipdb;
                 # ipdb.set_trace()
                 self.ic.DialogPlanner.launch_next_task()
             else:
                 # nothing to say, nothing to do...
                 #TODO templatize
-                self.userdialog.send_message_to_user("Sorry, I don't understand your blah blah blah")
+                self.userdialog.send_message_to_user("Простите, я не знаю, что Вам ответить ;)")
         # responses = ["kek %s" % text for text in utterances_batch]
         # confidences = [0.5 for x in range(len(utterances_batch))]
         return responses_list
 
-
-# ############################################################################################################
-# ##################################### Trashy Code Snippets #####################################
-class AbstractRuleSwitch():
-    def check(self, context):
-        """
-
-        :param context:
-        :return: bool
-        """
-        pass
-
-    def action(self, context):
-        """
-        Actualization of RuleConsequence
-
-        Action may:
-            emit production signals in the system (for some other components)
-            sendText operation
-            announce termination
-            route control to operator
-
-            launch interaction (put into Goals/Agenda)
-            launch SlotFillingProcess
-
-        :param context:
-        :return: ?
-        """
-
-    def else_action(self):
-        """????"""
-        pass
-
-
-class DecisionPolicy():
-    # when it called?
-    # how to keep flexibility and ease of bootstrap (default policy)?
-
-    pass

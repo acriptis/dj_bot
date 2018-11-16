@@ -16,6 +16,10 @@ class GreetingInteraction(Interaction):
     # TODO translatable?
     out_text = "Здравствуйте, это помощник СберБанка"
 
+    # @classmethod
+    # def name(cls):
+    #     return cls.__name__
+
     @classmethod
     def initialize(cls, ic, name=None, *args, **kwargs):
         # import ipdb; ipdb.set_trace()

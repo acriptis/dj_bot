@@ -1,21 +1,26 @@
 from django.db import models
 import django.dispatch
-
-# routes <names of Slots> into implementation classes
-from bank_interactions.models.slots import  DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot
-
-##############################################################################################
-# TODO make router less ugly,
-# TODO autodiscover slot classes by router
-slotName2SlotClassRouter = {
-    "DesiredCurrencySlot": DesiredCurrencySlot,
-    "OptionIntentsSlot": OptionIntentsSlot,
-    "NeedListDocsAndTarifsSlot": NeedListDocsAndTarifsSlot
-
-
-}
-slotClass2SlotNameRouter = {val:key for key, val in slotName2SlotClassRouter.items()}
-##############################################################################################
+#
+# # routes <names of Slots> into implementation classes
+# from bank_interactions.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
+#     ClientServiceRegionSlot, ClientIsResidentRFSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot
+#
+# ##############################################################################################
+# # TODO make router less ugly,
+# # TODO autodiscover slot classes by router
+# slotName2SlotClassRouter = {
+#     "DesiredCurrencySlot": DesiredCurrencySlot,
+#     "OptionIntentsSlot": OptionIntentsSlot,
+#     "NeedListDocsAndTarifsSlot": NeedListDocsAndTarifsSlot,
+#     "ClientIsResidentRFSlot": ClientIsResidentRFSlot,
+#     "ClientServiceRegionSlot": ClientServiceRegionSlot,
+#     "ClientPropertyTypeSlot": ClientPropertyTypeSlot,
+#     "ClientAgreeWithServicePackConditionsSlot": ClientAgreeWithServicePackConditionsSlot
+#
+#
+# }
+# slotClass2SlotNameRouter = {val:key for key, val in slotName2SlotClassRouter.items()}
+# ##############################################################################################
 
 class UserSlotProcess(models.Model):
     """
@@ -61,15 +66,22 @@ class UserSlotProcess(models.Model):
         :param slot_obj:
         :return:
         """
-        slot_codename = slotClass2SlotNameRouter[slot_obj.__class__]
+        # slot_codename = slotClass2SlotNameRouter[slot_obj.__class__]
+        slot_codename = slot_obj.get_name()
+
         usp, _ = cls.objects.get_or_create(user=user, slot_codename=slot_codename)
         usp.slot_filled_signal = django.dispatch.dispatcher.Signal(providing_args=["user_slot_process"])
+        # TODO how to restore signal connections? (So listeners will be notified)
         usp.slot = slot_obj
         return usp
 
     def save(self, *args, **kwargs):
+        # return
+        # import ipdb; ipdb.set_trace()
+        #
         if not hasattr(self, 'slot_codename'):
-            self.slot_codename = slotClass2SlotNameRouter[self.slot.__class__]
+            # self.slot_codename = slotClass2SlotNameRouter[self.slot.__class__]
+            self.slot_codename = self.slot.get_name()
         return super(self.__class__, self).save(*args, **kwargs)
 
     def start(self, ic):
@@ -89,6 +101,7 @@ class UserSlotProcess(models.Model):
         self.ic.userdialog.send_message_to_user(self.slot.asker_fn())
         self.ic.user_message_signal.connect(self.on_user_response)
         self.state = self.ACTIVE
+        self.save()
 
     def on_user_response(self, *args, **kwargs):
         """
@@ -114,42 +127,23 @@ class UserSlotProcess(models.Model):
             # self.result.save()
             self.raw_result = result
             self.state = self.COMPLETED
-            self.save()
+
+            # import ipdb; ipdb.set_trace()
+
             self.slot_filled_signal.send(sender=self, user_slot_process=self)
+            self.save()
             print("User response filled slot: %s!" % result)
 
         else:
-            # wromg response (
+            # wrong response (
             self.state = self.IGNORED
             self.save()
-            print("Unhandled")
-    #
-    #
-    # def __init__(self, user, slot):
-    #     self.user = user
-    #     self.slot = slot
-    #     self.state = self.INIT
-    #
-    #     # callbacks
-    #     self.callback_fns = []
-    #
-    #     # states = [
-    #     #     "init",
-    #     #     "value_requested",
-    #     #     "completed"
-    #     # ]
-    #
-    #     # state = models.CharField(
-    #     #     max_length=2,
-    #     #     choices=INTERACTION_STATES,
-    #     #     default=INIT
-    #     # )
-    #
-    #     # on completion process may produce results
-    #     self.result = None
-    #
-    # def _complete(self):
-    #     self.state = self.COMPLETED
-    #     # announse callbacks:
-    #     for each_fn in self.callback_fns:
-    #         each_fn(self.result)
+            # Greed reAsk Strategy:
+            print("Slot Unhandled (Greed reAsk Strategy). ReAsking...")
+            self.ic.userdialog.send_message_to_user(self.slot.asker_fn() + " (Greed ReAsk Strategy)")
+
+            # print("Slot Unhandled (Passive waiting Strategy)")
+            # TODO implement attachement of Exception Strategy:
+            # 1. Forced Slot: ReAsk Urgently
+            # 2. Passive Waiting, but we need to attach handler
+            # here

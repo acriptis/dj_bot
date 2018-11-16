@@ -158,10 +158,6 @@ class PersonalAgent(Agent):
         return "kek"
 
 
-
-class InformationController():
-    pass
-
 class Frame():
     pass
 
@@ -268,14 +264,6 @@ def main():
     ui = UserInteraction.activate(interaction=SendTextOperation(text="kuku, vatrushki!"))
 
     print(ui)
-
-    # humans[chat_id] = Dialog(pipe, RuleBasedSberdemoNLU(), RuleBasedSberdemoPolicy())
-    # bot.send_message(chat_id=chat_id, text='Добрый день, человек. В чём ваша проблема?')
-    #
-    # import sys
-    # for line in sys.stdin:
-    #     print(agent([line]), flush=True)
-
 
 # TODO make outputs linking class
 

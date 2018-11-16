@@ -1,7 +1,8 @@
 # coding=utf-8
 from interactions.models import Interaction, AbstractInteraction, SendTextOperation, UserInteraction
 from bank_interactions.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
-    ClientIsResidentRFSlot, ClientServiceRegionSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot
+    ClientIsResidentRFSlot, ClientServiceRegionSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot, \
+    ClientOkToSelfServiceSlot, ClientIsReadyToGiveDocsSlot
 
 
 class IntentRetrievalInteraction(Interaction, AbstractInteraction):
@@ -13,7 +14,7 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
     # TODO
     exit gates or productions signals:
     """
-
+    name = "IntentRetrievalInteraction"
     # external slots defined somewhere
     required_slots = [OptionIntentsSlot]
 
@@ -89,7 +90,8 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
                 self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
             if OptionIntentsSlot.SECRET_INFO in intents_opts:
-                self.ic.DialogPlanner.enqueue_interaction_by_name("BusinessOfferingInteraction", priority=1)
+                # self.ic.DialogPlanner.enqueue_interaction_by_name("BusinessOfferingInteraction", priority=1)
+                self.ic.DialogPlanner.enqueue_interaction_by_name("OnlineReservingFinalizationInteraction", priority=1)
                 # TODO generally it better to check if this interaction is not completed yet:
                 self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
@@ -97,6 +99,8 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
             action_rule_1_1_INTENTER()
         else:
             # Exception Scenario
+            print("Exception Scenario?")
+            import ipdb; ipdb.set_trace()
             print("Exception Scenario?")
         ######################### END Busines Rule BR2.1 Block ##########################################
 
@@ -130,24 +134,8 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
     2. OtherCurrency
 
     """
-    #sc_graph = Graph()
-    #sc_graph.node['start'].then('greeting', schema=GreetingInteraction)
-    #sc_graph.node['greeting'].then('desired_currency', schema=SlotProcess(DesiredCurrencySlot))
-    #
-    #sc_graph.node['desired_currency'].then("currencies_switch", schema=SWITCH(sc_graph))
-    #sc_graph.node['currencies_switch'].if_then('desired_currency(NONRUB)', 'sendText2.1')
-    #sc_graph.node['currencies_switch'].if_then('desired_currency(NONRUB)', 'sendText2.1')
-    #
-    #
-    #sc_graph.node['sendText2.1'].requires(SendText("Hehehe Text2.1"))
-    #
-    #
-    #
-    ## , SWITCHER, products = ['desired_currency(RUB)', 'desired_currency(NONRUB)'])
-    #scenario = {
-    #    'start': GreetingInteraction,
-    #    # 'fin': completion condition? Rules
-    #}
+
+    # name = "DesiredCurrencyInteraction"
     TEXT_2_1 = "Текст 2.1 про то как быть с нерублевыми валютами"
 
     EXIT_GATE_EXCEPTION = "Oops, Exception"
@@ -155,29 +143,15 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
     class Meta:
         proxy = True
 
-    # def __init__(self, ic, name='desired_currency_interaction',*args, **kwargs):
-    #     super(Interaction, self).__init__(*args, **kwargs)
-    #     super(AbstractInteractionSignalingExit, self).__init__(*args, **kwargs)
-    #     self.ic = ic
-    #     self.name = name
-
-    # @classmethod
-    # def initialize(cls, ic, name=None, *args, **kwargs):
-    #     if not name:
-    #         # default name is a name of class
-    #         name = cls.__name__
-    #
-    #     intrctn, _ = cls.objects.get_or_create(name=name)
-    #     intrctn.ic = ic
-    #     super(AbstractInteraction, intrctn).__init__(*args, **kwargs)
-    #
-    #     return intrctn
-
     def start(self, *args, **kwargs):
         print("DesiredCurrencyInteraction.start(")
         super(self.__class__, self).start(*args, **kwargs)
         # 1. retrieve CurrencySlot
+        # check if it is not retrieved yet?
+
         self.ic.DialogPlanner.plan_process_retrieve_slot_value(DesiredCurrencySlot, callback_fn=self.on_desired_currency_ready)
+        # import ipdb; ipdb.set_trace()
+        print("kkk")
 
     def on_desired_currency_ready(self, *args, **kwargs):
         """
@@ -187,7 +161,8 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         before completing the state of the interaction
         """
         print("DesiredCurrencyInteraction.on_desired_currency_ready(")
-        # desired_currency_values = self.ic.MemoryManager.get_slot_value(DesiredCurrencySlot.name)
+        # import ipdb; ipdb.set_trace()
+
         desired_currency_values = kwargs['user_slot_process'].result.value
         desired_currency_values = self.ic.MemoryManager.put_slot_value(DesiredCurrencySlot.name,
                                                                        desired_currency_values)
@@ -217,11 +192,14 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
             if nonrub_currencies:
                 action_rule_2_1_NONRUB()
         else:
-            raise Exception("Unexpect datatype for desired_currency_values: %s, %s" % (desired_currency_values, type(desired_currency_values)))
+            raise Exception("Unexpected datatype for desired_currency_values: %s, %s" % (desired_currency_values, type(desired_currency_values)))
 
         ######################### END Busines Rule BR2.1 Block ##########################################
 
         # Completion can be announced
+        print("kekekekekkekekekekekek")
+        # import ipdb; ipdb.set_trace()
+
         self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
 
@@ -242,21 +220,25 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
     Если НЕТ, счет в рублях, перейди к шагу 6
     Если НЕТ, счет в ин.валюте, перейди к шагу 7
     """
-
+    # name = "DocumentsListSupplyInteraction"
     # message to user after the PrivateInfoForm is filled
-    TEXT_3_docs_list_info = """
-       Действующие спец. предложения:
-
-       -спец. предложение для ЮЛ - Клиентов сторонних банков, 
-       у которых отозваны лицензии на 
-       осуществление банковской деятельности 
-       (см.п.9.5 документа Расчетно-кассовое обслуживание);
-
-       -спец. предложение для открытия расчетного счета
-       корпоративным Клиентам (см. документ Расчетно-кассовое обслуживание). 
-       """
+    # TODO: Uncomment on release:
+    # TEXT_3_docs_list_info = """
+    #
+    #    Действующие спец. предложения:
+    #
+    #    -спец. предложение для ЮЛ - Клиентов сторонних банков,
+    #    у которых отозваны лицензии на
+    #    осуществление банковской деятельности
+    #    (см.п.9.5 документа Расчетно-кассовое обслуживание);
+    #
+    #    -спец. предложение для открытия расчетного счета
+    #    корпоративным Клиентам (см. документ Расчетно-кассовое обслуживание).
+    #    """
+    TEXT_3_docs_list_info = "TEXT_3_docs_list_info. Действующие спец. предложения"
 
     EXIT_GATE_3_1 = "ExitGate3.1"
+    # ExitGate(EXIT_GATE_3_1)
     EXIT_GATE_3_2_RUB = "ExitGate3.2.RUB"
     EXIT_GATE_3_2_NONRUB= "ExitGate3.2.NonRUB"
 
@@ -271,14 +253,10 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         # 1. retrieve CurrencySlot
         print("Ready to go: DocumentsListSupplyInteraction.start")
         super(self.__class__, self).start(*args, **kwargs)
-        uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
         # 1. retrieve CurrencySlot
         self.ic.DialogPlanner.plan_process_retrieve_slot_value(NeedListDocsAndTarifsSlot,
                                                                callback_fn=self.on_response_3_Q1_ready)
-    # @classmethod
-    # def initialize(cls, ic, name=None, *args, **kwargs):
-    #     super(DocumentsListSupplyInteraction, cls).do(a)
-
     def on_response_3_Q1_ready(self, *args, **kwargs):
         """
         See step 3.Q1 at
@@ -293,7 +271,7 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         print(needs_tarifs_and_docs)
         print("on_response_3_Q1_ready method")
         if NeedListDocsAndTarifsSlot.ANSWER_YES in needs_tarifs_and_docs:
-            print("kekekuku")
+            # print("kekekuku")
             # following interaction encapsulates:
             #     plan Form Filling process,
             #       on completed Send Text
@@ -304,6 +282,9 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         elif NeedListDocsAndTarifsSlot.ANSWER_NO in needs_tarifs_and_docs:
 
             # assering existence of variable's value:
+            print('assering existence of DesiredCurrencySlot value:')
+            # import ipdb; ipdb.set_trace()
+
             desired_currency_slot_value = self.ic.MemoryManager.get_slot_value(DesiredCurrencySlot.name)
             # TODO more general solution is recommended:
             if DesiredCurrencySlot.RUB in desired_currency_slot_value:
@@ -340,7 +321,7 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
         ClientServiceRegionSlot,
         ClientPropertyTypeSlot
     ]
-
+    name = "PrivateInfoFormInteraction"
     # is_resident = ClientIsResidentRFSlot()
 
     def start(self, *args, **kwargs):
@@ -349,30 +330,53 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
         self.usp = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
         # TODO improve form filling process by abstraction of factory
         # start Slot filling process
+
+
+        # TODO UNDERSTAND WHY DEBUGGER FIXES MISSED SLOT CALL
+        # seems to be Garbage Collection related issue, But I don't know why
+        # import ipdb; ipdb.set_trace()
+
         self.ic.DialogPlanner.plan_process_retrieve_slot_value(ClientIsResidentRFSlot,
-                                                               callback_fn=self.ClientIsResidentRFSlot_is_filled)
+                                                               callback_fn=self.client_IsResidentRFSlot_is_filled)
 
-    def ClientIsResidentRFSlot_is_filled(self, *args, **kwargs):
+    def client_IsResidentRFSlot_is_filled(self, *args, **kwargs):
 
         # TODO improve mechanism of writing slot values?
         # To enable feature to specify target URI in MemoryManager
-
+        # import ipdb; ipdb.set_trace()
+        # post-filled-actions:
+        clientisresidentrfslot_value = kwargs['user_slot_process'].result.value
+        clientisresidentrfslot_value = self.ic.MemoryManager.put_slot_value(ClientIsResidentRFSlot.name,
+                                                                            clientisresidentrfslot_value)
+        print("ClientIsResidentRFSlot_is_filled")
+        # then plan next step
         self.ic.DialogPlanner.plan_process_retrieve_slot_value(ClientServiceRegionSlot,
-                                                               callback_fn=self.ClientServiceRegionSlot_is_filled)
+                                                               callback_fn=self.client_ServiceRegionSlot_is_filled)
 
-
-
-    def ClientServiceRegionSlot_is_filled(self, *args, **kwargs):
+    def client_ServiceRegionSlot_is_filled(self, *args, **kwargs):
 
         # TODO improve mechanism of writing slot values?
         # To enable feature to specify target URI in MemoryManager
+        # post-filled-actions:
+        clientserviceregionslot_value = kwargs['user_slot_process'].result.value
+        clientserviceregionslot_value = self.ic.MemoryManager.put_slot_value(ClientServiceRegionSlot.name,
+                                                                             clientserviceregionslot_value)
+
+        # then plan next step
         self.ic.DialogPlanner.plan_process_retrieve_slot_value(ClientPropertyTypeSlot,
-                                                               callback_fn=self.ClientPropertyTypeSlot_is_filled)
+                                                               callback_fn=self.client_PropertyTypeSlot_is_filled)
 
-    def ClientPropertyTypeSlot_is_filled(self, *args, **kwargs):
+    def client_PropertyTypeSlot_is_filled(self, *args, **kwargs):
 
-        # DO complete self process.
-        self.ic.DialogPlanner.complete_user_interaction_proc(self)
+        # post-filled-actions:
+        clientpropertytypeslot_value = kwargs['user_slot_process'].result.value
+        clientpropertytypeslot_value = self.ic.MemoryManager.put_slot_value(ClientPropertyTypeSlot.name,
+                                                                            clientpropertytypeslot_value)
+
+        # then
+        # import ipdb; ipdb.set_trace()
+
+        self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
         pass
 
 
@@ -387,57 +391,52 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
 
     и перейди к шагу 5
     """
-
-    TEXT_BIG_OFFER = """
-        BIG_OFFER_TEXT_TEMPLATE.         
-        Предложи открытие счета в рамках Пакетов услуг «Базис+», «Актив+», «Оптима+» или «Зарплатный».
-        Сообщи: «Пакеты услуг – набор банковских услуг, предоставляемых в течение месяца
-         в пределах установленного лимита за определенную плату.
-        В состав пакета услуг включены наиболее востребованные услуги
-         расчетно-кассового обслуживания, предоставляемые в определенном объеме
-         по единой фиксированной цене. При этом стоимость
-         пакета услуг ниже стоимости аналогичного
-         объема услуг при обслуживании по
-         стандартным тарифам Банка. 
-        В рамках пакета услуг обязательно 
-        подклчается система «Сбербанк Бизнес Онлайн». 
-        Также, в рамках 
-        Пакетов услуг «Базис+», «Актив+» и «Оптима+» предусмотрена 
-        возможность авансовой оплаты за 3 и 6 месяцев, 
-        что позволяет сэкономить деньги, а также не беспокоиться 
-        о наличии денежных средств на расчетном 
-        счете на 01 число каждого месяца для списания
-         комиссии за ежемесячное продление Пакета услуг».
-        Информация по Пакетам услуг представлена:
-        - в БЗ в документе«Пакеты услуг для юр.лиц»
-        -на сайтев разделе Расчетно-кассовое обслуживание → Пакеты услуг.
-    """
+    name = "BusinessOfferingInteraction"
+    TEXT_BIG_OFFER = "BIG_OFFER_TEXT_TEMPLATE."
+    # TEXT_BIG_OFFER = """
+    #     BIG_OFFER_TEXT_TEMPLATE.
+    #     Предложи открытие счета в рамках Пакетов услуг «Базис+», «Актив+», «Оптима+» или «Зарплатный».
+    #     Сообщи: «Пакеты услуг – набор банковских услуг, предоставляемых в течение месяца
+    #      в пределах установленного лимита за определенную плату.
+    #     В состав пакета услуг включены наиболее востребованные услуги
+    #      расчетно-кассового обслуживания, предоставляемые в определенном объеме
+    #      по единой фиксированной цене. При этом стоимость
+    #      пакета услуг ниже стоимости аналогичного
+    #      объема услуг при обслуживании по
+    #      стандартным тарифам Банка.
+    #     В рамках пакета услуг обязательно
+    #     подклчается система «Сбербанк Бизнес Онлайн».
+    #     Также, в рамках
+    #     Пакетов услуг «Базис+», «Актив+» и «Оптима+» предусмотрена
+    #     возможность авансовой оплаты за 3 и 6 месяцев,
+    #     что позволяет сэкономить деньги, а также не беспокоиться
+    #     о наличии денежных средств на расчетном
+    #     счете на 01 число каждого месяца для списания
+    #      комиссии за ежемесячное продление Пакета услуг».
+    #     Информация по Пакетам услуг представлена:
+    #     - в БЗ в документе«Пакеты услуг для юр.лиц»
+    #     -на сайтев разделе Расчетно-кассовое обслуживание → Пакеты услуг.
+    # """
 
     MINI_OFFER_TEXT = """
     предлагаю вам Пакет услуг «Минимальный» и сообщаю преимущества пакета
     """
-    #
-    # @classmethod
-    # def initialize(cls, ic, name=None, *args, **kwargs):
-    #     # TODO remove duplication of initialization
-    #     if not name:
-    #         # default name is a name of class
-    #         name = cls.__name__
-    #
-    #     intrctn, _ = cls.objects.get_or_create(name=name)
-    #     intrctn.ic = ic
-    #     super(AbstractInteraction, intrctn).__init__(*args, **kwargs)
-
-        # return intrctn
 
     def start(self, *args, **kwargs):
         super(self.__class__, self).start(*args, **kwargs)
-        # 1. retrieve CurrencySlot
-        # self.ic.DialogPlanner.plan_process_retrieve_slot_value(DesiredCurrencySlot).on_slot_filled(
-        #     self.on_desired_currency_ready)
+        print("BusinessOfferingInteraction 1234567789123467788")
+        # import ipdb; ipdb.set_trace()
+
+        # TODO why commenting ipdb breaks callback????
+
+
         self.ic.DialogPlanner.sendText(self.TEXT_BIG_OFFER)
         self.ic.DialogPlanner.plan_process_retrieve_slot_value(ClientAgreeWithServicePackConditionsSlot,
                                                                callback_fn=self.on_user_decision_on_big_offer_ready)
+        # import time
+        # time.sleep(5)
+        # import ipdb;
+        # ipdb.set_trace()
         print("Ready to go: BusinessOfferingInteraction.start")
 
     def on_user_decision_on_big_offer_ready(self, *args, **kwargs):
@@ -458,17 +457,205 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
         print(big_offer_decision)
         print("BusinessOfferingInteraction.on_user_decision_on_big_offer_ready method")
 
+
+        # import ipdb; ipdb.set_trace()
+
         ######################### Completion Busines Rule Block ##########################################
         if ClientAgreeWithServicePackConditionsSlot.ANSWER_YES in big_offer_decision:
             print("ClientAgreeWithServicePackConditionsSlot.ANSWER_YES in big_offer_decision")
 
             #     then complete self
-            self.ic.DialogPlanner.complete_user_interaction_proc(self)
+            self.ic.DialogPlanner.complete_user_interaction_proc(self, self.EXIT_GATE_OK)
 
         elif ClientAgreeWithServicePackConditionsSlot.ANSWER_NO in big_offer_decision:
+            print("ClientAgreeWithServicePackConditionsSlot.ANSWER_NO in big_offer_decision")
             self.ic.DialogPlanner.sendText(self.MINI_OFFER_TEXT)
             self.ic.DialogPlanner.complete_user_interaction_proc(self, self.EXIT_GATE_OK)
 
         else:
             import ipdb; ipdb.set_trace()
             raise Exception("BusinessOfferingInteraction.on_user_decision_on_big_offer_ready: unhandled case of user answer")
+
+class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
+
+    """
+        Удобно ли Клиенту самостоятельно ознакомиться с документами и тарифами на сайте Банка?
+
+        Если ДА,
+
+        Если НЕТ,
+        сообщи об условиях открытия счета, сроках открытия, требуемых документах, согласно документу Расчетно-кассовое обслуживание, а также тарифах, согласно информации на сайте.
+
+        проконсультируй клиента о преимуществах Сбербанк Бизнес Онлайн (назови Клиенту не менее одного), согласно документу Удаленное обслуживание (Карточка продукта)
+
+        Перейди к шагу 6
+
+        asks the currency of the account to be opened
+
+        Does logic of Handling NONRUB case
+
+        uses
+            ClientOkToSelfServiceSlot.name
+
+
+        exit gates:
+        1. ExitGate_Ok (default)
+
+        """
+
+    name = "ConsideringSelfServiceInteraction"
+
+    # TEXT_5_YES = """
+    #         сообщи путь размещения перечня документов на сайте
+    #     Банка в зависимости от того, оформляет клиент
+    #     «Договор банковского счета» или «Договор-конструктор»:
+    #     - Малому бизнесу/Корпоративным клиентам – Банковское обслуживание
+    #     – Расчетно-кассовое обслуживание – Открытие и ведение счетов /
+    #     Договор банковского счета /
+    #     Приложение №1 «Перечень документов, необходимых для открытия и ведения Счета»
+    #     - Малому бизнесу/Корпоративным клиентам – Банковское обслуживание –
+    #      Расчетно-кассовое обслуживание – Открытие и ведение счетов
+    #      / Договор-конструктор / Тарифы Договоры Операционное время /
+    #     Перечень документов, необходимых для заключения
+    #     Договора-Конструктора с 01.01.2015
+    #     сообщи путь размещения тарифов на сайте www.sberbank.ru:
+    #     раздел Малому бизнесу → Расчетно-кассовое обслуживание →
+    #     Полный перечень всех тарифов на услуги РКО → выбрать регион обслуживания.
+    #     раздел Корпоративным клиентам → Расчетно-кассовое обслуживание →
+    #      Тарифы и операционное время → выбрать регион обслуживания.
+    #     проконсультируй клиента о преимуществах Сбербанк
+    #     Бизнес Онлайн (назови Клиенту не менее одного),
+    #     согласно документу Удаленное обслуживание (Карточка продукта)
+    # """
+    TEXT_5_YES = "TEXT_5_YES"
+    TEXT_5_NO = "TEXT_5_NO"
+    # EXIT_GATE_EXCEPTION = "Oops, Exception"
+
+    class Meta:
+        proxy = True
+
+    def start(self, *args, **kwargs):
+        print("ConsideringSelfServiceInteraction.start(")
+        super(self.__class__, self).start(*args, **kwargs)
+        # 1. retrieve CurrencySlot
+        # check if it is not retrieved yet?
+
+        self.ic.DialogPlanner.plan_process_retrieve_slot_value(ClientOkToSelfServiceSlot,
+                                                               callback_fn=self.when_client_responded_about_self_serving)
+        # import ipdb; ipdb.set_trace()
+        print("kkk")
+
+    def when_client_responded_about_self_serving(self, *args, **kwargs):
+        """
+        event handler which
+        triggers rule checks
+        and precompletion behaviour
+        before completing the state of the interaction
+        """
+        # import ipdb; ipdb.set_trace()
+
+        print("ConsideringSelfServiceInteraction.when_client_responded_about_self_serving(")
+        # import ipdb; ipdb.set_trace()
+
+        self_serving_answer = kwargs['user_slot_process'].result.value
+        self_serving_answer = self.ic.MemoryManager.put_slot_value(ClientOkToSelfServiceSlot.name,
+                                                                       self_serving_answer)
+
+        ######################### Busines Rule BR5 Block ##########################################
+
+        ######################### Completion Busines Rule Block ##########################################
+        if ClientOkToSelfServiceSlot.ANSWER_YES in self_serving_answer:
+            print("ClientOkToSelfServiceSlot.ANSWER_YES in self_serving_answer")
+
+            #     then complete self
+            self.ic.DialogPlanner.sendText(self.TEXT_5_YES)
+            # self.ic.DialogPlanner.complete_user_interaction_proc(self, self.EXIT_GATE_OK)
+
+        elif ClientOkToSelfServiceSlot.ANSWER_NO in self_serving_answer:
+            print("ClientOkToSelfServiceSlot.ANSWER_NO in self_serving_answer")
+            self.ic.DialogPlanner.sendText(self.TEXT_5_NO)
+            # self.ic.DialogPlanner.complete_user_interaction_proc(self, self.EXIT_GATE_OK)
+
+        else:
+            import ipdb;
+            ipdb.set_trace()
+            raise Exception(
+                "ClientOkToSelfServiceSlot.when_client_responded_about_self_serving: unhandled case of user answer")
+
+        ######################### END Busines Rule BR5 Block ##########################################
+
+        self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
+
+
+class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
+    """
+    6 Шаг скрипта
+    """
+    TEXT_6_RUB_DOCS_LIST = "TEXT_6_RUB_DOCS_LIST"
+    TEXT_6_NONRUB_DOCS_INFO = "TEXT_6_NONRUB_DOCS_INFO"
+    TEXT_6_RUB_READY_REDIRECT = "TEXT_6_RUB_READY_REDIRECT"
+    TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER = "TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER"
+
+    EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE = "ExitGate_6_NONRUB_RESERVATION_OFFLINE"
+    # ExitGate(EXIT_GATE_3_1)
+    EXIT_GATE_6_RUB_UNREADY = "ExitGate_6_RUB_UNREADY"
+    EXIT_GATE_6_RUB_READY = "ExitGate_6_RUB_READY"
+
+    # Custom exit gates must be declared explicitly
+    EXIT_GATES_NAMES_LIST = [
+        EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE,
+        EXIT_GATE_6_RUB_UNREADY,
+        EXIT_GATE_6_RUB_READY
+    ]
+
+    class Meta:
+        proxy = True
+
+
+    def start(self, *args, **kwargs):
+        print("Ready to go: OnlineReservingFinalizationInteraction.start")
+        super(self.__class__, self).start(*args, **kwargs)
+        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+
+        # assering existence of variable's value:
+        print('assering existence of DesiredCurrencySlot value:')
+        # import ipdb; ipdb.set_trace()
+
+        desired_currency_slot_value = self.ic.MemoryManager.get_slot_value(DesiredCurrencySlot.name)
+        # TODO more general solution is recommended:
+        if DesiredCurrencySlot.RUB in desired_currency_slot_value:
+            self.ic.DialogPlanner.sendText(self.TEXT_6_RUB_DOCS_LIST)
+            self.ic.DialogPlanner.plan_process_retrieve_slot_value(ClientIsReadyToGiveDocsSlot,
+                                                                   callback_fn=self.on_client_responded_if_docs_ready)
+        # Возможны случаи когда клиент упомянул две и более валюты
+        # рублевую и нерублевую, в этом случае поведение не определено однозначно
+
+        # TODO:
+        # really it is a hack: we must check NONRUB
+        if DesiredCurrencySlot.USD in desired_currency_slot_value:
+            self.ic.DialogPlanner.sendText(self.TEXT_6_NONRUB_DOCS_INFO)
+            self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE)
+
+    def on_client_responded_if_docs_ready(self, *args, **kwargs):
+        """
+        Switch 6.2 at step 6
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        ready_to_give_docs = kwargs['user_slot_process'].result.value
+        ready_to_give_docs = self.ic.MemoryManager.put_slot_value(ClientIsReadyToGiveDocsSlot.name,
+                                                                  ready_to_give_docs)
+        print(ready_to_give_docs)
+        print("on_client_responded_if_docs_ready")
+        if ClientIsReadyToGiveDocsSlot.ANSWER_YES in ready_to_give_docs:
+            self.ic.DialogPlanner.sendText(self.TEXT_6_RUB_READY_REDIRECT)
+
+            self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_6_RUB_READY)
+            # self.ic.DialogPlanner.enqueue_interaction_by_name("PrivateInfoFormInteraction",
+            #                                                   callback_fn=self.on_private_info_form_completed)
+
+        elif ClientIsReadyToGiveDocsSlot.ANSWER_NO in ready_to_give_docs:
+            self.ic.DialogPlanner.sendText(self.TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER)
+            self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_6_RUB_UNREADY)
+

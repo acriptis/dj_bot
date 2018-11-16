@@ -1,6 +1,6 @@
 from django.db import models
 # from hello_bot.hello_bot.settings import SYSTEM_USER_NAME
-from hello_bot.settings import SYSTEM_USER_NAME
+from bank_bot.settings import SYSTEM_USER_NAME
 
 
 class UserDialog(models.Model):
