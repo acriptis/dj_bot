@@ -44,9 +44,6 @@ class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
             flat_norm[each_syn] = canonic_name
     ################################################################################################
 
-    def asker_fn(self):
-        return self.questioner
-
 
 class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
     """
@@ -83,9 +80,6 @@ class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
             flat_norm[each_syn] = canonic_name
     ################################################################################################
 
-    # TODO move into abstract
-    def asker_fn(self):
-        return self.questioner
 
 # 3 DocumentsListSupplyInteraction
 # NeedListDocsAndTarifsSlot
@@ -107,8 +101,6 @@ class NeedListDocsAndTarifsSlot(BaseSlotField, YesNoSlotReceptorMixin):
     ################################################################################################
 
 
-
-
 # #################################################################################
 # part of PrivateInfoForm:
 class ClientIsResidentRFSlot(BaseSlotField, YesNoSlotReceptorMixin):
@@ -116,9 +108,6 @@ class ClientIsResidentRFSlot(BaseSlotField, YesNoSlotReceptorMixin):
 
     questioner = "Вы резидент РФ?"
 
-    # TODO move into abstract
-    def asker_fn(self):
-        return self.questioner
 
 class ClientServiceRegionSlot(BaseSlotField, DictionarySlotReceptorMixin):
     name = 'ClientServiceRegionSlot'
@@ -195,51 +184,8 @@ class ClientAgreeWithServicePackConditionsSlot(BaseSlotField, YesNoSlotReceptorM
     ################################################################################################
 
 
-    # TODO move into abstract
-    def asker_fn(self):
-        return self.questioner
-
-    # def can_recept(self, text, *args, **kwargs):
-    #     """
-    #     Method that checks if UserMessage can be recepted by Receptor
-    #
-    #     :param text:
-    #     :param args:
-    #     :param kwargs:
-    #     :return: True/False
-    #     # TODO partial reception of the message!
-    #     """
-    #     import ipdb; ipdb.set_trace()
-    #
-    #     for each_cur in self.flat_norm.keys():
-    #         if each_cur in text:
-    #             return True
-    #
-    #     else:
-    #         return False
-    #
-    # def recept(self, text, *args, **kwargs):
-    #     """
-    #     Method that actually recepts message and extracts Slot's Value from it
-    #     :param text:
-    #     :param args:
-    #     :param kwargs:
-    #     :return:
-    #     """
-    #     results = []
-    #     for each_cur in self.flat_norm.keys():
-    #         if each_cur in text:
-    #             results.append(self.flat_norm[each_cur])
-    #
-    #     if results:
-    #         # we have something in results
-    #         print("DictionarySlotReceptorMixin.recept: %s grasped results: %s" % (self, results))
-    #         # TODO make productions signals?
-    #     return results
-
 # END Slots of PrivateInfoForm:
 #################################################################################
-
 
 
 class ClientOkToSelfServiceSlot(BaseSlotField, YesNoSlotReceptorMixin):
@@ -257,11 +203,6 @@ class ClientOkToSelfServiceSlot(BaseSlotField, YesNoSlotReceptorMixin):
     ################################################################################################
 
 
-    # TODO move into abstract
-    def asker_fn(self):
-        return self.questioner
-
-
 class ClientIsReadyToGiveDocsSlot(BaseSlotField, YesNoSlotReceptorMixin):
         """
         Slot for requesting user step6's question
@@ -275,10 +216,6 @@ class ClientIsReadyToGiveDocsSlot(BaseSlotField, YesNoSlotReceptorMixin):
         # Slot's Values Domain Specification
         # Don't need it because we use YesNo Receptors'
         ################################################################################################
-
-        # TODO move into abstract
-        def asker_fn(self):
-            return self.questioner
 
 
 class ClientWantsNearestOfficeRecomendation(BaseSlotField, YesNoSlotReceptorMixin):
@@ -294,7 +231,3 @@ class ClientWantsNearestOfficeRecomendation(BaseSlotField, YesNoSlotReceptorMixi
         # Slot's Values Domain Specification
         # Don't need it because we use YesNo Receptors'
         ################################################################################################
-
-        # TODO move into abstract
-        def asker_fn(self):
-            return self.questioner
