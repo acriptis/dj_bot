@@ -621,6 +621,10 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
         print('assering existence of DesiredCurrencySlot value:')
         # import ipdb; ipdb.set_trace()
 
+        # TODO: the following line should be async aware if slot is not exist
+        # Approach 1: (dirty and easy) use request-callback pattern, by requesting slot value and transfering it
+        # to callback
+        # Approach 2: (clean and async) use async pattern: https://habr.com/post/266743/
         desired_currency_slot_value = self.ic.MemoryManager.get_slot_value(DesiredCurrencySlot.name)
         # TODO more general solution is recommended:
         if DesiredCurrencySlot.RUB in desired_currency_slot_value:
