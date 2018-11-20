@@ -9,6 +9,11 @@ from components.user_slot_processes_manager import UserSlotProcessesManager
 
 
 class InformationController():
+    """
+    InformationController is a PlugIn for information management, may be plugged to an Agent object or to a Skill
+    instance for managing access of internal components to information and behaviours of the system.
+
+    """
 
     # TODO design structure
     def __init__(self, user=None):

@@ -22,6 +22,11 @@ from bank_interactions.models import IntentRetrievalInteraction, DesiredCurrency
 #
 
 class InteractionTask():
+    """
+    Atomic Task in Agenda
+
+    #TODO do abstraction refactoring for managing Slots as Tasks as well
+    """
     def __init__(self, interaction_obj, priority, callback_fn):
         self.interaction_obj=interaction_obj
         self.priority=priority
@@ -29,7 +34,7 @@ class InteractionTask():
 
 class Agenda():
     """
-    class keeping all tasks of the system
+    Class for storing the plan of future processing tasks
     """
     def __init__(self):
 
@@ -95,6 +100,10 @@ class Agenda():
         return itask
 
 class DialogPlanner():
+    """
+    Manager for Dialog Session planning. It allows to enqueue Interactions, SlotProcesses for future execution and
+    subscribing for results of the completed Processes
+    """
     # tasks queue collector
     def __init__(self, ic):
         self.ic = ic
@@ -102,10 +111,10 @@ class DialogPlanner():
         # here we put Interactions to be done in future
         # self.queue = []
 
-        # queue is a list of tuples (Interaction, priority)
-        # separate queue for slots
-        self.slots_queue = []
-        # slots queue is higher priority than Interactions queue?
+        # # queue is a list of tuples (Interaction, priority)
+        # # separate queue for slots
+        # self.slots_queue = []
+        # # slots queue is higher priority than Interactions queue?
 
         # here we put decisions which are processed or started processing
         self.done_or_doing = []
@@ -277,6 +286,7 @@ class DialogPlanner():
 
     # #############################################################################################
     # USER INTERACTION management:
+
     def initialize_user_interaction_proc(self, interaction_obj):
         """
         Interface method for starting User Interaction
@@ -285,6 +295,7 @@ class DialogPlanner():
         :param interaction_obj: 
         :return: 
         """
+        # TODO move to ?
         uip, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
         return uip
     

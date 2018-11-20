@@ -1,4 +1,7 @@
 class MemoryManager():
+    """
+    System-Wide Memory Management
+    """
     def __init__(self, ic):
         self.ic=ic
 

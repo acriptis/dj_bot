@@ -8,7 +8,7 @@ class InteractionsManager():
     """
     The most of scenaric interactions are singletons wuithin dialog session
 
-    So the Manager offers interface for all components to retrieve actual version of interaction instance from
+    So the Manager provides interface for all components to retrieve actual version of interaction instance from
         string name,
         class
 
