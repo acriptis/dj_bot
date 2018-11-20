@@ -134,10 +134,10 @@ class Interaction(models.Model):
         self._anti_garbage_collector_callbacks_list.append(callback_fn)
         self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn)
 
-    def class_router(self):
-        # given a name of interaction restores a BehaviourClass
-        # returns polymorphic object of concrete interaction class
-        pass
+    # def class_router(self):
+    #     # given a name of interaction restores a BehaviourClass
+    #     # returns polymorphic object of concrete interaction class
+    #     pass
 
 class QuestionInteractionFactory(Interaction, AbstractInteraction):
     # TODO allow generative template (GenericField)

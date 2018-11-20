@@ -7,7 +7,7 @@ class SlotsManager():
     """
     The most of scenaric slots are singletons within dialog session
 
-    So the Manager offers interface for all components to retrieve actual version of slot instance from
+    So the Manager provides interface for all components to retrieve actual version of slot instance from
         string name,
         class
 
@@ -42,6 +42,27 @@ class SlotsManager():
 
         # slot_name -> user_slot_process
         self.user_slots = {}
+
+    def compose_dynamic_slot(self, name, questioner, receptor_class, reasking_strategy="Greed", memory_target_uri=None, *args, **kwargs):
+        """
+        Factory method for construction of a custom slot according to
+        slot configuration specification
+
+        name - name of slot
+        questioner - string or callable returning string with question about slot
+        receptor class - mixin class providin recept and can_recept methods for filling the slot
+            from user response
+        reasking_strategy - specification of behaviour for cases when user don't answer the question
+
+
+        return slot object
+
+        """
+        # attrs to be provided
+        # name
+        # receptor_object
+        # questioner
+        pass
 
     def get_or_create_instance_by_classname(self, classname):
         """

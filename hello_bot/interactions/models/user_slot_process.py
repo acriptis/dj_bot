@@ -70,6 +70,7 @@ class UserSlotProcess(models.Model):
         slot_codename = slot_obj.get_name()
 
         usp, _ = cls.objects.get_or_create(user=user, slot_codename=slot_codename)
+        # signal emitted when slot is filled
         usp.slot_filled_signal = django.dispatch.dispatcher.Signal(providing_args=["user_slot_process"])
         # TODO how to restore signal connections? (So listeners will be notified)
         usp.slot = slot_obj
