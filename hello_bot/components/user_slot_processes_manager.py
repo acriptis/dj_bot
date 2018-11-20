@@ -3,6 +3,7 @@ from interactions.models.user_slot_process import UserSlotProcess
 
 class UserSlotProcessesManager():
     """
+    Manages UserSlotProcesses
     Helps to solve signal persistence problem
 
     Manages UserSlotProcesses and UserSlots?
