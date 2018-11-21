@@ -55,14 +55,14 @@ def petri_net_interaction6():
     transition_name2 = 'sendText(TEXT_6_RUB_DOCS_LIST)'
     transition_obj2 = Transition(transition_name2, guard=Expression('x.des_cur_value()=="RUB"'))
     pnet.add_transition(transition_obj2)
-    pnet.add_input(p_descur_compl, transition_name2, Variable('x'))
+    pnet.add_input(p_descur_compl, transition_name2, Test(Variable('x')))
     pnet.add_output(p_t6rdls, transition_name2, Variable('x'))
 
     # transition sendText(TEXT_6_NONRUB_DOCS_INFO)
     transition_name3 = 'sendText(TEXT_6_NONRUB_DOCS_INFO)'
     transition_obj3 = Transition(transition_name3, guard=Expression('x.des_cur_conatins("USD")'))
     pnet.add_transition(transition_obj3)
-    pnet.add_input(p_descur_compl, transition_name3, Variable('x'))
+    pnet.add_input(p_descur_compl, transition_name3, Test(Variable('x')))
     pnet.add_output(p_exg6_nro, transition_name3, Variable('x'))
 
 
