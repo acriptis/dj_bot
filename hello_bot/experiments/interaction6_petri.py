@@ -16,8 +16,7 @@ class MyObj():
         if curr == "USD":
             return True
 
-
-def slot_process_petri_net():
+def petri_net_interaction6():
     myobj = MyObj()
     pnet = PetriNet('Interaction_6')
 
@@ -76,14 +75,14 @@ def slot_process_petri_net():
 
     # transition sendText(TEXT_6_RUB_READY_REDIRECT)
     transition_name5 = 'sendText(TEXT_6_RUB_READY_REDIRECT)'
-    transition_obj5 = Transition(transition_name5, guard=Expression('ClientIsReadyToGiveDocs.value == YES'))
+    transition_obj5 = Transition(transition_name5, guard=Expression('x.ClientIsReadyToGiveDocs.value == "YES"'))
     pnet.add_transition(transition_obj5)
     pnet.add_input(p_cirtgdc, transition_name5, Variable('x'))
     pnet.add_output(p_exg6_rr, transition_name5, Variable('x'))
 
     # transition sendText(TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER)
     transition_name6 = 'sendText(TEXT_6_RUB_NOT_READY_ASK_RETRY_LATER)'
-    transition_obj6 = Transition(transition_name6, guard=Expression('ClientIsReadyToGiveDocs.value == NO'))
+    transition_obj6 = Transition(transition_name6, guard=Expression('x.ClientIsReadyToGiveDocs.value == "NO"'))
     pnet.add_transition(transition_obj6)
     pnet.add_input(p_cirtgdc, transition_name6, Variable('x'))
     pnet.add_output(p_exg6_ru, transition_name6, Variable('x'))
@@ -91,6 +90,7 @@ def slot_process_petri_net():
 
     pnet.draw("Interaction_6_1.png")
     print(transition_obj.modes())
+
 
     # make transition:
     transition_obj.fire(transition_obj.modes()[0])
@@ -114,4 +114,4 @@ def slot_process_petri_net():
 
 if __name__ == "__main__":
 
-    slot_process_petri_net()
+    petri_net_interaction6()
