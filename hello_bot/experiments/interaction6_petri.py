@@ -8,6 +8,7 @@ from nets import *
 class MyObj():
     def __init__(self):
         self.val = 5
+        self.DesiredCurrencySlot_value = ["RUB", "USD"]
 
     def des_cur_value(self):
         return "RUB"
@@ -53,7 +54,7 @@ def petri_net_interaction6():
 
     # transition sendText(TEXT_6_RUB_DOCS_LIST)
     transition_name2 = 'sendText(TEXT_6_RUB_DOCS_LIST)'
-    transition_obj2 = Transition(transition_name2, guard=Expression('x.des_cur_value()=="RUB"'))
+    transition_obj2 = Transition(transition_name2, guard=Expression('"RUB" in x.DesiredCurrencySlot_value'))
     pnet.add_transition(transition_obj2)
     pnet.add_input(p_descur_compl, transition_name2, Test(Variable('x')))
     pnet.add_output(p_t6rdls, transition_name2, Variable('x'))
@@ -87,23 +88,20 @@ def petri_net_interaction6():
     pnet.add_input(p_cirtgdc, transition_name6, Variable('x'))
     pnet.add_output(p_exg6_ru, transition_name6, Variable('x'))
 
-
     pnet.draw("Interaction_6_1.png")
     print(transition_obj.modes())
 
-
     # make transition:
     transition_obj.fire(transition_obj.modes()[0])
+
     pnet.draw("Interaction_6_2.png")
-    # transition_obj.modes()
     print("transition_obj2.modes():")
     print(transition_obj2.modes())
     print("transition_obj3.modes():")
     print(transition_obj3.modes())
-    # import ipdb; ipdb.set_trace()
     import ipdb; ipdb.set_trace()
 
-    # transition_obj2.fire(transition_obj2.modes()[0])
+    transition_obj2.fire(transition_obj2.modes()[0])
     transition_obj3.fire(transition_obj3.modes()[0])
 
     transition_obj2.modes()

@@ -134,7 +134,20 @@ class DialogPlanner():
 
     # #### SLOT PROCESS ###############################################################################################
 
-    def plan_process_retrieve_slot_value(self, slot_specification_cls, priority=10, callback_fn=None, duplicatable=False):
+    def plan_process_retrieve_slot_value_by_slot_name(self, slot_name, priority=10, callback_fn=None,
+                                         duplicatable=False):
+        """
+        Given a string of slot name it runs the process of slot-filling
+        :param slot_name:
+        :param priority:
+        :param callback_fn:
+        :param duplicatable:
+        :return:
+        """
+        slot_spec_obj = self.ic.sm.get_or_create_instance_by_classname(slot_name)
+        self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj, priority=priority, callback_fn=callback_fn, duplicatable=duplicatable)
+
+    def plan_process_retrieve_slot_value_by_slot_spec(self, slot_specification_cls, priority=10, callback_fn=None, duplicatable=False):
         """
         Given a slot specification initializes process of retrieving
         the slot value for the user.
@@ -158,19 +171,48 @@ class DialogPlanner():
         # TODO make possible to trigger starts of interactions after finishing other planned (or not planned?)
         # TODO interactions
 
+        slot_spec_obj = self.ic.sm.get_or_create_instance_by_class(slot_specification_cls)
+        self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj, priority=priority, callback_fn=callback_fn, duplicatable=duplicatable)
 
-        curr_slot_obj = self.ic.sm.get_or_create_instance_by_class(slot_specification_cls)
+    def plan_process_retrieve_slot_value_with_slot_spec_instance(self, slot_spec_obj, priority=10, callback_fn=None,
+                                                      duplicatable=False, target_uri=None):
+        """
 
+        Given a slot obj it runs the process of slot-filling
+        initializes process of retrieving the slot value for the user.
+
+        If not sure wether slot already retrieved or not it better to use:
+            self.ic.retrospect_or_retrieve_slot(slot_spec, target_uri, callback)
+
+        Activate user interaction with the highest priority if there is no more active?
+
+        :param slot_spec_obj:
+        :param priority: higher value - higher priority of execution
+        :param callback_fn: function which must be called when slot process complete
+
+        :param target_uri: str of URI where slot value should be written to, if None then default uri is a name of the slot
+
+        :param duplicatable: bool if, True then slot is retrieved again even if it already exists in memory.
+            If False then slot will not be retrieved if it was grasped before
+        :return: UserSlotProcess
+
+         or better to return:
+            ?Promise/Deferred/Contract for Future result?
+
+        """
+        if not target_uri:
+            target_uri = slot_spec_obj.get_name()
         if not duplicatable:
             # check existence of ready value:
-            results = self.ic.MemoryManager.get_slot_value_quite(curr_slot_obj.get_name())
+            results = self.ic.MemoryManager.get_slot_value_quite(target_uri)
             # import ipdb; ipdb.set_trace()
 
             if not results:
-
+                # we have no memory for the slot at target uri
                 # RUN RETRIEVAL PROCESS (or Attach callback to existing process)
                 # check if process exists:
-                usp = self.ic.uspm.find_user_slot_process(curr_slot_obj)
+                usp = self.ic.uspm.find_user_slot_process(slot_spec_obj)
+
                 if usp:
                     # exists
                     # assert is not completed
@@ -178,43 +220,63 @@ class DialogPlanner():
                         # investigate
                         raise Exception("Result is not written but process is completed!")
                     else:
+                        # process exists but not completed!
+                        if usp.target_uri:
+                            # target uri exists
+                            if target_uri != usp.target_uri:
+                                raise Exception("Multiple target URIs for the same slot are not supported yet!")
+                        else:
+                            # specify target URI:
+                            usp.target_uri = target_uri
                         usp.slot_filled_signal.connect(callback_fn)
 
                 else:
                     # if usp is None
                     # no process exist we must create a new one:
-                    self._force_plan_process_retrieve_slot_value(curr_slot_obj, priority=priority,
-                                                             callback_fn=callback_fn)
+                    self._force_plan_process_retrieve_slot_value(slot_spec_obj, priority=priority,
+                                                             callback_fn=callback_fn, target_uri=target_uri)
             else:
                 # RETRIEVE CACHED RESULTS! (No need to ReRun process)
                 # means we can call callbacks instantly
+
                 # TODO refactor below:
                 if callback_fn:
                     # import ipdb; ipdb.set_trace()
                     # emulate slot process:
-                    usps = self.ic.uspm.find_user_slot_process(curr_slot_obj)
+                    # TODO user slot processe must be differentiated by target URI for duplicatable slots
+                    usps = self.ic.uspm.find_user_slot_process(slot_spec_obj)
+                    # import ipdb; ipdb.set_trace()
+
                     # usps= UserSlotProcess.objects.filter(user=self.ic.user, slot_codename=curr_slot_obj.name)
                     if usps:
-                        # get first
-                        usp =usps[0]
-                        usp.result = UserSlot(user=self.ic.user,slot=curr_slot_obj,value=results)
+                        if isinstance(usps, list):
+                            # get first
+                            usp =usps[0]
+                        else:
+                            usp = usps
+                        usp.result = UserSlot(user=self.ic.user,slot=slot_spec_obj, value=results)
+                        # import ipdb; ipdb.set_trace()
+
+                        if usp.target_uri != target_uri:
+                            # TODO handle me
+                            raise Exception("Target URI mismatch!")
 
                     else:
-                        # import ipdb; ipdb.set_trace()
+
                         print("No UserSlotProcess, while result exists!")
                         raise Exception("Result exist and UserSlotProcess no???")
                         # usp = UserSlotProcess(user=self.ic.user, slot_codename=curr_slot_obj.name)
                         #
                         # usp.result = UserSlot(user=self.ic.user, slot=curr_slot_obj, value=results)
 
-                    callback_fn(sender=self, user_slot_process=usp)
+                    callback_fn(sender=self, user_slot_process=usp, results=results)
                     return
                 else:
                     return
         else:
             raise Exception("Duplicatable Slots are not supported yet!")
 
-    def _force_plan_process_retrieve_slot_value(self, curr_slot_spec_obj, priority=10, callback_fn=None):
+    def _force_plan_process_retrieve_slot_value(self, curr_slot_spec_obj, target_uri, priority=10,  callback_fn=None):
         """
         Method which actually starts slot process in system and attaches callback on its completion
 
@@ -231,6 +293,8 @@ class DialogPlanner():
         usp, created = self.ic.uspm.get_or_create_user_slot_process(curr_slot_spec_obj)
         if not created:
             raise Exception("found existing user slot process, while expecting creation of new one!")
+
+        usp.target_uri = target_uri
 
         if callback_fn:
             # hack:

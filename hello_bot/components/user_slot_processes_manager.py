@@ -28,7 +28,7 @@ class UserSlotProcessesManager():
         :return:
         """
 
-        # TODO handle multiuser case!
+        # TODO handle multiuser case!?
         # TODO add persistency support through db!
         # Requirement: Signals and callbacks must be persistent
         slot_codename = slot_obj.get_name()
@@ -51,6 +51,7 @@ class UserSlotProcessesManager():
         :param curr_slot_obj: Slot instance
         :return:
         """
+        # TODO implement target URI feature?
         if curr_slot_obj.get_name() in self.user_slot_processes:
             return self.user_slot_processes[curr_slot_obj.get_name()]
         else:

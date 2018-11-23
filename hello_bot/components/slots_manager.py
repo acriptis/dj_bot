@@ -7,7 +7,7 @@ class SlotsManager():
     """
     The most of scenaric slots are singletons within dialog session
 
-    So the Manager provides interface for all components to retrieve actual version of slot instance from
+    So the Manager provides interface for all components to retrieve actual version of slot's schema instance from
         string name,
         class
 
@@ -35,34 +35,14 @@ class SlotsManager():
         }
         self.slotClass2SlotNameRouter = {val: key for key, val in self.classname2class.items()}
 
-        # interactions instances registry
-        self.classname2instance = {}
+        # slot instances registry
+        self.slotname2instance = {}
         # TODO consider a case when one classname may be derived into multiple instances
         # for non-singleton slots
 
         # slot_name -> user_slot_process
         self.user_slots = {}
 
-    def compose_dynamic_slot(self, name, questioner, receptor_class, reasking_strategy="Greed", memory_target_uri=None, *args, **kwargs):
-        """
-        Factory method for construction of a custom slot according to
-        slot configuration specification
-
-        name - name of slot
-        questioner - string or callable returning string with question about slot
-        receptor class - mixin class providin recept and can_recept methods for filling the slot
-            from user response
-        reasking_strategy - specification of behaviour for cases when user don't answer the question
-
-
-        return slot object
-
-        """
-        # attrs to be provided
-        # name
-        # receptor_object
-        # questioner
-        pass
 
     def get_or_create_instance_by_classname(self, classname):
         """
@@ -71,8 +51,8 @@ class SlotsManager():
         :param classname:
         :return:
         """
-        if classname in self.classname2instance.keys():
-            return self.classname2instance[classname]
+        if classname in self.slotname2instance.keys():
+            return self.slotname2instance[classname]
         else:
             # get class spec by name
 
@@ -104,5 +84,59 @@ class SlotsManager():
         """
         # slot_instance = slot_class_spec.initialize(self.ic)
         slot_instance = slot_class_spec()
-        self.classname2instance[slot_instance.get_name()] = slot_instance
+        self.slotname2instance[slot_instance.get_name()] = slot_instance
         return slot_instance
+
+#     def compose_dynamic_slot_schema(self, target_uri, questioner, receptor_class, reasking_strategy="Greed", memory_target_uri=None, *args, **kwargs):
+#         """
+#         Factory method for construction of a custom slot according to
+#         slot configuration specification
+#
+#         name - name of slot
+#         questioner - string or callable returning string with question about slot
+#         receptor class - mixin class providin recept and can_recept methods for filling the slot
+#             from user response
+#         reasking_strategy - specification of behaviour for cases when user don't answer the question
+#
+#
+#         return slot object
+#
+#         """
+#         target_uri, slot_type, asker_fn, receptor_fn, validator_fn, normalizer_fn,
+#
+#         #              required, elicitable, *args, **kwargs
+#         # attrs to be provided
+#         # name
+#         # receptor_object
+#         # questioner
+#
+#         pass
+#
+#
+# def make_custom_dynamic_slot():
+#
+#     target_uri = "desired_currency"
+#     question = "Какая Валюта?"
+#
+#     def recept(text):
+#         if "USD" in text:
+#             return "USD"
+#         else:
+#             return None
+#
+#     def can_recept(text):
+#         if "USD" in text:
+#             return True
+#         else:
+#             return None
+#
+#     sm = SlotsManager(None)
+#     slot_schema = sm.compose_dynamic_slot_schema(target_uri=target_uri, questioner=question, can_recept_fn =can_recept, recept_fn=recept)
+#
+#     # initilization
+#     slot_spec_instance = slot_schema()
+#
+#     # register slot instance in slots manager
+#     slot_spec_instance
+#
+#     # then we may push it into process

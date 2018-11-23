@@ -26,7 +26,7 @@ def main():
         print("Write next message:")
 
 
-def main2():
+def main_user_emulated_replies():
     # construct components hierarchy + domain data
     # hi = TrainigPhrasesMatcher(training_phrases=["Hello", "Kek", "Hi"])
     # bye = TrainigPhrasesMatcher(training_phrases=["Bye", "Lol", "Exit"])
@@ -50,9 +50,9 @@ def main2():
     # FAILED TESTS
     # Тестовые сценарии
     # Падает:
-    # user_messages_sequence = ["Приветик, Роботишка", "СЕКРЕТ"]
+    user_messages_sequence = ["Приветик, Роботишка", "СЕКРЕТ", "РУБЛИ", "НЕТ"]
     # не знает что ответить:
-    # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "РУБЛИ", "НЕТ"]
+    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "БАКСЫ, РУБЛИ", "НЕТ", "ДА"]
 
 
     # ####################################################################################################
@@ -83,6 +83,6 @@ def main2():
 
 if __name__=="__main__":
 
-    # main2()
-    main()
+    main_user_emulated_replies()
+    # main()
     print("Fin.")

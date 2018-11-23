@@ -8,18 +8,18 @@ class MemoryManager():
         # key value data structure:
         self.memory = {}
 
-    def get_slot_value(self, slot_name):
+    def get_slot_value(self, slot_name_or_uri):
         """
         Given a slot name returns its value or raises Exception
-        :param slot_name: str?
+        :param slot_name_or_uri: str of URI or name of Slot (for singleton slots)
         :return:
             value of the memory element
             :keywordraise Exception (no value)
         """
         # print("MemoryManager: Implement Me")
-        if slot_name not in self.memory.keys():
-            raise Exception("Has no memory for key: %s" % slot_name)
-        return self.memory[slot_name]
+        if slot_name_or_uri not in self.memory.keys():
+            raise Exception("Has no memory for key: %s" % slot_name_or_uri)
+        return self.memory[slot_name_or_uri]
 
     def get_slot_value_quite(self, memo_uri):
         """
@@ -34,14 +34,14 @@ class MemoryManager():
             print(e)
             return None
 
-    def put_slot_value(self, slot_name, value, uri=None):
+    def put_slot_value(self, slot_name_or_uri, value):
         """
         Puts particular slot value
 
-        :param slot_name: URI?
+        :param slot_name_or_uri: URI?
         :param value:
         :return:
         """
-        self.memory[slot_name] = value
+        self.memory[slot_name_or_uri] = value
         # print("MemoryManager: Implement Me")
-        return self.memory[slot_name]
+        return self.memory[slot_name_or_uri]

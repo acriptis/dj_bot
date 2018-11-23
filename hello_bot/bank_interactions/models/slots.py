@@ -51,7 +51,8 @@ class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
 
     TODO make as child class of CurrencySlot
     """
-    name = 'desired_currency'
+    # TODO fix potential discrepancy between name of class and name of instance
+    name = 'DesiredCurrencySlot'
 
     questioner = "В какой валюте?"
 

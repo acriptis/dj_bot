@@ -57,13 +57,14 @@ class UserSlotProcess(models.Model):
     # ###################################################################################################
 
     @classmethod
-    def initialize(cls, user, slot_obj):
+    def initialize(cls, user, slot_obj, target_uri=None):
         """
         1. Create UserSlotProcess if it is not exist
         2. Declare Signal of the process for announcing completion (slot_filled_signal)
 
         :param user:
         :param slot_obj:
+        :param target_uri: URI in memory ontology where the value must be written to
         :return:
         """
         # slot_codename = slotClass2SlotNameRouter[slot_obj.__class__]
@@ -71,9 +72,11 @@ class UserSlotProcess(models.Model):
 
         usp, _ = cls.objects.get_or_create(user=user, slot_codename=slot_codename)
         # signal emitted when slot is filled
-        usp.slot_filled_signal = django.dispatch.dispatcher.Signal(providing_args=["user_slot_process"])
+        usp.slot_filled_signal = django.dispatch.dispatcher.Signal(providing_args=["user_slot_process", "results"])
         # TODO how to restore signal connections? (So listeners will be notified)
         usp.slot = slot_obj
+        usp.target_uri = target_uri
+
         return usp
 
     def save(self, *args, **kwargs):
@@ -128,10 +131,11 @@ class UserSlotProcess(models.Model):
             # self.result.save()
             self.raw_result = result
             self.state = self.COMPLETED
+            if self.target_uri:
+                # write the memory
+                self.ic.MemoryManager.put_slot_value(self.target_uri, result)
 
-            # import ipdb; ipdb.set_trace()
-
-            self.slot_filled_signal.send(sender=self, user_slot_process=self)
+            self.slot_filled_signal.send(sender=self, user_slot_process=self, results=result)
             self.save()
             print("User response filled slot: %s!" % result)
 

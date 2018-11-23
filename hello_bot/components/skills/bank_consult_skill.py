@@ -88,6 +88,17 @@ class Scenario():
             exit_gate=self.s3_doc_list_supply_interaction.EXIT_GATE_3_1,
             callback_fn=self.s4_business_offering_interaction.start)
 
+        # ExitGate3.2.RUB -> 6.start
+        self.s3_doc_list_supply_interaction.connect_exit_gate_with_fn(
+            exit_gate=self.s3_doc_list_supply_interaction.EXIT_GATE_3_2_RUB,
+            callback_fn=self.s6_onlinereservingfinalizationinteraction.start)
+        # ExitGate3.2.NonRUB -> 7.start
+        # TODO add prioritization into connections
+        self.s3_doc_list_supply_interaction.connect_exit_gate_with_fn(
+            exit_gate=self.s3_doc_list_supply_interaction.EXIT_GATE_3_2_NONRUB,
+            callback_fn=self.s7_officerecommendationinteraction.start)
+
+
         # 4.Exit -> 5.start
         self.s4_business_offering_interaction.connect_exit_gate_with_fn(
             callback_fn=self.s5_consideringselfserviceinteraction.start)
