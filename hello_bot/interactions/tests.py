@@ -22,20 +22,6 @@ from django.test import TestCase
 
 # Manual Tests
 
-
-class SlotProcess():
-    """
-    Abstraction holding sequence of actions in slot interaction
-    and marking state after each action
-
-    Slot controller
-    """
-
-    def __init__(self, slot):
-        pass
-
-
-
 def test_slot_processing():
     """
     Test case:
