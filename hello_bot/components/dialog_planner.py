@@ -158,33 +158,6 @@ class DialogPlanner():
         slot_spec_obj = self.ic.sm.get_or_create_instance_by_slotname(slot_name)
         self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj, priority=priority, callback_fn=callback_fn, duplicatable=duplicatable)
 
-    def plan_process_retrieve_slot_value_by_slot_spec(self, slot_specification_cls, priority=10, callback_fn=None, duplicatable=False):
-        """
-        Given a slot specification initializes process of retrieving
-        the slot value for the user.
-
-        Activate user interaction with the highest priority if there is no more active?
-
-        :param slot_specification_cls:
-        :param priority: higher value - higher priority of execution
-        :param callback_fn: function which must be called when slot process complete
-        :param duplicatable: bool if, True then slot is retrieved again even if it already exists in memory.
-            If False then slot will not be retrieved if it was grasped before
-        :return: UserSlotProcess
-
-         or better to return:
-            ?Promise/Deferred/Contract for Future result?
-
-        """
-        print("DialogPlanner: plan_process_retrieve_slot_value: %s" % slot_specification_cls.name)
-
-        # TODO implement TASK management with priority accounting and analysis of current active interactions
-        # TODO make possible to trigger starts of interactions after finishing other planned (or not planned?)
-        # TODO interactions
-
-        slot_spec_obj = self.ic.sm.get_or_create_instance_by_class(slot_specification_cls)
-        self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj, priority=priority, callback_fn=callback_fn, duplicatable=duplicatable)
-
     def plan_process_retrieve_slot_value_with_slot_spec_instance(self, slot_spec_obj, priority=10, callback_fn=None,
                                                       duplicatable=False, target_uri=None):
         """
