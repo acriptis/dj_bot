@@ -237,15 +237,10 @@ class BankConsulterSkill(AbstractSkill):
 
 
 class WeatherSkill(AbstractSkill):
+    """
+    Skill for managing Interactions about weather forecast
+    """
 
     def __init__(self, ic):
         self.ic = ic
-
-        # set up scenario of dialog:
-        ## Test
         self.weather_int = self.ic.im.get_or_create_instance_by_class(WeatherForecastInteraction)
-
-        # self.weather_int.start()
-        # import ipdb; ipdb.set_trace()
-
-        ## Test
