@@ -108,8 +108,8 @@ class Agenda():
         itask = InteractionTask(interaction_obj, priority, callback_fn)
         self.queue_of_tasks.append(itask)
         return itask
-    # def is_interaction_in_queue(self, interaction_obj):
-    #     pass
+
+
 class DialogPlanner():
     """
     Manager for Dialog Session planning. It allows to enqueue Interactions, SlotProcesses for future execution and
@@ -188,6 +188,8 @@ class DialogPlanner():
     def plan_process_retrieve_slot_value_with_slot_spec_instance(self, slot_spec_obj, priority=10, callback_fn=None,
                                                       duplicatable=False, target_uri=None):
         """
+        Infrastructure method for appending slot process to Agenda
+
 
         Given a slot obj it runs the process of slot-filling
         initializes process of retrieving the slot value for the user.
@@ -455,13 +457,17 @@ class DialogPlanner():
         Starts the most prioritized item (Interaction or Slot) from queue
         :return:
         """
-        # import ipdb; ipdb.set_trace()
-
         next_task = self.agenda.pop_the_highest_priority_task()
-
-        interaction_obj = next_task.interaction_obj
-
-        self._force_start_interaction_process(interaction_obj)
+        if isinstance(next_task, InteractionTask):
+            interaction_obj = next_task.interaction_obj
+            self._force_start_interaction_process(interaction_obj)
+        elif isinstance(next_task, SlotTask):
+            slot_obj= next_task.item
+            # slots must be carefully started! with check if they already completed, or in process so we neeed to call
+            import ipdb; ipdb.set_trace()
+            # lets investigate the case
+            self.plan_process_retrieve_slot_value_with_slot_spec_instance()
+            self._force_start_interaction_process(slot_obj)
         #
         # if type(type(next_element)) == type
         return

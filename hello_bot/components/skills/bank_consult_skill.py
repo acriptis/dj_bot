@@ -49,19 +49,19 @@ class Scenario():
         # self.business_offering_interaction = BusinessOfferingInteraction.initialize(ic=ic)
 
         # 5.
-        self.s5_consideringselfserviceinteraction = self.ic.im.get_or_create_instance_by_class(ConsideringSelfServiceInteraction)
+        self.s5_considering_self_service_interaction = self.ic.im.get_or_create_instance_by_class(ConsideringSelfServiceInteraction)
 
         # 6.
-        self.s6_onlinereservingfinalizationinteraction = self.ic.im.get_or_create_instance_by_class(OnlineReservingFinalizationInteraction)
+        self.s6_online_reserving_finalization_interaction = self.ic.im.get_or_create_instance_by_class(OnlineReservingFinalizationInteraction)
 
         # 7.
-        self.s7_officerecommendationinteraction = self.ic.im.get_or_create_instance_by_class(OfficeRecommendationInteraction)
+        self.s7_office_recommendation_interaction = self.ic.im.get_or_create_instance_by_class(OfficeRecommendationInteraction)
 
         # 8. Termination of dialog
-        self.s8_dialogterminationinteraction = self.ic.im.get_or_create_instance_by_class(DialogTerminationInteraction)
+        self.s8_dialog_termination_interaction = self.ic.im.get_or_create_instance_by_class(DialogTerminationInteraction)
 
         # 9. Operator Switch
-        self.s9_operatorswitchinteraction = self.ic.im.get_or_create_instance_by_class(OperatorSwitchInteraction)
+        self.s9_operator_switch_interaction = self.ic.im.get_or_create_instance_by_class(OperatorSwitchInteraction)
         # END Initialize interaction objects:
         # ########################################################################################
 
@@ -92,40 +92,40 @@ class Scenario():
         # ExitGate3.2.RUB -> 6.start
         self.s3_doc_list_supply_interaction.connect_exit_gate_with_fn(
             exit_gate=self.s3_doc_list_supply_interaction.EXIT_GATE_3_2_RUB,
-            callback_fn=self.s6_onlinereservingfinalizationinteraction.start)
+            callback_fn=self.s6_online_reserving_finalization_interaction.start)
         # ExitGate3.2.NonRUB -> 7.start
         # TODO add prioritization into connections
         self.s3_doc_list_supply_interaction.connect_exit_gate_with_fn(
             exit_gate=self.s3_doc_list_supply_interaction.EXIT_GATE_3_2_NONRUB,
-            callback_fn=self.s7_officerecommendationinteraction.start)
+            callback_fn=self.s7_office_recommendation_interaction.start)
 
 
         # 4.Exit -> 5.start
         self.s4_business_offering_interaction.connect_exit_gate_with_fn(
-            callback_fn=self.s5_consideringselfserviceinteraction.start)
+            callback_fn=self.s5_considering_self_service_interaction.start)
 
         # 5.Exit -> 6.start
-        self.s5_consideringselfserviceinteraction.connect_exit_gate_with_fn(
-            callback_fn=self.s6_onlinereservingfinalizationinteraction.start)
+        self.s5_considering_self_service_interaction.connect_exit_gate_with_fn(
+            callback_fn=self.s6_online_reserving_finalization_interaction.start)
 
         # 6 Exits: ###########################################
         # 6.ExitGate_6_NONRUB_RESERVATION_OFFLINE -> 7.start
-        self.s6_onlinereservingfinalizationinteraction.connect_exit_gate_with_fn(
-            exit_gate=self.s6_onlinereservingfinalizationinteraction.EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE,
-            callback_fn=self.s7_officerecommendationinteraction.start)
+        self.s6_online_reserving_finalization_interaction.connect_exit_gate_with_fn(
+            exit_gate=self.s6_online_reserving_finalization_interaction.EXIT_GATE_6_NONRUB_RESERVATION_OFFLINE,
+            callback_fn=self.s7_office_recommendation_interaction.start)
         # 6.EXIT_GATE_6_RUB_READY -> 9.start
-        self.s6_onlinereservingfinalizationinteraction.connect_exit_gate_with_fn(
-            exit_gate=self.s6_onlinereservingfinalizationinteraction.EXIT_GATE_6_RUB_READY,
-            callback_fn=self.s9_operatorswitchinteraction.start)
+        self.s6_online_reserving_finalization_interaction.connect_exit_gate_with_fn(
+            exit_gate=self.s6_online_reserving_finalization_interaction.EXIT_GATE_6_RUB_READY,
+            callback_fn=self.s9_operator_switch_interaction.start)
         # 6.EXIT_GATE_6_RUB_UNREADY -> 8.start
-        self.s6_onlinereservingfinalizationinteraction.connect_exit_gate_with_fn(
-            exit_gate=self.s6_onlinereservingfinalizationinteraction.EXIT_GATE_6_RUB_UNREADY,
-            callback_fn=self.s8_dialogterminationinteraction.start)
+        self.s6_online_reserving_finalization_interaction.connect_exit_gate_with_fn(
+            exit_gate=self.s6_online_reserving_finalization_interaction.EXIT_GATE_6_RUB_UNREADY,
+            callback_fn=self.s8_dialog_termination_interaction.start)
         #####################################################
 
         # 7.Exit -> 8.start
-        self.s7_officerecommendationinteraction.connect_exit_gate_with_fn(
-            callback_fn=self.s8_dialogterminationinteraction.start)
+        self.s7_office_recommendation_interaction.connect_exit_gate_with_fn(
+            callback_fn=self.s8_dialog_termination_interaction.start)
 
         # import ipdb; ipdb.set_trace()
         # print("lkk")
