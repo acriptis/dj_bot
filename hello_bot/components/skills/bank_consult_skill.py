@@ -11,6 +11,7 @@ from bank_interactions.models import DocumentsListSupplyInteraction, IntentRetri
     OfficeRecommendationInteraction, DialogTerminationInteraction, OperatorSwitchInteraction
 from bank_interactions.models.greeting import GreetingInteraction
 from bank_interactions.models.interactions import DesiredCurrencyInteraction
+from personal_assistant_interactions.models import WeatherForecastInteraction
 
 
 class Scenario():
@@ -132,48 +133,32 @@ class Scenario():
         # ########################################################################################
 
 
-class BankConsulterAgentSkill(AbstractSkill):
+class AgentSkillInitializer():
     """
-        Agent that is a skill as well
+    Agent that initializes skills
+    Instead of basic agent which requires skills
     """
-    # signal emmitted when user message comes:
-    # user_message_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
+    def __init__(self, skills_spec):
+        self.skills_spec = skills_spec
 
-    def __init__(self, ic=None):
+        self.skills = []
+
+        # Agent Customization:
         # TODO implement user model
-        self.user = 'Греф'
+        self.user = 'Иван Павлов'
 
-        # #############################################
-        # information controller injection hack
-        if not ic:
-            # create information controller
-            ic = InformationController(user=self.user)
-        self.ic = ic
-        # END ############################################
+        # create information controller
+        self.ic = InformationController(user=self.user)
 
-        ########################################################################################
-        ####################### init scenario map ############################################
         # create user dialog and push the message
         self.userdialog = UserDialog.objects.create()
 
         # store userdialog in information controller
         self.ic.userdialog = self.userdialog
 
-        # set up scenario of dialog:
-        self.ic.scenario = Scenario(self.ic)
-
-        # whom we ask to start SlotInteraction?
-
-        # pending goals
-        # self.goals = [curr_slot_spec]
-
-
-        # END load scenario map ############################################
-
-        # start dialog by
-        # 1. greeting (GreetInteraction) and
-        # 2. asking user question about intent (IntentClarificator)
-
+        for each_skill_cls in self.skills_spec:
+            # initialize skills that expect information controller access
+            self.skills.append(each_skill_cls(self.ic))
 
     def __call__(self, utterance, *args, **kwargs):
         """
@@ -203,7 +188,7 @@ class BankConsulterAgentSkill(AbstractSkill):
         # 1. locally active receptors from active user interactions
         # 2. globally active receptors from scenario interactions
 
-        # polling listeners (receptors) with new message:
+        # polling listeners (receptors/skills) with new message:
         self.ic.user_message_signal.send(sender=self, message=utterance, userdialog=self.userdialog)
 
         # TODO show pending receptors
@@ -238,3 +223,29 @@ class BankConsulterAgentSkill(AbstractSkill):
         # confidences = [0.5 for x in range(len(utterances_batch))]
         return responses_list
 
+class BankConsulterSkill(AbstractSkill):
+    """
+        Skill for bank consulting
+    """
+    # signal emmitted when user message comes:
+    # user_message_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
+
+    def __init__(self, ic):
+        self.ic = ic
+        # set up scenario of dialog:
+        self.ic.scenario = Scenario(self.ic)
+
+
+class WeatherSkill(AbstractSkill):
+
+    def __init__(self, ic):
+        self.ic = ic
+
+        # set up scenario of dialog:
+        ## Test
+        self.weather_int = self.ic.im.get_or_create_instance_by_class(WeatherForecastInteraction)
+
+        # self.weather_int.start()
+        # import ipdb; ipdb.set_trace()
+
+        ## Test

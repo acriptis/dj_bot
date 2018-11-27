@@ -1,4 +1,4 @@
-from interactions.models.slots import BaseSlotField, DictionarySlotReceptorMixin, YesNoSlotReceptorMixin
+from components.slots.slots import BaseSlotField, DictionarySlotReceptorMixin, YesNoSlotReceptorMixin
 
 
 class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
@@ -7,7 +7,7 @@ class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
      выбор опций:
       COMMON_INFO и/или SECRET_INFO
     """
-    name = "intents"
+    name = "OptionIntentsSlot"
 
     questioner = "Я могу рассказать Общие Сведения об открытии счетов для юридических лиц, " \
                  "а также Секретную Информацию для посвященных об открытии счетов. \n" \

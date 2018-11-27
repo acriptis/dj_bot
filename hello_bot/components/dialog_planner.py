@@ -1,36 +1,51 @@
 from interactions.models import UserSlotProcess, UserInteraction, UserSlot
-from bank_interactions.models import IntentRetrievalInteraction, DesiredCurrencyInteraction, \
-    BusinessOfferingInteraction, PrivateInfoFormInteraction, DocumentsListSupplyInteraction
 
 
-# class Task():
-#     def __init__(self, task_name, task_obj, task_args, completion_callbacks):
-#         self.task_name, task_obj, task_args, completion_callbacks
-#         task_name, task_obj, task_args, completion_callbacks
-#
-# class SlotTask():
-#     """
-#     Task to complete slot and call callback
-#
-#     Each slot task is always check if slot already was retrieved in this case it just sends result to callbacks
-#     Otherwise starts userslot retrieval process
-#     Process may be active... in this case we need to wait the completion of slot and then trigger callback
-#     """
-#     def __init__(self, slot, callback_fn):
-#         self.slot = slot
-#         self.callback_fn = callback_fn
-#
+class BaseTask():
+    def __init__(self, item, priority, callback_fns):
+        """
 
-class InteractionTask():
+        :param item: element of task
+        :param priority:
+        :param callback_fns: list of callback functions or a callback function
+        """
+        self.item = item
+        self.priority = priority
+        if isinstance(callback_fns, list):
+            self.callback_fns = callback_fns
+        else:
+            # The most used case: if one callback is provided
+            self.callback_fns = [callback_fns]
+
+
+class InteractionTask(BaseTask):
     """
     Atomic Task in Agenda
 
     #TODO do abstraction refactoring for managing Slots as Tasks as well
     """
     def __init__(self, interaction_obj, priority, callback_fn):
-        self.interaction_obj=interaction_obj
-        self.priority=priority
-        self.callback_fn=callback_fn
+        super().__init__(interaction_obj, priority, callback_fn)
+
+    @property
+    def interaction_obj(self):
+        return self.item
+
+
+class SlotTask(BaseTask):
+    """
+    Task for slot filling in Agenda
+
+    Task to complete slot and call callback
+
+    Each slot task is always check if slot already was retrieved, in this case it sends result to callback
+    Otherwise starts userslot retrieval process
+    Process may be active... in this case we need to wait the completion of slot and then trigger callback
+        (add callback to listeners pool)
+    """
+    def __init__(self, slot_obj, priority, callback_fn):
+        super().__init__(slot_obj, priority, callback_fn)
+
 
 class Agenda():
     """
@@ -40,12 +55,7 @@ class Agenda():
 
         self.queue_of_tasks = []
 
-
         self.interactions_in_queue = {}
-
-    def is_interaction_in_queue(self, interaction_obj):
-        pass
-
 
     def find_task_by_interaction(self, interaction_obj):
         """
@@ -98,7 +108,8 @@ class Agenda():
         itask = InteractionTask(interaction_obj, priority, callback_fn)
         self.queue_of_tasks.append(itask)
         return itask
-
+    # def is_interaction_in_queue(self, interaction_obj):
+    #     pass
 class DialogPlanner():
     """
     Manager for Dialog Session planning. It allows to enqueue Interactions, SlotProcesses for future execution and
@@ -144,7 +155,7 @@ class DialogPlanner():
         :param duplicatable:
         :return:
         """
-        slot_spec_obj = self.ic.sm.get_or_create_instance_by_classname(slot_name)
+        slot_spec_obj = self.ic.sm.get_or_create_instance_by_slotname(slot_name)
         self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj, priority=priority, callback_fn=callback_fn, duplicatable=duplicatable)
 
     def plan_process_retrieve_slot_value_by_slot_spec(self, slot_specification_cls, priority=10, callback_fn=None, duplicatable=False):
@@ -205,7 +216,6 @@ class DialogPlanner():
         if not duplicatable:
             # check existence of ready value:
             results = self.ic.MemoryManager.get_slot_value_quite(target_uri)
-            # import ipdb; ipdb.set_trace()
 
             if not results:
                 # we have no memory for the slot at target uri
@@ -233,8 +243,8 @@ class DialogPlanner():
                 else:
                     # if usp is None
                     # no process exist we must create a new one:
-                    self._force_plan_process_retrieve_slot_value(slot_spec_obj, priority=priority,
-                                                             callback_fn=callback_fn, target_uri=target_uri)
+                    self._force_start_slot_value_retrieval_process(slot_spec_obj, priority=priority,
+                                                                   callback_fn=callback_fn, target_uri=target_uri)
             else:
                 # RETRIEVE CACHED RESULTS! (No need to ReRun process)
                 # means we can call callbacks instantly
@@ -276,7 +286,7 @@ class DialogPlanner():
         else:
             raise Exception("Duplicatable Slots are not supported yet!")
 
-    def _force_plan_process_retrieve_slot_value(self, curr_slot_spec_obj, target_uri, priority=10,  callback_fn=None):
+    def _force_start_slot_value_retrieval_process(self, curr_slot_spec_obj, target_uri, priority=10, callback_fn=None):
         """
         Method which actually starts slot process in system and attaches callback on its completion
 
@@ -285,11 +295,7 @@ class DialogPlanner():
         :param callback_fn:
         :return:
         """
-        # self.ic.uspm.goalize_user_slot_process
-        # RUN RETRIEVAL PROCESS
-        # self.usp = UserSlotProcess.initialize(self.ic.user, curr_slot_spec_obj)
-        # import ipdb; ipdb.set_trace()
-
+        # RUN SLOT RETRIEVAL PROCESS
         usp, created = self.ic.uspm.get_or_create_user_slot_process(curr_slot_spec_obj)
         if not created:
             raise Exception("found existing user slot process, while expecting creation of new one!")
@@ -330,8 +336,6 @@ class DialogPlanner():
         if interaction_obj.name not in self.callbacks_on_completion_of_interactions:
             self.callbacks_on_completion_of_interactions[interaction_obj.name] = []
 
-        # import ipdb; ipdb.set_trace()
-
         if callback_fn:
             self.callbacks_on_completion_of_interactions[interaction_obj.name].append(callback_fn)
 
@@ -345,7 +349,7 @@ class DialogPlanner():
         """
         # TODO make interactions registry!!!!!
         # resolve interaction obj from name:
-        interaction_obj= self.ic.im.get_or_create_instance_by_classname(interaction_name)
+        interaction_obj= self.ic.im.get_or_create_instance_by_name(interaction_name)
         self.enqueue_interaction(interaction_obj, priority=priority, callback_fn=callback_fn)
 
     # #############################################################################################
@@ -419,36 +423,15 @@ class DialogPlanner():
             print("Moved completed interaction %s from queue into done_list" % task.interaction_obj)
         print("DialogPlanner.COMPLETED INTERACTION: %s/%s" % (interaction_obj, exit_gate))
 
-    # END USER Interactions Management ########################################################################################
-    # END Interactions Management ########################################################################################
-
-    # SendText Operation
-    def sendText(self, text_template):
+    def _force_start_interaction_process(self, interaction_obj, priority=10, callback_fn=None):
         """
-        Question:
-
-        It seems better to push SendText operations into queue of the interaction (for better conflict resolution)
-        but we need lightweight result now, so do the easiest implementation which sends text directly
-
-        :param text_template:
+        Actually starts Interaction Process
+        :param interaction_obj:
+        :param priority:
+        :param callback_fn:
         :return:
         """
-        self.ic.userdialog.send_message_to_user(text_template)
-
-    # General Management
-    def launch_next_task(self):
-        """
-        Starts the most prioritized item (Interaction or Slot) from queue
-        :return:
-        """
-        # import ipdb; ipdb.set_trace()
-
-        next_task = self.agenda.pop_the_highest_priority_task()
-
-        interaction_obj = next_task.interaction_obj
-
         self.done_or_doing.append(interaction_obj)
-        # import ipdb; ipdb.set_trace()
 
         # make abstraction of all process types (Slots and Interactions)
         # TODO add support of Slot Processes ?
@@ -462,6 +445,36 @@ class DialogPlanner():
 
         ui, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
         interaction_obj.start()
+
+    # END USER Interactions Management ########################################################################################
+    # END Interactions Management ########################################################################################
+
+    # General Management
+    def launch_next_task(self):
+        """
+        Starts the most prioritized item (Interaction or Slot) from queue
+        :return:
+        """
+        # import ipdb; ipdb.set_trace()
+
+        next_task = self.agenda.pop_the_highest_priority_task()
+
+        interaction_obj = next_task.interaction_obj
+
+        self._force_start_interaction_process(interaction_obj)
         #
         # if type(type(next_element)) == type
         return
+
+    # SendText Operation
+    def sendText(self, text_template):
+        """
+        Question:
+
+        It seems better to push SendText operations into queue of the interaction (for better conflict resolution)
+        but we need lightweight result now, so do the easiest implementation which sends text directly
+
+        :param text_template:
+        :return:
+        """
+        self.ic.userdialog.send_message_to_user(text_template)

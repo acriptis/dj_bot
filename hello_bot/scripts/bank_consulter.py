@@ -11,12 +11,12 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 import django
 django.setup()
 
-from components.skills.bank_consult_skill import BankConsulterAgentSkill
+from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer, WeatherSkill
 
 
-def main():
+def main(agent):
     import sys
-    agent = BankConsulterAgentSkill()
+
     print("Write your message to dialogue bot:")
     for line in sys.stdin:
         print(">>>")
@@ -26,15 +26,14 @@ def main():
         print("Write next message:")
 
 
-def main_user_emulated_replies():
+def main_user_emulated_replies(agent):
     # construct components hierarchy + domain data
     # hi = TrainigPhrasesMatcher(training_phrases=["Hello", "Kek", "Hi"])
     # bye = TrainigPhrasesMatcher(training_phrases=["Bye", "Lol", "Exit"])
     # disjoint_matchers = [hi, bye]
     # pgmc = PhraseGroupsMatcherController(disjoint_matchers)
 
-    agent = BankConsulterAgentSkill()
-
+    # agent = BankConsulterSkill()
     # user_messages_sequence = ["Приветик, Роботишка", "Рубли", "Пока"]
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "Пока"]
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "Пока"]
@@ -46,13 +45,15 @@ def main_user_emulated_replies():
                               "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "ДА", "Пока"]
     user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
                               "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
+
     # ########################################################################################################
     # FAILED TESTS
     # Тестовые сценарии
     # Падает:
-    user_messages_sequence = ["Приветик, Роботишка", "СЕКРЕТ", "РУБЛИ", "НЕТ"]
+    # user_messages_sequence = ["Приветик, Роботишка", "СЕКРЕТ", "РУБЛИ", "НЕТ"]
     # не знает что ответить:
-    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "БАКСЫ, РУБЛИ", "НЕТ", "ДА"]
+    # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "БАКСЫ, РУБЛИ", "НЕТ", "ДА"]
+    # user_messages_sequence = ["Приветик, Роботишка", "КАКАЯ ПОГОДА будет В МОСКВЕ?", "МОСКВА, БОБРУЙСК", "ЗАВТРА", "ДА"]
 
 
     # ####################################################################################################
@@ -83,6 +84,12 @@ def main_user_emulated_replies():
 
 if __name__=="__main__":
 
-    main_user_emulated_replies()
-    # main()
+    # construct the agent:
+
+    agent = AgentSkillInitializer([BankConsulterSkill])
+    # agent = AgentSkillInitializer([BankConsulterSkill, WeatherSkill])
+    # agent = AgentSkillInitializer([ WeatherSkill])
+
+    main_user_emulated_replies(agent)
+    # main(agent)
     print("Fin.")

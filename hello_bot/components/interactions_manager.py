@@ -2,6 +2,7 @@ from bank_interactions.models import IntentRetrievalInteraction, DesiredCurrency
     DocumentsListSupplyInteraction, PrivateInfoFormInteraction, BusinessOfferingInteraction, GreetingInteraction, \
     ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, OfficeRecommendationInteraction, \
     DialogTerminationInteraction, OperatorSwitchInteraction
+from personal_assistant_interactions.models import WeatherForecastInteraction
 
 
 class InteractionsManager():
@@ -33,6 +34,7 @@ class InteractionsManager():
             "OfficeRecommendationInteraction": OfficeRecommendationInteraction,
             "DialogTerminationInteraction": DialogTerminationInteraction,
             "OperatorSwitchInteraction": OperatorSwitchInteraction,
+            "WeatherForecastInteraction": WeatherForecastInteraction,
         }
 
         # interactions instances registry
@@ -40,7 +42,7 @@ class InteractionsManager():
         # TODO consider a case when one classname may be derived into multiple instances
         # for non-singleton interactions
 
-    def get_or_create_instance_by_classname(self, classname):
+    def get_or_create_instance_by_name(self, classname):
         """
         Interface method for retrieving INSTANCE by (class)NAME of interaction
         Given a classname it returns instance
@@ -65,7 +67,7 @@ class InteractionsManager():
         :return: interaction instance
         """
         name = interaction_class_spec.get_name()
-        return self.get_or_create_instance_by_classname(name)
+        return self.get_or_create_instance_by_name(name)
 
     def _initialize_interaction(self, interaction_class_spec):
         """

@@ -44,24 +44,24 @@ class SlotsManager():
         self.user_slots = {}
 
 
-    def get_or_create_instance_by_classname(self, classname):
+    def get_or_create_instance_by_slotname(self, slotname):
         """
-        Interface method for retrieving INSTANCE by (class)NAME of slot
+        Interface method for retrieving INSTANCE by SLOTNAME (or CLASSNAME of slot)
         Given a classname it returns instance
-        :param classname:
+        :param slotname:
         :return:
         """
-        if classname in self.slotname2instance.keys():
-            return self.slotname2instance[classname]
+        if slotname in self.slotname2instance.keys():
+            return self.slotname2instance[slotname]
         else:
             # get class spec by name
 
-            if classname not in self.classname2class.keys():
+            if slotname not in self.classname2class.keys():
 
                 import ipdb; ipdb.set_trace()
                 # investigate
-                raise Exception("Name %s is not in SlotsManager.classname2class registry" % classname)
-            slot_class_spec = self.classname2class[classname]
+                raise Exception("Name %s is not in SlotsManager.classname2class registry" % slotname)
+            slot_class_spec = self.classname2class[slotname]
 
             return self._initialize_slot(slot_class_spec)
 
@@ -72,8 +72,9 @@ class SlotsManager():
         :param slot_class_spec:
         :return: slot instance
         """
-        name = slot_class_spec.get_name()
-        return self.get_or_create_instance_by_classname(name)
+        # name = slot_class_spec.get_name()
+        name = slot_class_spec.name
+        return self.get_or_create_instance_by_slotname(name)
 
     def _initialize_slot(self, slot_class_spec):
         """
@@ -84,8 +85,30 @@ class SlotsManager():
         """
         # slot_instance = slot_class_spec.initialize(self.ic)
         slot_instance = slot_class_spec()
-        self.slotname2instance[slot_instance.get_name()] = slot_instance
+        self.register_slot(slot_instance)
         return slot_instance
+
+    def register_slot(self, slot_spec_obj):
+        """
+        Registers slot in registry so the same slot reference may be used for accessing evaluated data by any
+        Interaction.
+
+        If slot is already in registry it jsut returns True
+
+
+        Expects slot to have get_name() method for accessing shared name
+
+        :param slot_spec_obj: instance of SlotField subclass
+
+        :return: tuple (slot_name, slot_instance)
+        """
+
+        # name of slot which may be a name of class or particular name (for  MultiSlot dialog )
+        slot_name = slot_spec_obj.get_name()
+        if  slot_name not in self.slotname2instance:
+            self.slotname2instance[slot_name] = slot_spec_obj
+        return slot_name, slot_spec_obj
+
 
 #     def compose_dynamic_slot_schema(self, target_uri, questioner, receptor_class, reasking_strategy="Greed", memory_target_uri=None, *args, **kwargs):
 #         """

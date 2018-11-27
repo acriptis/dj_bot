@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'polls',
     'interactions.apps.InteractionsConfig',
     'bank_interactions.apps.BankInteractionsConfig',
+    'personal_assistant_interactions.apps.PersonalAssistantInteractionsConfig',
 ]
 
 MIDDLEWARE = [

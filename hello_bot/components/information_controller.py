@@ -4,7 +4,7 @@ import django.dispatch
 from components.dialog_planner import DialogPlanner
 from components.interactions_manager import InteractionsManager
 from components.memory_manager import MemoryManager
-from components.slots_manager import SlotsManager
+from components.slots.slots_manager import SlotsManager
 from components.user_slot_processes_manager import UserSlotProcessesManager
 
 
@@ -73,6 +73,7 @@ class InformationController():
         try:
             slot_value = self.ic.MemoryManager.get_slot_value(target_uri)
             # send data to callback
+            # may be buggy call...
             callback(slot_value)
         except Exception as e:
             # slot is not available, hence we need to run slot process
