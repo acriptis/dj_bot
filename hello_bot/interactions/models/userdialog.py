@@ -47,6 +47,11 @@ class UserDialog(models.Model):
         return self._push_dialog_act(SYSTEM_USER_NAME, message)
 
     def show_latest_sys_responses(self):
+        """
+        Returns responses of the dialog system at current step (everything after the latest user message
+        or the messages of the first step)
+        :return:
+        """
         # import ipdb; ipdb.set_trace()
         # find highest non sys index:
         user_indexes = [i for i, x in enumerate(self.dialog_speakers) if x != SYSTEM_USER_NAME]
