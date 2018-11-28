@@ -103,6 +103,10 @@ class UserSlotProcess(models.Model):
         # send question to active dialog
         self.ic = ic
         self.ic.userdialog.send_message_to_user(self.slot.asker_fn())
+        # now we should put the question under question on dicsussion
+        assert self.ic.DialogPlanner.question_under_discussion is None
+        self.ic.DialogPlanner.question_under_discussion = self.slot
+
         self.ic.user_message_signal.connect(self.on_user_response)
         self.state = self.ACTIVE
         self.save()
@@ -134,6 +138,10 @@ class UserSlotProcess(models.Model):
             if self.target_uri:
                 # write the memory
                 self.ic.MemoryManager.put_slot_value(self.target_uri, result)
+
+            # now we should remove question under discussion, asserting it equals to current slot:
+            assert self.ic.DialogPlanner.question_under_discussion == self.slot
+            self.ic.DialogPlanner.question_under_discussion = None
 
             self.slot_filled_signal.send(sender=self, user_slot_process=self, results=result)
             self.save()

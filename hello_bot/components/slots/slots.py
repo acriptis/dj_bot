@@ -50,9 +50,12 @@ class BaseSlotField():
 
 class DictionaryBasedSlotField(BaseSlotField):
     """
+
         Dictioanry based slot uses CANONIC_NAMES as domin of values
         each Canonic value may be complemented with synsets (all lexical representations of the
         slot in the UserMessage)
+
+        Slot with target_uri specification
     """
     def __init__(self, name, domain_of_values_synsets=None, receptor_spec=None, target_uri=None,
                  silent_value=None, confirm_silent_value=False, questioner=None,
@@ -98,8 +101,6 @@ class DictionaryBasedSlotField(BaseSlotField):
         self.flat_norm = ReceptorFactory.synsets_to_flat_norm_index(self.domain_of_values_synsets)
 
     def can_recept(self, text, *args, **kwargs):
-        # import ipdb; ipdb.set_trace()
-
         return self.receptor_spec.can_recept(self, text, *args, **kwargs)
 
     def recept(self, text, *args, **kwargs):

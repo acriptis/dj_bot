@@ -150,8 +150,6 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         # check if it is not retrieved yet?
 
         self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(DesiredCurrencySlot.name, callback_fn=self.on_desired_currency_ready)
-        # import ipdb; ipdb.set_trace()
-        print("kkk")
 
     def on_desired_currency_ready(self, *args, **kwargs):
         """
@@ -197,9 +195,6 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         ######################### END Busines Rule BR2.1 Block ##########################################
 
         # Completion can be announced
-        print("kekekekekkekekekekekek")
-        # import ipdb; ipdb.set_trace()
-
         self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
 
@@ -271,7 +266,6 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         print(needs_tarifs_and_docs)
         print("on_response_3_Q1_ready method")
         if NeedListDocsAndTarifsSlot.ANSWER_YES in needs_tarifs_and_docs:
-            # print("kekekuku")
             # following interaction encapsulates:
             #     plan Form Filling process,
             #       on completed Send Text
@@ -283,7 +277,6 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
 
             # assering existence of variable's value:
             print('assering existence of DesiredCurrencySlot value:')
-            # import ipdb; ipdb.set_trace()
 
             desired_currency_slot_value = self.ic.MemoryManager.get_slot_value(DesiredCurrencySlot.name)
             # TODO more general solution is recommended:
@@ -424,19 +417,11 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         super(self.__class__, self).start(*args, **kwargs)
-        print("BusinessOfferingInteraction 1234567789123467788")
-        # import ipdb; ipdb.set_trace()
-
-        # TODO why commenting ipdb breaks callback????
-
 
         self.ic.DialogPlanner.sendText(self.TEXT_BIG_OFFER)
         self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientAgreeWithServicePackConditionsSlot.name,
                                                                             callback_fn=self.on_user_decision_on_big_offer_ready)
-        # import time
-        # time.sleep(5)
-        # import ipdb;
-        # ipdb.set_trace()
+
         print("Ready to go: BusinessOfferingInteraction.start")
 
     def on_user_decision_on_big_offer_ready(self, *args, **kwargs):
@@ -542,8 +527,6 @@ class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
 
         self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientOkToSelfServiceSlot.name,
                                                                             callback_fn=self.when_client_responded_about_self_serving)
-        # import ipdb; ipdb.set_trace()
-        print("kkk")
 
     def when_client_responded_about_self_serving(self, *args, **kwargs):
         """
@@ -733,15 +716,34 @@ class DialogTerminationInteraction(Interaction, AbstractInteraction):
         print("Ready to go: DialogTerminationInteraction.start")
         super(self.__class__, self).start(*args, **kwargs)
         self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+
+        # hack to announce that scenaric dialog is finished
+        self.ic.MemoryManager.put_slot_value("bank_scenario.terminated", True)
+
         self.ic.DialogPlanner.sendText("На этом завершим разговор.")
 
-
+from components.matchers.matchers import TrainigPhrasesMatcher
 class OperatorSwitchInteraction(Interaction, AbstractInteraction):
     class Meta:
         proxy = True
+
+    def post_init_hook(self):
+        """
+        The post-initialize hook  for attaching global receptors.
+
+        Here we connect the interaction's Global Receptors with InformationController
+        :return:
+        """
+        # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
+        self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["ОПЕРАТОР", "Переключите меня на оператора"],
+                                                                daemon_if_matched=self.start)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+
 
     def start(self, *args, **kwargs):
         print("Ready to go: OperatorSwitchInteraction.start")
         super(self.__class__, self).start(*args, **kwargs)
         self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        # hack to announce that scenaric dialog is finished
+        self.ic.MemoryManager.put_slot_value("bank_scenario.terminated", True)
         self.ic.DialogPlanner.sendText("Переключаю Вас на оператора...")

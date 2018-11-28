@@ -54,9 +54,9 @@ class MonopolyAgentSkill(AbstractSkill):
 
         # connecting interactions to informationController
         # interaction connects itself to global receptors
-        self.greet_intrctn.connect_to_dataflow(self.ic)
-        self.farewell_intrctn.connect_to_dataflow(self.ic)
-        self.what_is_ur_name_intrctn.connect_to_dataflow(self.ic)
+        self.greet_intrctn.post_init_hook()
+        self.farewell_intrctn.post_init_hook()
+        self.what_is_ur_name_intrctn.post_init_hook()
         self.greet_intrctn.connect_exit_gate_with_fn(self.what_is_ur_name_intrctn.start)
         self.what_is_ur_name_intrctn.connect_exit_gate_with_fn(self.farewell_intrctn.start)
 

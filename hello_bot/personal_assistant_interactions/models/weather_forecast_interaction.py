@@ -8,83 +8,32 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
     """
     Interaction with GlobalReceptor Detecting the command about Weather Request
     """
+    class Meta:
+        proxy = True
+
     def __init__(self, *args, **kwargs):
         super(Interaction, self).__init__(*args, **kwargs)
         super(AbstractInteraction, self).__init__()
 
-        # self.location_slot = LocationSlot(target_uri='%user.weather.location', )
-        # self.date_slot = DateSlot(target_uri='%user.weather.date')
-        # self.slots = [
-        #     self.location_slot,
-        #     self.date_slot
-        # ]
-
-    class Meta:
-        proxy = True
-
-    @classmethod
-    def initialize(cls, ic, name=None, *args, **kwargs):
+    def post_init_hook(self):
         """
+        The post-initialize hook  for attaching global receptors.
 
-        :param ic:
-        :param name:
-        :param args:
-        :param kwargs:
+        Here we connect the interaction's Global Receptors with InformationController
         :return:
         """
-        # TODO how to merge parent classmethod with this one avoiding duplication of code and to preserve classname?
-        # Solution1: make instance method?
-
-        # ###############################################################################################################
-        # Code from Interaction Base class:
-        # ###############################################################################################################
-        if not name:
-            # default name is a name of class
-            name = cls.__name__
-
-        intrctn, _ = cls.objects.get_or_create(name=name)
-
-        intrctn.ic = ic
-
-        # #########################################################################################
-        # # Exit Gate Signals and Registry initialization
-        intrctn.EXIT_GATES_SIGNALS = {}
-
-        if not hasattr(intrctn,'EXIT_GATES_NAMES_LIST'):
-            # TODO fix to support inheritance of ExitGates!
-            # then import default Gates :
-            intrctn.EXIT_GATES_NAMES_LIST = cls.base_EXIT_GATES_NAMES_LIST
-
-        # now init signal objects for each exit gate:
-        for each_exit_gate_name in intrctn.EXIT_GATES_NAMES_LIST:
-            # create a signal object for each exit gate
-            intrctn.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
-
-
-        intrctn._anti_garbage_collector_callbacks_list = []
-        # END ExitGate Signals Initialization
-
-        ########################################################################################
-        # END Code from Interaction Base class:
-        # ###############################################################################################################
-
-        # weather forecast instantiation:
-
-        # import ipdb; ipdb.set_trace()
-
-
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        intrctn.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["What is the weather in *",
-                                                                               "Gimme weather", "Will it rain?",
-                                                                               "Give me forecast for tomorrow",
-                                                                               "ПОГОДА",
-                                                                               "КАКАЯ ПОГОДА",
-                                                                               "\Weather"
-                                                                               ],
-                                                             daemon_if_matched=intrctn.start)
-        intrctn.ic.user_message_signal.connect(intrctn.global_trigger_receptor)
+        self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["What is the weather in *",
+                                                                                  "Gimme weather", "Will it rain?",
+                                                                                  "Give me forecast for tomorrow",
+                                                                                  "ПОГОДА",
+                                                                                  "КАКАЯ ПОГОДА",
+                                                                                  "\Weather"
+                                                                                  ],
+                                                                daemon_if_matched=self.start)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor)
 
-        intrctn._prepare_slots()
+        self._prepare_slots()
         # register slots:
         # register LocationSlot with default value = Moscow
         # register DateSlot with default value = now
@@ -93,9 +42,6 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         # 2 if prehistory contains slot value choose preanswered slot value
         # 3 as explicitly the value of slot for which case?
         # register slots:
-
-
-        return intrctn
 
     def _prepare_slots(self):
         """
@@ -194,11 +140,3 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         self.ic.DialogPlanner.sendText("I've checked weather in %s %s: Weather will be okay!" % (loc_raw[0], date_raw[0]))
         return
 
-    # def connect_to_dataflow(self, ic):
-    #     """
-    #     here we connect the interaction's Global Receptors with InformationController
-    #     :return:
-    #     """
-    #     # ic.receptors
-    #     self.ic = ic
-    #     ic.user_message_signal.connect(self.global_trigger_receptor)

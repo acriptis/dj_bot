@@ -104,7 +104,7 @@ class Interaction(models.Model):
         # END ExitGate Signals Initialization
 
         ########################################################################################
-
+        intrctn.post_init_hook()
 
         return intrctn
 
@@ -134,6 +134,14 @@ class Interaction(models.Model):
         self._anti_garbage_collector_callbacks_list.append(callback_fn)
         self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn)
 
+    def post_init_hook(self):
+        """
+        This is hook which allows us to overload initilization procedures, for example connect global receptors
+        to dialog context
+        :return:
+        """
+        # implement it in child class
+        pass
     # def class_router(self):
     #     # given a name of interaction restores a BehaviourClass
     #     # returns polymorphic object of concrete interaction class
@@ -183,7 +191,7 @@ class QuestionInteractionFactory(Interaction, AbstractInteraction):
         super(Interaction, self).__init__(*args, **kwargs)
         super(AbstractInteraction, self).__init__()
 
-    def connect_to_dataflow(self, ic):
+    def post_init_hook(self, ic):
         """
         here we connect the interaction's Global Receptors with InformationController
         :return:
@@ -304,7 +312,7 @@ class GreetInteraction(Interaction, AbstractInteraction):
         self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["Hello", "Kek", "Hi"],
                                                              daemon_if_matched=self.do)
 
-    def connect_to_dataflow(self, ic):
+    def post_init_hook(self, ic):
         """
         here we connect the interaction's Global Receptors with InformationController
         :return:
@@ -358,7 +366,7 @@ class ByeInteraction(Interaction, AbstractInteraction):
         self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["Bye", "Spoki", "Tchao"],
                                                              daemon_if_matched=self.do)
 
-    def connect_to_dataflow(self, ic):
+    def post_init_hook(self, ic):
         """
         here we connect the interaction's Global Receptors with InformationController
         :return:

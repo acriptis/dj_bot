@@ -16,62 +16,33 @@ class GreetingInteraction(Interaction):
     # TODO translatable?
     out_text = "Здравствуйте, это помощник СберБанка"
 
-    # @classmethod
-    # def name(cls):
-    #     return cls.__name__
-
-    @classmethod
-    def initialize(cls, ic, name=None, *args, **kwargs):
-        # import ipdb; ipdb.set_trace()
-
-        # intrctn = super(GreetingInteraction, cls).initialize(ic, name=name, *args, **kwargs)
-        intrctn = super(GreetingInteraction, cls).initialize(ic, name=name, *args, **kwargs)
-        # intrctn = super(Interaction, GreetingInteraction).initialize(ic, name=name, *args, **kwargs)
-
-        # if not name:
-        #     # default name is a name of class
-        #     name = cls.__name__
-        #
-        # intrctn, _ = cls.objects.get_or_create(name=name)
-        # intrctn.ic = ic
-        # # TODO refactor to import base method of initilization and correctly use signals:
-        # import ipdb; ipdb.set_trace()
-        #
-        # # Exit Signal Declaration
-        # intrctn.exit_gate_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
-
-        # return intrctn
-        # intrctn = cls()
-        # intrctn = super(Interaction, intrctn).initialize(ic, name=None, *args, **kwargs)
-        # # intrctn = Interaction.initialize(ic, name=None, *args, **kwargs)
-        #
-        intrctn.scenario = SendTextOperation(text=intrctn.out_text)
-        # this Interaction may be activated by Receptor
-        # TODO templatize
-        intrctn.global_trigger_receptor = TrainigPhrasesMatcher(
-            training_phrases=["Привет", "Здравствуйте", "Hello", "Kek", "Hi"],
-            daemon_if_matched=intrctn.do)
-
-        # here we connect the interaction's Global Receptors with InformationController's UserMessageEvent
-        # (IC helps to adapt user-agnostic Interaction specification for particular User Case)
-        ic.user_message_signal.connect(intrctn.global_trigger_receptor)
-        return intrctn
-
-    def connect_to_dataflow(self, ic):
-
-        # deprecated
-
-        self.ic = ic
+    def post_init_hook(self):
 
         # self.exit_gate_signal = django.dispatch.Signal(providing_args=["userdialog"])
 
-        ic.active_receptors.append(self.global_trigger_receptor)
+        # ic.active_receptors.append(self.global_trigger_receptor)
+        self.scenario = SendTextOperation(text=self.out_text)
+        # this Interaction may be activated by Receptor
+        # TODO templatize
+        self.global_trigger_receptor = TrainigPhrasesMatcher(
+            training_phrases=["Привет", "Здравствуйте", "Hello", "Kek", "Hi"],
+            daemon_if_matched=self.start)
 
-    def do(self, *args, **kwargs):
+        # here we connect the interaction's Global Receptors with InformationController's UserMessageEvent
+        # (IC helps to adapt user-agnostic Interaction specification for particular User Case)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+
+    def start(self, *args, **kwargs):
         """
-        What happens just after activation
-        :return:
+
+        :param args:
+        :param kwargs:
+        :return: Promise for completion?
         """
+        # super(self.__class__, self).start(*args, **kwargs)
+        # TODO refactor
+        # greeting interaction makes explicit check of UserInteraction state to handle start behaviour, so we
+        # can not just call super method (or we need to request UserInteraction instance again in child method)
         uint, created = UserInteraction.objects.get_or_create(userdialog=self.ic.userdialog, interaction=self)
 
         # print("hi_interaction.do")
@@ -92,14 +63,4 @@ class GreetingInteraction(Interaction):
         uint.save()
         self.ic.user_message_signal.disconnect(self.global_trigger_receptor)
         return uint
-
-    def start(self, *args, **kwargs):
-        """
-
-        :param args:
-        :param kwargs:
-        :return: Promise for completion?
-        """
-        return self.do(*args, **kwargs)
-
 

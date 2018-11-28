@@ -13,12 +13,11 @@ from bank_interactions.models.greeting import GreetingInteraction
 from bank_interactions.models.interactions import DesiredCurrencyInteraction
 from personal_assistant_interactions.models import WeatherForecastInteraction
 
-
 class Scenario():
     """
     Class for specification of Dialog's Scenario
     """
-
+    # TODO do we need AbstractScenario?
     def __init__(self, ic):
 
         self.ic = ic
@@ -168,7 +167,7 @@ class AgentSkillInitializer():
         :param kwargs:
         :return:
         """
-        # push last utterance into userdialog stracture
+        # push user's utterance into userdialog container
         utterance = utterance.strip()
         self.userdialog._push_dialog_act(self.user, utterance)
         ############################################################################
@@ -193,34 +192,10 @@ class AgentSkillInitializer():
 
         # TODO show pending receptors
 
-
-        # for each_receptor in self.ic.active_receptors:
-        #     # receptor_activated = each_receptor(utterance, self.userdialog)
-        #     # print(receptor_activated)
-        #     pass
+        self.ic.DialogPlanner.process_agenda()
 
         responses_list = self.userdialog.show_latest_sys_responses()
-        # # exceptional case:
-        if not responses_list:
-            # no interactions have responded to the utterance...
-            print("no interactions have responded to the latest utterance...")
-            # no responses from system:
-            # else scenario
-            ########################### Check Pending Interactions Plan ##############################################
-            # Alternative else scenario:
-            # check if we have queue of actions in plan
-            print("self.ic.DialogPlanner.agenda.queue_of_tasks")
-            print(self.ic.DialogPlanner.agenda.queue_of_tasks)
-            if len(self.ic.DialogPlanner.agenda.queue_of_tasks)>0:
-                # import ipdb;
-                # ipdb.set_trace()
-                self.ic.DialogPlanner.launch_next_task()
-            else:
-                # nothing to say, nothing to do...
-                #TODO templatize
-                self.userdialog.send_message_to_user("Простите, я не знаю, что Вам ответить ;)")
-        # responses = ["kek %s" % text for text in utterances_batch]
-        # confidences = [0.5 for x in range(len(utterances_batch))]
+
         return responses_list
 
 class BankConsulterSkill(AbstractSkill):
