@@ -25,15 +25,31 @@ def main(agent):
         agent.ic.userdialog.print_dialog()
         print("Write next message:")
 
+def conjugate_agent_with_autouser(agent, user_messages_sequence):
+    """
+
+    :param agent:
+    :param user_messages_sequence:
+    :return: UserDialog?
+    """
+    for line in user_messages_sequence:
+        print(">>>"*30)
+        agent.ic.userdialog.print_dialog()
+        print("New Message: %s" % line)
+        print("VVV"*45)
+
+        print(agent(line), flush=True)
+        print("^^^"*30)
+        # import ipdb; ipdb.set_trace()
+
+
+    print("="*80)
+    print("Final Dialog Content:")
+    agent.ic.userdialog.print_dialog()
+    return agent.ic.userdialog
 
 def main_user_emulated_replies(agent):
     # construct components hierarchy + domain data
-    # hi = TrainigPhrasesMatcher(training_phrases=["Hello", "Kek", "Hi"])
-    # bye = TrainigPhrasesMatcher(training_phrases=["Bye", "Lol", "Exit"])
-    # disjoint_matchers = [hi, bye]
-    # pgmc = PhraseGroupsMatcherController(disjoint_matchers)
-
-    # agent = BankConsulterSkill()
     # user_messages_sequence = ["Приветик, Роботишка", "Рубли", "Пока"]
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "Пока"]
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "Пока"]
@@ -41,10 +57,11 @@ def main_user_emulated_replies(agent):
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!"]
     user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
                               "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов"]
-    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
-                              "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "ДА", "Пока"]
-    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
-                              "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
+    user_messages_sequence = ["Приветик, Роботишка", "Привет", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
+                              "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "ДА", "Вероятно, ДА", "ДА!","Пока"]
+
+    # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
+    #                           "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
 
     # ########################################################################################################
     # FAILED TESTS
@@ -65,21 +82,8 @@ def main_user_emulated_replies(agent):
     # 2 check that text2.1 occurs in dialog with messages:
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ"]
     # ####################################################################################################
+    conjugate_agent_with_autouser(agent, user_messages_sequence)
 
-    for line in user_messages_sequence:
-        print(">>>"*30)
-        agent.ic.userdialog.print_dialog()
-        print("New Message: %s" % line)
-        print("VVV"*45)
-
-        print(agent(line), flush=True)
-        print("^^^"*30)
-        # import ipdb; ipdb.set_trace()
-
-
-    print("="*80)
-    print("Final Dialog Content:")
-    agent.ic.userdialog.print_dialog()
 
 
 if __name__=="__main__":
