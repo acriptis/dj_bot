@@ -52,10 +52,8 @@ class UserDialog(models.Model):
         or the messages of the first step)
         :return:
         """
-        # import ipdb; ipdb.set_trace()
         # find highest non sys index:
         user_indexes = [i for i, x in enumerate(self.dialog_speakers) if x != SYSTEM_USER_NAME]
-        # import ipdb; ipdb.set_trace()
 
         max_user_index = max(user_indexes)
 
@@ -63,3 +61,13 @@ class UserDialog(models.Model):
         latest_sys_indexes = [i for i, x in enumerate(self.dialog_speakers) if (x == SYSTEM_USER_NAME and i>max_user_index)]
         sys_answers = [self.dialog_acts[i] for i in latest_sys_indexes]
         return sys_answers
+
+    def list_user_messages(self):
+        """
+        Method used for prehistory analysis
+
+        :return: list of user utterances since the start of the dialog.
+        """
+        user_indexes = [i for i, x in enumerate(self.dialog_speakers) if x != SYSTEM_USER_NAME]
+        user_answers = [self.dialog_acts[i] for i in user_indexes]
+        return user_answers
