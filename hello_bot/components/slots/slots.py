@@ -1,34 +1,3 @@
-from django.db import models
-
-class BaseDjangoSlotField():
-    def __init__(self, *, required=True, widget=None, label=None, initial=None,
-                 help_text='', error_messages=None, show_hidden_initial=False,
-                 validators=(), localize=False, disabled=False, label_suffix=None):
-        # required -- Boolean that specifies whether the field is required.
-        #             True by default.
-        # widget -- A Widget class, or instance of a Widget class, that should
-        #           be used for this Field when displaying it. Each Field has a
-        #           default Widget that it'll use if you don't specify this. In
-        #           most cases, the default widget is TextInput.
-        # label -- A verbose name for this field, for use in displaying this
-        #          field in a form. By default, Django will use a "pretty"
-        #          version of the form field name, if the Field is part of a
-        #          Form.
-        # initial -- A value to use in this Field's initial display. This value
-        #            is *not* used as a fallback if data isn't given.
-        # help_text -- An optional string to use as "help text" for this Field.
-        # error_messages -- An optional dictionary to override the default
-        #                   messages that the field will raise.
-        # show_hidden_initial -- Boolean that specifies if it is needed to render a
-        #                        hidden widget with initial value after widget.
-        # validators -- List of additional validators to use
-        # localize -- Boolean that specifies if the field should be localized.
-        # disabled -- Boolean that specifies whether the field is disabled, that
-        #             is its widget is shown in the form but not editable.
-        # label_suffix -- Suffix to be added to the label. Overrides
-        #                 form's label_suffix.
-        pass
-
 class BaseSlotField():
     """
     Base class for SlotFields
@@ -74,7 +43,8 @@ class DictionaryBasedSlotField(BaseSlotField):
         :param slot_process_specification_class: SlotProcess specifies ReAskingStrategy, PreHistory analysis
             default is SlotProcess
         :param prehistory_extractor_fn: method which may be called before explicit question is asked
-            (for filling slot value by message said by user)
+            (for filling slot value from dialog prehistory, when user initiates slot filling without questioning,
+            this method may implement different algorithm in comparison to ActiveQuestioningProcess Receptor)
         :return: UsableSlot
         """
 
@@ -105,7 +75,6 @@ class DictionaryBasedSlotField(BaseSlotField):
 
     def recept(self, text, *args, **kwargs):
         return self.receptor_spec.recept(self, text, *args, **kwargs)
-
 
 # Receptors Base Classes:
 class DictionarySlotReceptorMixin():

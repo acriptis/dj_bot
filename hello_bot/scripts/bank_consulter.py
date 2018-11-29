@@ -11,7 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 import django
 django.setup()
 
-from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer, WeatherSkill
+from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer, WeatherSkill, AlarmSkill
 
 
 def main(agent):
@@ -77,6 +77,7 @@ def main_user_emulated_replies(agent):
     # не знает что ответить:
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "БАКСЫ, РУБЛИ", "НЕТ", "ДА"]
     # user_messages_sequence = ["Приветик, Роботишка", "КАКАЯ ПОГОДА будет В МОСКВЕ?", "МОСКВА, БОБРУЙСК", "ЗАВТРА", "ДА"]
+    user_messages_sequence = ["Приветик, Роботишка", "УСТАНОВИ БУДИЛЬНИК", "МОСКВА, БОБРУЙСК", "ЗАВТРА", "ДА"]
 
 
     # ####################################################################################################
@@ -95,9 +96,10 @@ if __name__=="__main__":
 
     # construct the agent:
 
-    agent = AgentSkillInitializer([BankConsulterSkill])
+    # agent = AgentSkillInitializer([BankConsulterSkill])
     # agent = AgentSkillInitializer([BankConsulterSkill, WeatherSkill])
-    # agent = AgentSkillInitializer([ WeatherSkill])
+    # agent = AgentSkillInitializer([WeatherSkill])
+    agent = AgentSkillInitializer([AlarmSkill])
 
     main_user_emulated_replies(agent)
     # main(agent)

@@ -122,11 +122,11 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         # Both slots may have default values (or preloaded from user profile)
         # Both slots may be featured with confirmation interaction
         # Both Slots must be autofilled if user has specified the information before
-        self.ic.retrospect_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
+        self.ic.remind_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
 
 
-        self.ic.retrospect_or_retrieve_slot(self.date_slot_instance, target_uri=self.date_slot_instance.name,
-                                            callback=self.weather_request)
+        self.ic.remind_or_retrieve_slot(self.date_slot_instance, target_uri=self.date_slot_instance.name,
+                                        callback=self.weather_request)
         pass
 
     def weather_request(self, *args, **kwargs):

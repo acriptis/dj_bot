@@ -608,7 +608,7 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
         # to callback
         # Approach 2: (clean and async) use async pattern: https://habr.com/post/266743/
 
-        self.ic.retrospect_or_retrieve_slot(slot_spec=DesiredCurrencySlot, target_uri=DesiredCurrencySlot.name, callback=self.after_desired_currency_slot_evaluated)
+        self.ic.remind_or_retrieve_slot(slot_spec=DesiredCurrencySlot, target_uri=DesiredCurrencySlot.name, callback=self.after_desired_currency_slot_evaluated)
 
     def after_desired_currency_slot_evaluated(self, *args, **kwargs):
         # TODO make up more general solution ?

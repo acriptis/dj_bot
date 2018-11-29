@@ -1,6 +1,7 @@
 from bank_interactions.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
     ClientServiceRegionSlot, ClientIsResidentRFSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot, \
     ClientOkToSelfServiceSlot, ClientIsReadyToGiveDocsSlot, ClientWantsNearestOfficeRecomendation
+from personal_assistant_interactions.models import AlarmDateTimeSlot
 
 
 class SlotsManager():
@@ -31,6 +32,7 @@ class SlotsManager():
             "ClientOkToSelfServiceSlot": ClientOkToSelfServiceSlot,
             "ClientIsReadyToGiveDocsSlot": ClientIsReadyToGiveDocsSlot,
             "ClientWantsNearestOfficeRecomendation": ClientWantsNearestOfficeRecomendation,
+            "AlarmDateTimeSlot": AlarmDateTimeSlot,
 
         }
         self.slotClass2SlotNameRouter = {val: key for key, val in self.classname2class.items()}

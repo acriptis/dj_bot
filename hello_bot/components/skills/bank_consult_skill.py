@@ -11,7 +11,8 @@ from bank_interactions.models import DocumentsListSupplyInteraction, IntentRetri
     OfficeRecommendationInteraction, DialogTerminationInteraction, OperatorSwitchInteraction
 from bank_interactions.models.greeting import GreetingInteraction
 from bank_interactions.models.interactions import DesiredCurrencyInteraction
-from personal_assistant_interactions.models import WeatherForecastInteraction
+from personal_assistant_interactions.models import WeatherForecastInteraction, AlarmSetterInteraction
+
 
 class Scenario():
     """
@@ -149,11 +150,10 @@ class AgentSkillInitializer():
         # create information controller
         self.ic = InformationController(user=self.user)
 
-        # create user dialog and push the message
-        self.userdialog = UserDialog.objects.create()
-
-        # store userdialog in information controller
-        self.ic.userdialog = self.userdialog
+        # # create user dialog and push the message
+        # self.userdialog = UserDialog.objects.create()
+        # # store userdialog in information controller
+        # self.ic.userdialog = self.userdialog
 
         for each_skill_cls in self.skills_spec:
             # initialize skills that expect information controller access
@@ -169,7 +169,7 @@ class AgentSkillInitializer():
         """
         # push user's utterance into userdialog container
         utterance = utterance.strip()
-        self.userdialog._push_dialog_act(self.user, utterance)
+        self.ic.userdialog._push_dialog_act(self.user, utterance)
         ############################################################################
 
         # now we have dialog and utterance preloaded
@@ -188,15 +188,19 @@ class AgentSkillInitializer():
         # 2. globally active receptors from scenario interactions
 
         # polling listeners (receptors/skills) with new message:
-        self.ic.user_message_signal.send(sender=self, message=utterance, userdialog=self.userdialog)
+        self.ic.user_message_signal.send(sender=self, message=utterance, userdialog=self.ic.userdialog)
 
         # TODO show pending receptors
 
         self.ic.DialogPlanner.process_agenda()
 
-        responses_list = self.userdialog.show_latest_sys_responses()
+        responses_list = self.ic.userdialog.show_latest_sys_responses()
 
         return responses_list
+
+# TODO clarify where to place IC in case of MultipleSkills!
+# answer: must be shared by agent
+# if so then skills must initilize IC or get existing singleton!
 
 class BankConsulterSkill(AbstractSkill):
     """
@@ -219,3 +223,8 @@ class WeatherSkill(AbstractSkill):
     def __init__(self, ic):
         self.ic = ic
         self.weather_int = self.ic.im.get_or_create_instance_by_class(WeatherForecastInteraction)
+
+class AlarmSkill(AbstractSkill):
+    def __init__(self, ic):
+        self.ic = ic
+        self.alarm_setter_int = self.ic.im.get_or_create_instance_by_class(AlarmSetterInteraction)
