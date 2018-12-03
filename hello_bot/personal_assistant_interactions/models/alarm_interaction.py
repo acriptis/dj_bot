@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from components.matchers.matchers import TrainigPhrasesMatcher
 from interactions.models import Interaction, AbstractInteraction
-import django.dispatch
 
 from personal_assistant_interactions.models.slot_alarm_datetime import AlarmDateTimeSlot
 
@@ -57,6 +56,31 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         # 2 if prehistory contains slot value choose preanswered slot value
         # 3 as explicitly the value of slot for which case?
         # register slots:
+
+
+    def start(self, *args, **kwargs):
+        # if we here means we catched command to get weather forecast.
+        # So we need to goalize slots of Location and Date
+        # Both slots may have default values (or preloaded from user profile)
+        # Both slots may be featured with confirmation interaction
+        # Both Slots must be autofilled if user has specified the information before
+        # self.ic.remind_retrospect_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
+
+
+        self.ic.remind_retrospect_or_retrieve_slot(self.alarm_timestamp_at_slot.name, target_uri=self.alarm_timestamp_at_slot.name,
+                                        callback=self.when_alarm_time_ready)
+        pass
+
+    def when_alarm_time_ready(self, *args, **kwargs):
+        # import ipdb; ipdb.set_trace()
+        # print("KEKEKEKEK")
+        at_datetime = kwargs['results']['value']
+        self._set_alarm(at_datetime)
+
+    def _set_alarm(self, at_datetime, title=None):
+
+        self.ic.DialogPlanner.sendText("Я устанавливаю будильник на %s" % (at_datetime))
+        return
 
     def _prepare_slots(self):
         """
@@ -130,28 +154,3 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         # )
         # self.ic.sm.register_slot(self.date_slot_instance)
         pass
-
-    def start(self, *args, **kwargs):
-        # if we here means we catched command to get weather forecast.
-        # So we need to goalize slots of Location and Date
-        # Both slots may have default values (or preloaded from user profile)
-        # Both slots may be featured with confirmation interaction
-        # Both Slots must be autofilled if user has specified the information before
-        # self.ic.remind_retrospect_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
-
-
-        self.ic.remind_retrospect_or_retrieve_slot(self.alarm_timestamp_at_slot.name, target_uri=self.alarm_timestamp_at_slot.name,
-                                        callback=self.when_alarm_time_ready)
-        pass
-
-    def when_alarm_time_ready(self, *args, **kwargs):
-        # import ipdb; ipdb.set_trace()
-        # print("KEKEKEKEK")
-        at_datetime = kwargs['results']['value']
-        self._set_alarm(at_datetime)
-
-    def _set_alarm(self, at_datetime, title=None):
-
-        self.ic.DialogPlanner.sendText("Я устанавливаю будильник на %s" % (at_datetime))
-        return
-
