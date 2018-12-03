@@ -13,7 +13,6 @@ class AlarmDateTimeSlot(BaseSlotField):
 
     questioner = "На какое время установить будильник?"
 
-
     def recept(self, text, *args, **kwargs):
         can_recept, results = self._infiltrate(text)
         return results
@@ -23,6 +22,17 @@ class AlarmDateTimeSlot(BaseSlotField):
         return can_recept
 
     def _infiltrate(self, text):
+        """
+        Given an input text it analyses it and returns a tuple (bool, data)
+        Where first element is predicate if infiltartion completed (some relevant tokens are grasped
+        from some part of the utterance).
+        The second element of tuple is data object, retrieved from utterance
+
+        Currently only one element may be retrieved (so utterance with multiple datetime objects will announce
+        only the first result)
+        :param text: str
+        :return:
+        """
         # try to infiltrate the slot value
         list_of_result_tuples = search_dates(text)
         if list_of_result_tuples:
@@ -60,6 +70,5 @@ class AlarmDateTimeSlot(BaseSlotField):
             else:
                 # no relevant data in this msg
                 continue
-
 
         return False, None
