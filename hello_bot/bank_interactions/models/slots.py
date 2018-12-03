@@ -121,7 +121,7 @@ class ClientServiceRegionSlot(BaseSlotField, DictionarySlotReceptorMixin):
 class ClientPropertyTypeSlot(BaseSlotField, DictionarySlotReceptorMixin):
     name = 'ClientPropertyTypeSlot'
 
-    questioner = "Какой у вас тип собственности"
+    questioner = "Какой у вас тип собственности?"
 
     ######################################################
     # Slot's Values Domain Specification
