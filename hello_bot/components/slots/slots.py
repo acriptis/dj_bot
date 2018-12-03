@@ -83,11 +83,19 @@ class DictionarySlotReceptorMixin():
     """
     # children must specify domain of distinctive slot values classes
     CANONIC_DOMAIN = []
+    #
+    # # children must define flat norm (Dictionary that provides <surface token> to <canonic form> index
+    # flat_norm = {}
+    # # TODO add support of MultiCase, Stemming support etc
+    # # def __init__(self, canonic_domain):
 
-    # children must define flat norm (Dictionary that provides <surface token> to <canonic form> index
-    flat_norm = {}
-    # TODO add support of MultiCase, Stemming support etc
-    # def __init__(self, canonic_domain):
+    def __init__(self):
+        # construct flat norm
+        # index object for translating synonyms into normalized categories:
+        self.flat_norm = {}
+        for canonic_name, synset in self.synsets.items():
+            for each_syn in synset:
+                self.flat_norm[each_syn] = canonic_name
 
     def can_recept(self, text, *args, **kwargs):
         """

@@ -206,8 +206,6 @@ class BankConsulterSkill(AbstractSkill):
     """
         Skill for bank consulting
     """
-    # signal emmitted when user message comes:
-    # user_message_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
 
     def __init__(self, ic):
         self.ic = ic
@@ -223,6 +221,7 @@ class WeatherSkill(AbstractSkill):
     def __init__(self, ic):
         self.ic = ic
         self.weather_int = self.ic.im.get_or_create_instance_by_class(WeatherForecastInteraction)
+
 
 class AlarmSkill(AbstractSkill):
     def __init__(self, ic):

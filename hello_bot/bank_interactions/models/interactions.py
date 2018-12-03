@@ -15,27 +15,9 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
     exit gates or productions signals:
     """
     name = "IntentRetrievalInteraction"
-    # external slots defined somewhere
-    required_slots = [OptionIntentsSlot]
 
     class Meta:
         proxy = True
-
-    # def __init__(self, ic, name='intent_retrieval_interaction', *args, **kwargs):
-    #     super(Interaction, self).__init__(*args, **kwargs)
-    #     super(AbstractInteractionSignalingExit, self).__init__(*args, **kwargs)
-    # TODO move to Interactions Model abstraction:
-    # @classmethod
-    # def initialize(cls, ic, name=None, *args, **kwargs):
-    #     if not name:
-    #         # default name is a name of class
-    #         name = cls.__name__
-    #
-    #     intrctn, _ = cls.objects.get_or_create(name=name)
-    #     intrctn.ic = ic
-    #     super(AbstractInteraction, intrctn).__init__(*args, **kwargs)
-    #
-    #     return intrctn
 
     def start(self, *args, **kwargs):
         super(self.__class__, self).start(*args, **kwargs)

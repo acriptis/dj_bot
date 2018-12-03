@@ -19,12 +19,9 @@ class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
 
     SECRET_INFO = "SecretInfoOption"
 
-    # if user intents nothing, we use it as Exception scenario in case if nothing optioned
-    NOTHING = "Nothing"
-
     # TODO  if user wants nothing we may should use greed strategy of slot requestioning
 
-    CANONIC_DOMAIN = [COMMON_INFO, SECRET_INFO, NOTHING]
+    CANONIC_DOMAIN = [COMMON_INFO, SECRET_INFO]
 
     # synonyms set:
     # capitals for case insensitive pattern search
@@ -37,11 +34,6 @@ class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
         ],
     }
 
-    # index object for translating synonyms into normalized categories:
-    flat_norm = {}
-    for canonic_name, synset in synsets.items():
-        for each_syn in synset:
-            flat_norm[each_syn] = canonic_name
     ################################################################################################
 
 
@@ -72,13 +64,6 @@ class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
         ]
 
     }
-
-    # TODO move into abstract?
-    # index object for translating synonyms into normalized categories:
-    flat_norm = {}
-    for canonic_name, synset in synsets.items():
-        for each_syn in synset:
-            flat_norm[each_syn] = canonic_name
     ################################################################################################
 
 
@@ -132,13 +117,6 @@ class ClientServiceRegionSlot(BaseSlotField, DictionarySlotReceptorMixin):
 
     }
 
-    # TODO move into abstract?
-    # index object for translating synonyms into normalized categories:
-    flat_norm = {}
-    for canonic_name, synset in synsets.items():
-        for each_syn in synset:
-            flat_norm[each_syn] = canonic_name
-
 
 class ClientPropertyTypeSlot(BaseSlotField, DictionarySlotReceptorMixin):
     name = 'ClientPropertyTypeSlot'
@@ -161,13 +139,6 @@ class ClientPropertyTypeSlot(BaseSlotField, DictionarySlotReceptorMixin):
         ]
 
     }
-
-    # TODO move into abstract?
-    # index object for translating synonyms into normalized categories:
-    flat_norm = {}
-    for canonic_name, synset in synsets.items():
-        for each_syn in synset:
-            flat_norm[each_syn] = canonic_name
 
 
 class ClientAgreeWithServicePackConditionsSlot(BaseSlotField, YesNoSlotReceptorMixin):
