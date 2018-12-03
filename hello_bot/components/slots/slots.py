@@ -5,10 +5,6 @@ class BaseSlotField():
 
     def asker_fn(self):
         return self.questioner
-    #
-    # @classmethod
-    # def get_name(cls):
-    #     return cls.__name__
 
     def get_name(self):
         if hasattr(self, 'name'):
@@ -75,6 +71,7 @@ class DictionaryBasedSlotField(BaseSlotField):
 
     def recept(self, text, *args, **kwargs):
         return self.receptor_spec.recept(self, text, *args, **kwargs)
+
 
 # Receptors Base Classes:
 class DictionarySlotReceptorMixin():

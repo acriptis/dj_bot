@@ -24,9 +24,6 @@ class AbstractTextMatcher():
         pass
 
     def __call__(self, *args, **kwargs):
-        # import ipdb; ipdb.set_trace()
-        # import ipdb; ipdb.set_trace()
-
         return self.check_match(kwargs['message'])
 
 
@@ -45,7 +42,7 @@ class TrainigPhrasesMatcher(AbstractTextMatcher):
 
     def check_match(self, text, *args, **kwargs):
         """
-
+        Given a text (utterance) it checks if utterance matches the pattern (training phrases)
         :param text:
         :return: True if matches, False otherwise
         """

@@ -704,6 +704,7 @@ class DialogTerminationInteraction(Interaction, AbstractInteraction):
 
         self.ic.DialogPlanner.sendText("На этом завершим разговор.")
 
+
 from components.matchers.matchers import TrainigPhrasesMatcher
 class OperatorSwitchInteraction(Interaction, AbstractInteraction):
     class Meta:

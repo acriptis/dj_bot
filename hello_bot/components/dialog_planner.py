@@ -70,12 +70,11 @@ class SlotTask(BaseTask):
         self.kwargs = kwargs
 
 
-
-
 class Agenda():
     """
     Class for storing the plan of future processing tasks
     """
+    # TODO make agenda user specific and persistent
     def __init__(self):
 
         self.queue_of_tasks = []
@@ -165,6 +164,7 @@ class DialogPlanner():
         self.done_or_doing = []
 
         # question that is asked to user and waiting answer:
+        # holds None or Slot instance!
         self.question_under_discussion = None
         # we restrict the system to have only one pending-asked question (to reduce ambiguity in recepted answers)
 
