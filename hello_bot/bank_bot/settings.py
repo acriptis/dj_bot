@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'interactions.apps.InteractionsConfig',
     'bank_interactions.apps.BankInteractionsConfig',
     'personal_assistant_interactions.apps.PersonalAssistantInteractionsConfig',
+    'root_skill.apps.RootSkillConfig',
 ]
 
 MIDDLEWARE = [
