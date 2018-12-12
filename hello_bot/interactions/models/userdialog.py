@@ -71,3 +71,11 @@ class UserDialog(models.Model):
         user_indexes = [i for i, x in enumerate(self.dialog_speakers) if x != SYSTEM_USER_NAME]
         user_answers = [self.dialog_acts[i] for i in user_indexes]
         return user_answers
+
+    def __getitem__(self, key):
+        """
+        retrieves message by numerical index of message
+        :param key: int
+        :return: message
+        """
+        return self.dialog_acts[key]

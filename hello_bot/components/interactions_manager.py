@@ -3,6 +3,7 @@ from bank_interactions.models import IntentRetrievalInteraction, DesiredCurrency
     ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, OfficeRecommendationInteraction, \
     DialogTerminationInteraction, OperatorSwitchInteraction
 from personal_assistant_interactions.models import WeatherForecastInteraction, AlarmSetterInteraction
+from root_skill.models import ShowMemoryInteraction, ShowAgendaInteraction
 
 
 class InteractionsManager():
@@ -35,7 +36,9 @@ class InteractionsManager():
             "DialogTerminationInteraction": DialogTerminationInteraction,
             "OperatorSwitchInteraction": OperatorSwitchInteraction,
             "WeatherForecastInteraction": WeatherForecastInteraction,
-            "AlarmSetterInteraction": AlarmSetterInteraction
+            "AlarmSetterInteraction": AlarmSetterInteraction,
+            "ShowMemoryInteraction": ShowMemoryInteraction,
+            "ShowAgendaInteraction":ShowAgendaInteraction
         }
 
         # interactions instances registry

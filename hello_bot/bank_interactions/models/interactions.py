@@ -22,7 +22,10 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
     def start(self, *args, **kwargs):
         super(self.__class__, self).start(*args, **kwargs)
         # 1. retrieve OptionIntentsSlot
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(OptionIntentsSlot.name, callback_fn=self.on_intents_ready)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(OptionIntentsSlot.name, callback_fn=self.on_intents_ready)
+        # self.ic.DialogPlanner.sendText("IntentRetrievalInteraction.starts")
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(OptionIntentsSlot.name, callback=self.on_intents_ready)
+
 
         # TODO consider
         # how to handle MultiGateness:
@@ -131,7 +134,8 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         # 1. retrieve CurrencySlot
         # check if it is not retrieved yet?
 
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(DesiredCurrencySlot.name, callback_fn=self.on_desired_currency_ready)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(DesiredCurrencySlot.name, callback_fn=self.on_desired_currency_ready)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(DesiredCurrencySlot.name, callback=self.on_desired_currency_ready)
 
     def on_desired_currency_ready(self, *args, **kwargs):
         """
@@ -141,8 +145,6 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         before completing the state of the interaction
         """
         print("DesiredCurrencyInteraction.on_desired_currency_ready(")
-        # import ipdb; ipdb.set_trace()
-
         desired_currency_values = kwargs['user_slot_process'].result.value
         desired_currency_values = self.ic.MemoryManager.put_slot_value(DesiredCurrencySlot.name,
                                                                        desired_currency_values)
@@ -162,18 +164,14 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
             else:
                 return False
 
-        def action_rule_2_1_NONRUB():
-            self.ic.DialogPlanner.sendText(self.TEXT_2_1)
-
         ###################################################
-        if isinstance(desired_currency_values, list):
-            # special Case for multiple currencies
-            nonrub_currencies = list(filter(check_rule_2_1_NONRUB, desired_currency_values))
-            if nonrub_currencies:
-                action_rule_2_1_NONRUB()
-        else:
-            raise Exception("Unexpected datatype for desired_currency_values: %s, %s" % (desired_currency_values, type(desired_currency_values)))
+        assert isinstance(desired_currency_values, list), "Unexpected datatype for desired_currency_values: %s, %s" % (desired_currency_values, type(desired_currency_values))
 
+        # special Case for multiple currencies
+        nonrub_currencies = list(filter(check_rule_2_1_NONRUB, desired_currency_values))
+        if nonrub_currencies:
+            # action_rule_2_1_NONRUB
+            self.ic.DialogPlanner.sendText(self.TEXT_2_1)
         ######################### END Busines Rule BR2.1 Block ##########################################
 
         # Completion can be announced
@@ -232,8 +230,11 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         super(self.__class__, self).start(*args, **kwargs)
         self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
         # 1. retrieve CurrencySlot
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(NeedListDocsAndTarifsSlot.name,
-                                                                            callback_fn=self.on_response_3_Q1_ready)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(NeedListDocsAndTarifsSlot.name,
+        #                                                                     callback_fn=self.on_response_3_Q1_ready)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(NeedListDocsAndTarifsSlot.name,
+                                                                 callback=self.on_response_3_Q1_ready)
+
     def on_response_3_Q1_ready(self, *args, **kwargs):
         """
         See step 3.Q1 at
@@ -311,8 +312,10 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
         # seems to be Garbage Collection related issue, But I don't know why
         # import ipdb; ipdb.set_trace()
 
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientIsResidentRFSlot.name,
-                                                                            callback_fn=self.client_IsResidentRFSlot_is_filled)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientIsResidentRFSlot.name,
+        #                                                                     callback_fn=self.client_IsResidentRFSlot_is_filled)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientIsResidentRFSlot.name,
+                                                                 callback=self.client_IsResidentRFSlot_is_filled)
 
     def client_IsResidentRFSlot_is_filled(self, *args, **kwargs):
 
@@ -325,8 +328,8 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
                                                                             clientisresidentrfslot_value)
         print("ClientIsResidentRFSlot_is_filled")
         # then plan next step
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientServiceRegionSlot.name,
-                                                                            callback_fn=self.client_ServiceRegionSlot_is_filled)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientServiceRegionSlot.name,
+                                                                 callback=self.client_ServiceRegionSlot_is_filled)
 
     def client_ServiceRegionSlot_is_filled(self, *args, **kwargs):
 
@@ -338,8 +341,10 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
                                                                              clientserviceregionslot_value)
 
         # then plan next step
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientPropertyTypeSlot.name,
-                                                                            callback_fn=self.client_PropertyTypeSlot_is_filled)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientPropertyTypeSlot.name,
+        #                                                                     callback_fn=self.client_PropertyTypeSlot_is_filled)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientPropertyTypeSlot.name,
+                                                                 callback=self.client_PropertyTypeSlot_is_filled)
 
     def client_PropertyTypeSlot_is_filled(self, *args, **kwargs):
 
@@ -401,8 +406,10 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
         super(self.__class__, self).start(*args, **kwargs)
 
         self.ic.DialogPlanner.sendText(self.TEXT_BIG_OFFER)
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientAgreeWithServicePackConditionsSlot.name,
-                                                                            callback_fn=self.on_user_decision_on_big_offer_ready)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientAgreeWithServicePackConditionsSlot.name,
+        #                                                                     callback_fn=self.on_user_decision_on_big_offer_ready)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientAgreeWithServicePackConditionsSlot.name,
+                                                                 callback=self.on_user_decision_on_big_offer_ready)
 
         print("Ready to go: BusinessOfferingInteraction.start")
 
@@ -507,8 +514,10 @@ class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
         # 1. retrieve CurrencySlot
         # check if it is not retrieved yet?
 
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientOkToSelfServiceSlot.name,
-                                                                            callback_fn=self.when_client_responded_about_self_serving)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientOkToSelfServiceSlot.name,
+        #                                                                     callback_fn=self.when_client_responded_about_self_serving)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientOkToSelfServiceSlot.name,
+                                                                 callback=self.when_client_responded_about_self_serving)
 
     def when_client_responded_about_self_serving(self, *args, **kwargs):
         """
@@ -590,7 +599,11 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
         # to callback
         # Approach 2: (clean and async) use async pattern: https://habr.com/post/266743/
 
-        self.ic.remind_or_retrieve_slot(slot_spec=DesiredCurrencySlot, target_uri=DesiredCurrencySlot.name, callback=self.after_desired_currency_slot_evaluated)
+        # self.ic.remind_or_retrieve_slot(slot_spec=DesiredCurrencySlot, target_uri=DesiredCurrencySlot.name, callback=self.after_desired_currency_slot_evaluated)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(
+            slot_spec_name=DesiredCurrencySlot.name,
+            target_uri=DesiredCurrencySlot.name,
+            callback=self.after_desired_currency_slot_evaluated)
 
     def after_desired_currency_slot_evaluated(self, *args, **kwargs):
         # TODO make up more general solution ?
@@ -600,8 +613,10 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
 
         if DesiredCurrencySlot.RUB in desired_currency_slot_value:
             self.ic.DialogPlanner.sendText(self.TEXT_6_RUB_DOCS_LIST)
-            self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientIsReadyToGiveDocsSlot.name,
-                                                                                callback_fn=self.on_client_responded_if_docs_ready)
+            # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientIsReadyToGiveDocsSlot.name,
+            #                                                                     callback_fn=self.on_client_responded_if_docs_ready)
+            self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientIsReadyToGiveDocsSlot.name,
+                                                                     callback=self.on_client_responded_if_docs_ready)
         # Возможны случаи когда клиент упомянул две и более валюты
         # рублевую и нерублевую, в этом случае поведение не определено однозначно
 
@@ -660,8 +675,10 @@ class OfficeRecommendationInteraction(Interaction, AbstractInteraction):
         print("Ready to go: OfficeRecommendationInteraction.start")
         super(self.__class__, self).start(*args, **kwargs)
         self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
-        self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientWantsNearestOfficeRecomendation.name,
-                                                                            callback_fn=self.on_answer_about_nearest_office_recomendation)
+        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientWantsNearestOfficeRecomendation.name,
+        #                                                                     callback_fn=self.on_answer_about_nearest_office_recomendation)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientWantsNearestOfficeRecomendation.name,
+                                                                 callback=self.on_answer_about_nearest_office_recomendation)
 
     def on_answer_about_nearest_office_recomendation(self, *args, **kwargs):
         """

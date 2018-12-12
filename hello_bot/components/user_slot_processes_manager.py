@@ -49,7 +49,7 @@ class UserSlotProcessesManager():
         """
         Returns related UserSlotProcess (if exist) or None
         :param curr_slot_obj: Slot instance
-        :return:
+        :return: UserSlotProcess or None
         """
         # TODO implement target URI feature?
         if curr_slot_obj.get_name() in self.user_slot_processes:

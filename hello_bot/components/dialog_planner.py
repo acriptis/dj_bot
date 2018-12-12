@@ -34,6 +34,7 @@ class BaseTask():
     def __repr__(self):
         return "%s --then-> %s" % (self.item, self.callback_fns)
 
+
 class InteractionTask(BaseTask):
     """
     Atomic Task in Agenda
@@ -163,13 +164,12 @@ class DialogPlanner():
         # here we put decisions which are processed or started processing
         self.done_or_doing = []
 
-        # question that is asked to user and waiting answer:
-        # holds None or Slot instance!
-        self.question_under_discussion = None
+        # slots asked to user but not percepted (waiting answer):
+        # questions under discussion stack (the newest are on top):
+        self.questions_under_discussion = []
         # we restrict the system to have only one pending-asked question (to reduce ambiguity in recepted answers)
 
-
-        # dictionary for callbacks which must be called after particular interactions will be completed
+        # dictionary for callback functions which must be called after particular interactions completed
         self.callbacks_on_completion_of_interactions = {}
         # ^^ TODO delegate task management to celery?
 
@@ -183,11 +183,60 @@ class DialogPlanner():
         self._callbacks_storage = []
 
     # #### SLOT PROCESS ###############################################################################################
+    def remind_retrospect_or_retrieve_slot(self, slot_spec_name, target_uri=None, callback=None, priority=10):
+        """
+        Interface method for domain interactions which encapsulates slots management as knowledge-agnostic interface
+        (Callers of method don't know if the value exist already or must be retrieved through interactive process).
+            The system requests slot from memory,
+                if memory check fails
+                    the system tries to apply retrospection process
+                        (anlyse dialog prehistory to extract slot value from user's initiative directive),
+                    if retrospection fails
+                        the system launches ActiveQuestioningProcess or default value retrieval
+
+        :param slot_spec_name: Slot name to be evaluated
+        :param target_uri:
+        :return:
+        """
+
+        slot_spec_obj = self.ic.sm.get_or_create_instance_by_slotname(slot_spec_name)
+
+        if not target_uri:
+            # means uri is slot name for singleton slots
+            target_uri = slot_spec_obj.get_name()
+
+        usp, created = self.ic.uspm.get_or_create_user_slot_process(slot_spec_obj)
+        usp.ic = self.ic
+        is_recepted, result = usp.fast_evaluation_process_attempt()
+        if is_recepted:
+            if callback:
+                # announce callback
+                # TODO CONSIDER
+                # what if this is not first evaluation attempt of the slot and
+                # the slot process is already in the agenda?
+
+                # it may cause situation when some processes subscribed for the slot when prehistory had no answer,
+                # but during the waiting in the agenda chat went on and user has replied with providing the answer for
+                # a slot that is not actively asked yet.
+                # if we call only the latest callback, then we must gurantee that older listeners that are waiting since
+                # previous requests are not misinformed? (Very unlikely case)
+                callback(result)
+        else:
+            # can not retrieve slot withpout questioning
+
+            # #########################################################################
+            # ###### User Slot Retrieval Process #####################################
+            # enqueue Active Questioning Process
+            self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj,
+                                                                                        priority=priority,
+                                                                                        callback_fn=callback,
+                                                                                        target_uri=target_uri,
+                                                                                        duplicatable=False)
 
     def plan_process_retrieve_slot_value_by_slot_name(self, slot_name, priority=10, callback_fn=None,
                                          duplicatable=False):
         """
-        Given a string of slot name it runs the process of slot-filling
+        Given a string of slot name it runs the process of slot-filling with ActiveQuestioning
         :param slot_name:
         :param priority:
         :param callback_fn:
@@ -262,84 +311,26 @@ class DialogPlanner():
             ?Promise/Deferred/Contract for Future result?
 
         """
-        if not target_uri:
-            target_uri = slot_spec_obj.get_name()
-        if not duplicatable:
-            # check existence of ready value:
-            results = self.ic.MemoryManager.get_slot_value_quite(target_uri)
 
-            if not results:
-                # we have no memory for the slot at target uri
-                # RUN RETRIEVAL PROCESS (or Attach callback to existing process)
-                # check if process exists:
-                usp = self.ic.uspm.find_user_slot_process(slot_spec_obj)
+        usp = self.ic.uspm.find_user_slot_process(slot_spec_obj)
+        if not usp:
+            import ipdb; ipdb.set_trace()
+            raise Exception("Why there is no USP for slot: %s" % slot_spec_obj)
 
-                if usp:
-                    # exists
-                    # assert is not completed
-                    if usp.state == UserSlotProcess.COMPLETED:
-                        # investigate
-                        raise Exception("Result is not written but process is completed!")
-                    else:
-                        # process exists but not completed!
-                        if usp.target_uri:
-                            # target uri exists
-                            if target_uri != usp.target_uri:
-                                raise Exception("Multiple target URIs for the same slot are not supported yet!")
-                        else:
-                            # specify target URI:
-                            usp.target_uri = target_uri
-                        # connect all callbacks
-                        for each_cb_fn in callback_fns:
-                            usp.slot_filled_signal.connect(each_cb_fn)
-
-                else:
-                    # if usp is None
-                    # no process exist we must create a new one:
-                    self._force_start_slot_value_retrieval_process(slot_spec_obj, priority=priority,
-                                                                   callback_fns=callback_fns, target_uri=target_uri)
-            else:
-                # RETRIEVE CACHED RESULTS! (No need to ReRun process)
-                # means we can call callbacks instantly
-
-                # TODO refactor below:
-                if callback_fns:
-                    # import ipdb; ipdb.set_trace()
-                    # emulate slot process:
-                    # TODO user slot processe must be differentiated by target URI for duplicatable slots
-                    usps = self.ic.uspm.find_user_slot_process(slot_spec_obj)
-                    # import ipdb; ipdb.set_trace()
-
-                    # usps= UserSlotProcess.objects.filter(user=self.ic.user, slot_codename=curr_slot_obj.name)
-                    if usps:
-                        if isinstance(usps, list):
-                            # get first
-                            usp =usps[0]
-                        else:
-                            usp = usps
-                        usp.result = UserSlot(user=self.ic.user,slot=slot_spec_obj, value=results)
-                        # import ipdb; ipdb.set_trace()
-
-                        if usp.target_uri != target_uri:
-                            # TODO handle me
-                            raise Exception("Target URI mismatch!")
-
-                    else:
-
-                        print("No UserSlotProcess, while result exists!")
-                        raise Exception("Result exist and UserSlotProcess no???")
-                        # usp = UserSlotProcess(user=self.ic.user, slot_codename=curr_slot_obj.name)
-                        #
-                        # usp.result = UserSlot(user=self.ic.user, slot=curr_slot_obj, value=results)
-                    # poll all callbacks
-                    for each_cb_fn in callback_fns:
-                        each_cb_fn(sender=self, user_slot_process=usp, results=results)
-
-                    return
-                else:
-                    return
+        assert hasattr(usp, 'ic')
+        is_recepted, result = usp.fast_evaluation_process_attempt()
+        if is_recepted:
+            # announce listeners
+            if callback_fns:
+                import ipdb;ipdb.set_trace()
+                for each_cb_fn in callback_fns:
+                    each_cb_fn(sender=self, user_slot_process=usp, results=result)
+            return
         else:
-            raise Exception("Duplicatable Slots are not supported yet!")
+            # not recepted
+            print("Slot is not recepted from prehistory")
+        self._force_start_slot_value_retrieval_process(slot_spec_obj, priority=priority,
+                                                       callback_fns=callback_fns, target_uri=target_uri)
 
     def _force_start_slot_value_retrieval_process(self, curr_slot_spec_obj, target_uri, priority=10, callback_fns=None):
         """
@@ -353,10 +344,15 @@ class DialogPlanner():
         """
         # RUN SLOT RETRIEVAL PROCESS
         usp, created = self.ic.uspm.get_or_create_user_slot_process(curr_slot_spec_obj)
-        if not created:
-            raise Exception("found existing user slot process, while expecting creation of new one!")
+        # if not created:
+        #     # raise Exception("found existing user slot process, while expecting creation of new one!")
+        #     import ipdb; ipdb.set_trace()
+        if created:
+            # raise Exception("found existing user slot process, while expecting creation of new one!")
+            import ipdb; ipdb.set_trace()
 
-        usp.target_uri = target_uri
+        if target_uri and usp.target_uri != target_uri:
+            usp.target_uri = target_uri
 
         if callback_fns:
             # hack:
@@ -508,7 +504,66 @@ class DialogPlanner():
     # END Interactions Management ########################################################################################
 
     # General Management
-    def process_agenda(self, *args, **kwargs):
+    def process_agenda(self):
+        """
+        Refactored Agenda processing version
+
+        it exists decisioning loop in any of following cases:
+        1. There is exist a question on discussion
+        2. There is no more tasks in Agenda
+
+        :return: None
+        """
+
+        if len(self.questions_under_discussion)>0:
+            # should we check when there is a question on discussion but passive strategy avoids reasking?
+            # we may drown in silent loop
+            return
+        if len(self.agenda.queue_of_tasks) == 0:
+            return
+        else:
+            launched_task = self.launch_next_task()
+            if launched_task:
+                # launched something then we need to re-run processing loop
+                self.process_agenda()
+                return
+            else:
+                # Exception?
+                import ipdb; ipdb.set_trace()
+                print("Investigate me!")
+
+    def launch_next_task(self):
+        """
+        Starts the most prioritized item (Interaction or Slot) from queue
+        :return: Task launched if something launched, None if nothing to launch
+        """
+        if len(self.agenda.queue_of_tasks) > 0:
+            next_task = self.agenda.pop_the_highest_priority_task()
+            # import ipdb; ipdb.set_trace()
+            self._launch_task(next_task)
+            return next_task
+        else:
+            return None
+
+    def _launch_task(self, task):
+        """
+        Givewn a task object starts it (Slot Process or Interaction Process)
+        :param task:
+        :return:
+        """
+        if isinstance(task, InteractionTask):
+            interaction_obj = task.interaction_obj
+            self._force_start_interaction_process(interaction_obj)
+        elif isinstance(task, SlotTask):
+            slot_obj= task.item
+            # slots must be carefully started! with check if they already completed, or in process so we neeed to call
+            # import ipdb; ipdb.set_trace()
+            # lets investigate the case
+            self._evaluate_slot_task(slot_obj, task.priority, task.callback_fns, task.kwargs)
+        return
+
+    # Deprecated
+    def process_agenda34(self, *args, **kwargs):
         """
         If we have no response to user at present step:
             then we need to try to check if agenda has pending tasks
@@ -517,6 +572,7 @@ class DialogPlanner():
 
         :return:
         """
+        import ipdb; ipdb.set_trace()
 
         responses_list = self.ic.userdialog.show_latest_sys_responses()
 
@@ -530,74 +586,52 @@ class DialogPlanner():
             # check if we have queue of actions in plan
             print("self.ic.DialogPlanner.agenda.queue_of_tasks")
             print(self.ic.DialogPlanner.agenda.queue_of_tasks)
-            if len(self.ic.DialogPlanner.agenda.queue_of_tasks)>0:
-                # self.ic.DialogPlanner.launch_next_task()
-                next_task = self.agenda.pop_the_highest_priority_task()
-                # call agenda processing again after completion
-                # (for the case when next task is completed silently)
-                next_task.add_callback_fn(self.process_agenda)
-                self._launch_task(next_task)
+            launched = self.launch_next_task()
+            if launched:
+                print("Launched task")
+
+
+            elif len(self.questions_under_discussion)==0 :
+                # here we have two cases:
+                # 1. we said him something from one interaction, but don't wait any questions,
+                # although we have some tasks in plan that may have questions to discuss
+                # 2. we have finished communication and don't need any questions to discuss anymore
+                # For the first case we need to launch next task
+                # For the second case we need nothing to do
+
+                # and not self.scenario_completed
+                # Scenario Policy is not Dialog Policy!
+                # how to detect if scenario has no more questions to ask?
+                # TODO remove hack:
+                if self.ic.MemoryManager.get_slot_value_quite("bank_scenario.terminated") is True:
+                    # hacky check that scenario is completed
+                    # really we need a voting system between branches of dialog, so that real termination is happens only
+                    # when all voters vote for termination, otherwise we assume that there are exist branches that are
+                    # may have pending actions, but this is quite peculliar case, not applicable for this banking scenario
+                    pass
+                else:
+                    launched = self.launch_next_task()
+                    if not launched:
+                        # Exceptional case
+                        # investigate
+                        print("investigate me")
+                        import ipdb; ipdb.set_trace()
+                        print("investigate me")
+                pass
             else:
                 # nothing to say, nothing to do...
                 #TODO templatize
                 self.ic.userdialog.send_message_to_user("Простите, я не знаю, что Вам ответить ;)")
-        elif not self.question_under_discussion:
-            # here we have two cases:
-            # 1. we said him something from one interaction, but don't wait any questions,
-            # although we have some tasks in plan that may have questions to discuss
-            # 2. we have finished communication and don't need any questions to discuss anymore
-            # For the first case we need to launch next task
-            # For the second case we need nothing to do
-
-            # and not self.scenario_completed
-            # Scenario Policy is not Dialog Policy!
-            # how to detect if scenario has no more questions to ask?
-            if self.ic.MemoryManager.get_slot_value_quite("bank_scenario.terminated") is True:
-                # hacky check that scenario is completed
-                # really we need a voting system between branches of dialog, so that real termination is happens only
-                # when all voters vote for termination, otherwise we assume that there are exist branches that are
-                # may have pending actions, but this is quite peculliar case, not applicable for this banking scenario
-                pass
-            else:
-                # TODO handle code duplication
-                if len(self.ic.DialogPlanner.agenda.queue_of_tasks)>0:
-                    # self.ic.DialogPlanner.launch_next_task()
-                    next_task = self.agenda.pop_the_highest_priority_task()
-                    # call agenda processing again after completion
-                    # (for the case when next task is completed silently)
-                    next_task.add_callback_fn(self.process_agenda)
-                    self._launch_task(next_task)
-                else:
-                    # Exceptional case
-                    # investigate
-                    print("investigate me")
-                    import ipdb; ipdb.set_trace()
-                    print("investigate me")
-            pass
         else:
             # nothing to do anymore for this step
+            # if we have no active questions, but have pending we may ask them now
+            if len(self.questions_under_discussion)==0:
+                print("MNo questions on discussion may be we can start some interaction?")
+                self.launch_next_task()
+            else:
+                import ipdb; ipdb.set_trace()
+                print("We have questrion on discussion")
             return
-
-    def launch_next_task(self):
-        """
-        Starts the most prioritized item (Interaction or Slot) from queue
-        :return:
-        """
-        next_task = self.agenda.pop_the_highest_priority_task()
-        import ipdb; ipdb.set_trace()
-        self._launch_task(next_task)
-
-    def _launch_task(self, task):
-        if isinstance(task, InteractionTask):
-            interaction_obj = task.interaction_obj
-            self._force_start_interaction_process(interaction_obj)
-        elif isinstance(task, SlotTask):
-            slot_obj= task.item
-            # slots must be carefully started! with check if they already completed, or in process so we neeed to call
-            # import ipdb; ipdb.set_trace()
-            # lets investigate the case
-            self._evaluate_slot_task(slot_obj, task.priority, task.callback_fns, task.kwargs)
-        return
 
     # SendText Operation
     def sendText(self, text_template):

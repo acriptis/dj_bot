@@ -1,30 +1,13 @@
 from django.db import models
 import django.dispatch
-#
-# # routes <names of Slots> into implementation classes
-# from bank_interactions.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
-#     ClientServiceRegionSlot, ClientIsResidentRFSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot
-#
-# ##############################################################################################
-# # TODO make router less ugly,
-# # TODO autodiscover slot classes by router
-# slotName2SlotClassRouter = {
-#     "DesiredCurrencySlot": DesiredCurrencySlot,
-#     "OptionIntentsSlot": OptionIntentsSlot,
-#     "NeedListDocsAndTarifsSlot": NeedListDocsAndTarifsSlot,
-#     "ClientIsResidentRFSlot": ClientIsResidentRFSlot,
-#     "ClientServiceRegionSlot": ClientServiceRegionSlot,
-#     "ClientPropertyTypeSlot": ClientPropertyTypeSlot,
-#     "ClientAgreeWithServicePackConditionsSlot": ClientAgreeWithServicePackConditionsSlot
-#
-#
-# }
-# slotClass2SlotNameRouter = {val:key for key, val in slotName2SlotClassRouter.items()}
-# ##############################################################################################
+from .user_slot import UserSlot
+
 
 class UserSlotProcess(models.Model):
     """
-    The process of interaction between user and system about some slot filling
+    The process of interaction between user and system about some slot filling via ActiveQuestioning Process
+
+    TODO link ActiveQuestioningProcess in doc
 
     For slots that requre asking the user and then handling the answer
 
@@ -77,6 +60,9 @@ class UserSlotProcess(models.Model):
         usp.slot = slot_obj
         usp.target_uri = target_uri
 
+        # counts for failed recepts (may be used by ReQuestioning Strategy):
+        usp.recept_fails_counter = 0
+
         return usp
 
     def save(self, *args, **kwargs):
@@ -91,7 +77,7 @@ class UserSlotProcess(models.Model):
     def start(self, ic):
         """
 
-        Start of retrieval process:
+        Start of ActiveQuestioning retrieval process:
         1. Ask Question to user
         2. Connect AnswerReceptor to UserMessageSignal
         3. Set state as Active
@@ -102,14 +88,23 @@ class UserSlotProcess(models.Model):
 
         # send question to active dialog
         self.ic = ic
+        # #################################################################################
+        # ########## START ACTIVE QUESTIONING PHASE #######################################
         self.ic.userdialog.send_message_to_user(self.slot.asker_fn())
-        # now we should put the question under question on dicsussion
-        assert self.ic.DialogPlanner.question_under_discussion is None
-        self.ic.DialogPlanner.question_under_discussion = self.slot
+        # now we should put the question under questions on dicsussion
+        if len(self.ic.DialogPlanner.questions_under_discussion)>0:
+            # second slot!
+            # Exceptional case adding the second slot. Is it context switch?
+            print(self.ic.DialogPlanner.questions_under_discussion)
+            import ipdb; ipdb.set_trace()
 
+        self.ic.DialogPlanner.questions_under_discussion.insert(0, self.slot)
+
+        # connect particular Receptor to ActiveReceptors Pool
         self.ic.user_message_signal.connect(self.on_user_response)
         self.state = self.ACTIVE
         self.save()
+        # #################################################################################
 
     def on_user_response(self, *args, **kwargs):
         """
@@ -117,46 +112,135 @@ class UserSlotProcess(models.Model):
         :param text:
         :return:
         """
-        # import ipdb; ipdb.set_trace()
         text = kwargs['message']
-        from .user_slot import UserSlot
-        # import ipdb; ipdb.set_trace()
 
         if self.slot.can_recept(text):
             result = self.slot.recept(text)
-            # validate
-            # normalize
-            #if ok:
-            # put value to user slot and announce completion for arbiter
+            # #################################################################################
+            # ########## FINALIZATION and MEMORIZATION of the SLOT  ###########################
             self.ic.user_message_signal.disconnect(self.on_user_response)
-            # print
-            # self.result, _ = UserSlot.objects.get_or_create(self.user, self.slot, result)
-            self.result = UserSlot(self.user, self.slot, result)
-            # self.result.save()
-            self.raw_result = result
-            self.state = self.COMPLETED
-            if self.target_uri:
-                # write the memory
-                self.ic.MemoryManager.put_slot_value(self.target_uri, result)
-
-            # now we should remove question under discussion, asserting it equals to current slot:
-            assert self.ic.DialogPlanner.question_under_discussion == self.slot
-            self.ic.DialogPlanner.question_under_discussion = None
-
-            self.slot_filled_signal.send(sender=self, user_slot_process=self, results=result)
-            self.save()
-            print("User response filled slot: %s!" % result)
-
+            self.complete_self(result)
+            # END FINALIZATION and MEMORIZATION of the SLOT
+            # #################################################################################
         else:
             # wrong response (
+            self.recept_fails_counter += 1
             self.state = self.IGNORED
             self.save()
-            # Greed reAsk Strategy:
-            print("Slot Unhandled (Greed reAsk Strategy). ReAsking...")
-            self.ic.userdialog.send_message_to_user(self.slot.asker_fn() + " (Greed ReAsk Strategy)")
 
-            # print("Slot Unhandled (Passive waiting Strategy)")
+            # TODO refactor
+            # #################################################################################
+            # ########## Requestioning Strategy Exploitation ##################################
+            if self.slot.requestioning_strategy == "Greed":
+
+                # Greed reAsk Strategy:
+                print("Slot Unhandled (Greed reAsk Strategy). ReAsking...")
+                self.ic.userdialog.send_message_to_user(self.slot.asker_fn() + " (Greed ReAsk Strategy)")
+
+                # print("Slot Unhandled (Passive waiting Strategy)")
+            elif self.slot.requestioning_strategy == "RemindOn3rdFail":
+                if self.recept_fails_counter >= 3:
+                    print("Slot Unhandled (RemindOn3rdFail). ReAsking...")
+                    self.ic.userdialog.send_message_to_user(self.slot.asker_fn() + " (RemindOn3rdFail ReAsk Strategy)")
+
+            elif self.slot.requestioning_strategy == "Passive":
+                # default behaviour?
+                print("Slot Unhandled (Passive Strategy)...")
+            else:
+                raise Exception("Unspecified ReQuestioning Strategy!")
             # TODO implement attachement of Exception Strategy:
             # 1. Forced Slot: ReAsk Urgently
             # 2. Passive Waiting, but we need to attach handler
             # here
+
+    def complete_self(self, result):
+        """
+        Implements finalization of slot process with provided result
+        :param result:
+        :return:
+        """
+        self.result = UserSlot(self.user, self.slot, result)
+        # self.result.save()
+        self.raw_result = result
+        self.state = self.COMPLETED
+        if self.target_uri:
+            # write the memory
+            self.ic.MemoryManager.put_slot_value(self.target_uri, result)
+
+        # now we should remove question under discussion (if we are in active questioning process)
+        if self.slot in self.ic.DialogPlanner.questions_under_discussion:
+            self.ic.DialogPlanner.questions_under_discussion.remove(self.slot)
+
+        self.slot_filled_signal.send(sender=self, user_slot_process=self, results=result)
+        self.save()
+        print("User response filled slot: %s!" % result)
+
+    def fast_evaluation_process_attempt(self):
+        is_recepted, result = self._fast_evaluation_process_attempt_raw_output()
+        if is_recepted and self.state != self.COMPLETED:
+            # finlize userslot process (if it is not finalized yet)
+            self.complete_self(result)
+
+        return is_recepted, result
+
+    def _fast_evaluation_process_attempt_raw_output(self):
+        """
+        Process of value evaluation when we check
+            1. Memory
+            2. Prehistory
+            3. DefaultValue
+
+        if some of them succed then annoubnce completion
+        else return exception
+
+        No callback polling
+
+        No slot process finalization
+
+        :return: (is_slot_value_retrieved:bool, result:any)
+        """
+        slot_spec_obj = self.slot
+
+        if not self.target_uri:
+            # means uri is slot name for singleton slots
+            self.target_uri = slot_spec_obj.get_name()
+
+        try:
+            # #######################################################################################
+            # ########## MemorySlotValueRetrievalOperation ##########################################
+            slot_value = self.ic.MemoryManager.get_slot_value(self.target_uri)
+
+            return True, slot_value
+
+        except Exception as e:
+            # #########################################################################
+            # ###### PreHistory Filling Process #####################################
+            if hasattr(slot_spec_obj, 'prehistory_recept'):
+                print("Retrieving slot value from PreHistory")
+                # asserting it is callable method!
+
+                is_recepted, results = slot_spec_obj.prehistory_recept(self.ic.userdialog)
+                if is_recepted:
+                    print("Recepted Slot from Prehistory!")
+                    print(results)
+                    # if self.target_uri:
+                    # write the memory
+                    self.ic.MemoryManager.put_slot_value(self.target_uri, results)
+
+                    return True, results
+
+                else:
+                    print("Can NOT RECEPT Slot from Prehistory!")
+            # no prehistory value, so we need to check default value:
+            # #########################################################################
+            # ###### Default Value Filling Process #####################################
+            if hasattr(slot_spec_obj, 'silent_value') and slot_spec_obj.silent_value:
+                # we have default value then we don't need to specify it in ActiveQuestioning
+                print("Retrieving slot value from DefaultValue")
+                # if self.target_uri:
+                # write the memory
+                self.ic.MemoryManager.put_slot_value(self.target_uri, slot_spec_obj.silent_value)
+
+                return True, slot_spec_obj.silent_value
+
+            return False, None

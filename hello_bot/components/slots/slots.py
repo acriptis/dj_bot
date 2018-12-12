@@ -1,7 +1,13 @@
+REQUESTIONING_STRATEGY_DEFAULT = "Greed"
+
 class BaseSlotField():
     """
     Base class for SlotFields
     """
+
+    # "Greed", "RemindOn3rdFail", "Passive", "ReAskIfNoControls"
+    # requestioning_strategy = "Passive"
+    requestioning_strategy = REQUESTIONING_STRATEGY_DEFAULT
 
     def asker_fn(self):
         return self.questioner
@@ -12,19 +18,40 @@ class BaseSlotField():
         else:
             return self.__class__.__name__
 
+    # def prehistory_recept(self, *args, **kwargs):
+    #     """
+    #     Method for retrieveing slot values that were provided by User initiative (without active questioning process)
+    #
+    #     In this case we may use the same methods of extraction as for recept, although in general case
+    #     Prehistory Analysis differs from ExplicitQuestioningAnswer Anslysis
+    #
+    #     :return: tuple (is_recepted, results_data) or (False, None) for absense of relevant information in prehistory
+    #     """
+    #     # raise Exception("Implement me in child (Receptor) class")
+    #     print("Not implemented prehistory recept, returning dummy result")
+    #     return False, None
+
 
 class DictionaryBasedSlotField(BaseSlotField):
     """
 
-        Dictioanry based slot uses CANONIC_NAMES as domin of values
-        each Canonic value may be complemented with synsets (all lexical representations of the
-        slot in the UserMessage)
+        Dictionary based slot uses CANONIC_NAMES list as domain of distinct value classes.
+
+        Each Canonic Name (name of the SlotValueClass) should be supported with Synsets (all possible lexical
+        representations of the values in the UserMessage for matching the ValueClass).
+
+        TODO we may need to introduce additional layer of abstraction with normalized synonyms (words in normal form)
+        So the alogithm during pattern matching phase will match normal form in Specification with SurfaceForm of Word
+        (in particular tense, modality, number etc). Currently we allow only strict match
+
 
         Slot with target_uri specification
     """
     def __init__(self, name, domain_of_values_synsets=None, receptor_spec=None, target_uri=None,
                  silent_value=None, confirm_silent_value=False, questioner=None,
-                 slot_process_specification_class=None, prehistory_extractor_fn=None):
+                 slot_process_specification_class=None,
+                 # prehistory_extractor_spec=None,
+                 requestioning_strategy=REQUESTIONING_STRATEGY_DEFAULT):
         """
         A factory method for dictionary based slots
 
@@ -38,10 +65,15 @@ class DictionaryBasedSlotField(BaseSlotField):
         :param domain_of_values_synsets: for dictionary based slots we need to specify domain of values and their synonyms
         :param slot_process_specification_class: SlotProcess specifies ReAskingStrategy, PreHistory analysis
             default is SlotProcess
-        :param prehistory_extractor_fn: method which may be called before explicit question is asked
+        :param prehistory_extractor_spec: class which may be called before explicit question is asked
             (for filling slot value from dialog prehistory, when user initiates slot filling without questioning,
             this method may implement different algorithm in comparison to ActiveQuestioningProcess Receptor)
+        :param requestioning_strategy: may be Greed, Passive, RemindOn3rdFail
         :return: UsableSlot
+
+        # TODO WARNING if you patch this class with complex prehistory receptors (which depends on other methods)
+        you need to import other methods as weel as method prehistory_recept, recept, can_recept.
+
         """
 
         self.name = name
@@ -55,14 +87,17 @@ class DictionaryBasedSlotField(BaseSlotField):
         # receptor spec must provide methods recept(text, *, **) and can_recept(text, *, **)
         self.receptor_spec = receptor_spec
 
+        # for providing prehistory_recept(userdialog) method
+        # self.prehistory_extractor_spec = prehistory_extractor_spec
+
+        self.requestioning_strategy = requestioning_strategy
 
         # # TODO in future:
         from interactions.models import UserSlotProcess
         if slot_process_specification_class != UserSlotProcess:
             raise Exception("Not implemented functionality (UserSlotProcess as slot_process_specification_class is supported only now!)")
 
-        if prehistory_extractor_fn:
-            raise Exception("Not implemented functionality (prehistory_extractor_fn)")
+            # raise Exception("Not implemented functionality (prehistory_extractor_fn)")
 
         self.flat_norm = ReceptorFactory.synsets_to_flat_norm_index(self.domain_of_values_synsets)
 
@@ -72,17 +107,30 @@ class DictionaryBasedSlotField(BaseSlotField):
     def recept(self, text, *args, **kwargs):
         return self.receptor_spec.recept(self, text, *args, **kwargs)
 
+    # def prehistory_recept(self, userdialog):
+    #     # import ipdb; ipdb.set_trace()
+    #     if self.prehistory_extractor_spec:
+    #         try:
+    #             return self.prehistory_extractor_spec.prehistory_recept(self, userdialog)
+    #         except Exception as e:
+    #             import ipdb; ipdb.set_trace()
+    #             print(e)
+    #
+    #     else:
+    #         return False, None
 
 # Receptors Base Classes:
 class DictionarySlotReceptorMixin():
     """
-    Class is MixIn that helps dictionary-based slots handle answers (in natural language)
+    MixIn Class that helps dictionary-based slots to recept UserMessages (in natural language)
+    Currently only case insensitive matching supported!
     """
     # children must specify domain of distinctive slot values classes
     CANONIC_DOMAIN = []
     #
     # # children must define flat norm (Dictionary that provides <surface token> to <canonic form> index
     # flat_norm = {}
+
     # # TODO add support of MultiCase, Stemming support etc
     # # def __init__(self, canonic_domain):
 
@@ -105,7 +153,7 @@ class DictionarySlotReceptorMixin():
         # TODO partial reception of the message!
         """
         for each_cur in self.flat_norm.keys():
-            if each_cur in text:
+            if each_cur.lower() in text.lower():
                 return True
 
         else:
@@ -121,7 +169,7 @@ class DictionarySlotReceptorMixin():
         """
         results = []
         for each_cur in self.flat_norm.keys():
-            if each_cur in text:
+            if each_cur.lower() in text.lower():
                 results.append(self.flat_norm[each_cur])
 
         if results:
@@ -129,6 +177,32 @@ class DictionarySlotReceptorMixin():
             print("DictionarySlotReceptorMixin.recept: %s grasped results: %s" % (self, results))
             # TODO make productions signals?
         return results
+
+    def prehistory_recept(self, userdialog):
+        """
+        Method launched after interaction triggering to consume User's directive about time without explicit question
+
+        In this case we may use the same methods of extraction, although in general case
+        Prehistory Analysis differs from ExplicitQuestioningAnswer Anslysis
+
+        Returns only the most recent match!
+
+        :return: tuple (is_recepted, results)
+        """
+        # get text of prehistory
+        # grasp datetimes mentioned before, the most recent datetimes are more confident estimations
+        # print("21222222222222222222222222222222222222222222222222222222")
+        # import ipdb; ipdb.set_trace()
+
+        usermessages = userdialog.list_user_messages()
+        # search for the recent slot setting (from recent messages to oldest):
+        for each_msg in reversed(usermessages):
+            can_rec = self.can_recept(each_msg)
+            if can_rec:
+                results = self.recept(each_msg)
+                return can_rec, results
+
+        return False, None
 
 
 class YesNoSlotReceptorMixin(DictionarySlotReceptorMixin):
@@ -148,18 +222,20 @@ class YesNoSlotReceptorMixin(DictionarySlotReceptorMixin):
     # capitals for case insensitive pattern search
     synsets = {
         ANSWER_YES: [
-            "ДА", "Yes", "Sim"
+            "ДА", "Yes", "Sim", "да", "Да", "Конечно", "Наверное", "Вероятно", "Ок",
+
         ],
         ANSWER_NO: [
-            "НЕТ", "НЕ",
+            "НЕТ", "НЕ", "нет", "Нет", "не", "Вряд ли","Едва ли", "Сомневаюсь","Ни за что"
+
         ],
     }
 
-    # index object for translating synonyms into normalized categories:
-    flat_norm = {}
-    for canonic_name, synset in synsets.items():
-        for each_syn in synset:
-            flat_norm[each_syn] = canonic_name
+    def prehistory_recept(self, userdialog):
+        """Disable prehistory recepting for default Yes/No, otherwise we may catch irrelevant Yes/No answers"""
+        # import ipdb; ipdb.set_trace()
+
+        return False, None
 
 ################################################################################################
 
@@ -213,25 +289,3 @@ class ReceptorFactory():
                 flat_norm[each_syn] = canonic_name
 
         return flat_norm
-
-#
-# loc_receptor = ReceptorFactory.make_dictionary_based_receptor(
-#     domain_of_values_synsets=1,
-#     receptor_template_class=DictionarySlotReceptorMixin
-#     )
-# loc_slot = make_slot(
-#     name='LocationSlot',
-#     # or maybe silent function which retrieves slot value from user profile or remote function?
-#     silent_value="Москва",
-#     questioner="В каком городе?",
-#     receptor_spec=loc_receptor
-#
-# )
-#
-# class CityLocationSlot(BaseSlotField):
-#     questioner = "В каком городе?"
-#
-#
-#
-# class DateSlot():
-#     pass

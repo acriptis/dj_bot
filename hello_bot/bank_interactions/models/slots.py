@@ -1,3 +1,4 @@
+from components.slots.city_slot import CitySlot
 from components.slots.slots import BaseSlotField, DictionarySlotReceptorMixin, YesNoSlotReceptorMixin
 
 
@@ -95,27 +96,10 @@ class ClientIsResidentRFSlot(BaseSlotField, YesNoSlotReceptorMixin):
     questioner = "Вы резидент РФ?"
 
 
-class ClientServiceRegionSlot(BaseSlotField, DictionarySlotReceptorMixin):
+class ClientServiceRegionSlot(CitySlot):
     name = 'ClientServiceRegionSlot'
 
     questioner = "В каком регионе обитаете?"
-
-    ######################################################
-    # Slot's Values Domain Specification
-    MSK = "Moscow"
-    BOBRU = "Bobruisk"
-    CANONIC_DOMAIN = [MSK, BOBRU]
-
-    # synonyms set:
-    synsets = {
-        MSK: [
-            "МОСКВА", "МСК"
-        ],
-        BOBRU: [
-            "БОБРУЙСК", "БОБРУИСК"
-        ]
-
-    }
 
 
 class ClientPropertyTypeSlot(BaseSlotField, DictionarySlotReceptorMixin):

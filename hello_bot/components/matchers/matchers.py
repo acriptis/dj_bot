@@ -28,7 +28,7 @@ class AbstractTextMatcher():
 
 
 class TrainigPhrasesMatcher(AbstractTextMatcher):
-    def __init__(self, training_phrases, daemon_if_matched=None):
+    def __init__(self, training_phrases, daemon_if_matched=None, case_sensitive=False):
         """
 
         :param training_phrases:
@@ -40,13 +40,18 @@ class TrainigPhrasesMatcher(AbstractTextMatcher):
         else:
             self.daemon_if_matched_fn = None
 
+        self.case_sensitive = case_sensitive
+
     def check_match(self, text, *args, **kwargs):
         """
         Given a text (utterance) it checks if utterance matches the pattern (training phrases)
         :param text:
         :return: True if matches, False otherwise
         """
-        result = any([str_pattern in text for str_pattern in self.training_phrases])
+        if self.case_sensitive:
+            result = any([str_pattern in text for str_pattern in self.training_phrases])
+        else:
+            result = any([str_pattern.lower() in text.lower() for str_pattern in self.training_phrases])
         assert result is True or result is False
         # call the daemon
         if result is True:

@@ -40,8 +40,23 @@ class MemoryManager():
 
         :param slot_name_or_uri: URI?
         :param value:
-        :return:
+        :return: dict of slot values
         """
         self.memory[slot_name_or_uri] = value
         # print("MemoryManager: Implement Me")
         return self.memory[slot_name_or_uri]
+
+    def get_slots(self, slot_names_filter=None):
+        """
+        Just retrieves all filled slots
+        :param slot_names_filter:
+        :return:
+        """
+        if slot_names_filter:
+            # show only particular slots
+            #TODO
+            raise Exception("Not implemented!")
+        else:
+            slot_names_filter = self.memory.keys()
+
+        return self.memory

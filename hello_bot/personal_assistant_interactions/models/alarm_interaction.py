@@ -67,13 +67,11 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         # self.ic.remind_retrospect_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
 
 
-        self.ic.remind_retrospect_or_retrieve_slot(self.alarm_timestamp_at_slot.name, target_uri=self.alarm_timestamp_at_slot.name,
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(self.alarm_timestamp_at_slot.name, target_uri=self.alarm_timestamp_at_slot.name,
                                         callback=self.when_alarm_time_ready)
         pass
 
     def when_alarm_time_ready(self, *args, **kwargs):
-        # import ipdb; ipdb.set_trace()
-        # print("KEKEKEKEK")
         at_datetime = kwargs['results']['value']
         self._set_alarm(at_datetime)
 

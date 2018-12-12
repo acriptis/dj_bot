@@ -25,7 +25,7 @@ class GreetingInteraction(Interaction):
         # this Interaction may be activated by Receptor
         # TODO templatize
         self.global_trigger_receptor = TrainigPhrasesMatcher(
-            training_phrases=["Привет", "Здравствуйте", "Hello", "Kek", "Hi"],
+            training_phrases=["Привет", "Здравствуйте", "Hello", "Kek", "Hi", "Приветик"],
             daemon_if_matched=self.start)
 
         # here we connect the interaction's Global Receptors with InformationController's UserMessageEvent
