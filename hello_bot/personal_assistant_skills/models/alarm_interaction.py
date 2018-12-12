@@ -2,7 +2,7 @@
 from components.matchers.matchers import TrainigPhrasesMatcher
 from interactions.models import Interaction, AbstractInteraction
 
-from personal_assistant_interactions.models.slot_alarm_datetime import AlarmDateTimeSlot
+from personal_assistant_skills.models.slot_alarm_datetime import AlarmDateTimeSlot
 
 
 class AlarmSetterInteraction(Interaction, AbstractInteraction):

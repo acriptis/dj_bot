@@ -37,11 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'polls',
     'interactions.apps.InteractionsConfig',
     'bank_interactions.apps.BankInteractionsConfig',
-    'personal_assistant_interactions.apps.PersonalAssistantInteractionsConfig',
+    'personal_assistant_skills.apps.PersonalAssistantSkillsConfig',
     'root_skill.apps.RootSkillConfig',
 ]
 

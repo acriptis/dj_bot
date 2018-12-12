@@ -11,7 +11,7 @@ from bank_interactions.models import DocumentsListSupplyInteraction, IntentRetri
     OfficeRecommendationInteraction, DialogTerminationInteraction, OperatorSwitchInteraction
 from bank_interactions.models.greeting import GreetingInteraction
 from bank_interactions.models.interactions import DesiredCurrencyInteraction
-from personal_assistant_interactions.models import WeatherForecastInteraction, AlarmSetterInteraction
+from personal_assistant_skills.models import WeatherForecastInteraction, AlarmSetterInteraction
 
 
 class Scenario():
@@ -211,19 +211,3 @@ class BankConsulterSkill(AbstractSkill):
         self.ic = ic
         # set up scenario of dialog:
         self.ic.scenario = Scenario(self.ic)
-
-
-class WeatherSkill(AbstractSkill):
-    """
-    Skill for managing Interactions about weather forecast
-    """
-
-    def __init__(self, ic):
-        self.ic = ic
-        self.weather_int = self.ic.im.get_or_create_instance_by_class(WeatherForecastInteraction)
-
-
-class AlarmSkill(AbstractSkill):
-    def __init__(self, ic):
-        self.ic = ic
-        self.alarm_setter_int = self.ic.im.get_or_create_instance_by_class(AlarmSetterInteraction)

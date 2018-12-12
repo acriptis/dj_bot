@@ -2,7 +2,7 @@ from bank_interactions.models import IntentRetrievalInteraction, DesiredCurrency
     DocumentsListSupplyInteraction, PrivateInfoFormInteraction, BusinessOfferingInteraction, GreetingInteraction, \
     ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, OfficeRecommendationInteraction, \
     DialogTerminationInteraction, OperatorSwitchInteraction
-from personal_assistant_interactions.models import WeatherForecastInteraction, AlarmSetterInteraction
+from personal_assistant_skills.models import WeatherForecastInteraction, AlarmSetterInteraction
 from root_skill.models import ShowMemoryInteraction, ShowAgendaInteraction
 
 

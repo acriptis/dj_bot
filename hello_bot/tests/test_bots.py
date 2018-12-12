@@ -11,7 +11,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 # #####################################################
 import django
 django.setup()
-from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer, WeatherSkill, AlarmSkill
+from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer
+from personal_assistant_skills.weather_skill import WeatherSkill
+from personal_assistant_skills.alarm_setter_skill import AlarmSkill
 from scripts.bank_consulter import conjugate_agent_with_autouser
 
 
@@ -29,7 +31,6 @@ class BankScenarioBotTest(unittest.TestCase):
         # check non ruble currencies trigger non rub specific text:
         self.assertIn("Текст 2.1", userdialog[8])
         self.assertIn("Вавилова, 19", userdialog[39])
-
 
 
 class WeatherBotTest(unittest.TestCase):

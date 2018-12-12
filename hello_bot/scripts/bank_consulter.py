@@ -11,7 +11,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 import django
 django.setup()
 
-from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer, WeatherSkill, AlarmSkill
+from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer
+from personal_assistant_skills.weather_skill import WeatherSkill
+from personal_assistant_skills.alarm_setter_skill import AlarmSkill
 
 
 def main(agent):
@@ -60,8 +62,11 @@ def main_user_emulated_replies(agent):
     user_messages_sequence = ["Приветик, Роботишка", "Привет", "ОБЩАЯ, СЕКРЕТ", "РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
                               "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "ДА", "Вероятно, ДА", "ДА!","Пока"]
 
-    # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет ЗАВТРА?","РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
-    #                           "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
+    user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет ЗАВТРА?","РУБЛИ и БАКСЫ", "ДА", "Оги-оги, Привет", "ДА!",
+                              "ДА", "МСК", "ИП", "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
+
+    user_messages_sequence = ["Приветик, Роботишка", "Уги", "общая, секрет", "А КАКАЯ ПОГОДА будет ЗАВТРА?", "Погода!",
+                              "ДА"]
 
     # Test Operator switch within dialog
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет ЗАВТРА?", "РУБЛИ и БАКСЫ",
@@ -77,7 +82,7 @@ def main_user_emulated_replies(agent):
     # не знает что ответить:
     # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ", "БАКСЫ, РУБЛИ", "НЕТ", "ДА"]
     # user_messages_sequence = ["Приветик, Роботишка", "КАКАЯ ПОГОДА будет В МОСКВЕ?", "МОСКВА, БОБРУЙСК", "ЗАВТРА", "ДА"]
-    user_messages_sequence = ["Приветик, Роботишка", "УСТАНОВИ БУДИЛЬНИК", "МОСКВА, БОБРУЙСК", "ЗАВТРА", "ДА"]
+    # user_messages_sequence = ["Приветик, Роботишка", "УСТАНОВИ БУДИЛЬНИК", "МОСКВА, БОБРУЙСК", "ЗАВТРА", "ДА"]
 
 
     # ####################################################################################################
@@ -99,8 +104,8 @@ if __name__=="__main__":
     # agent = AgentSkillInitializer([BankConsulterSkill])
     # agent = AgentSkillInitializer([BankConsulterSkill, WeatherSkill])
     # agent = AgentSkillInitializer([WeatherSkill])
-    agent = AgentSkillInitializer([AlarmSkill])
-
+    # agent = AgentSkillInitializer([AlarmSkill])
+    agent = AgentSkillInitializer([BankConsulterSkill, WeatherSkill, AlarmSkill])
     main_user_emulated_replies(agent)
     # main(agent)
     print("Fin.")
