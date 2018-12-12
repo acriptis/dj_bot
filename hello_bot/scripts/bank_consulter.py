@@ -12,7 +12,7 @@ import django
 django.setup()
 
 from components.agent import AgentSkillInitializer
-from bank_consulter_skill.bank_consult_skill import BankConsulterSkill
+from bank_consulter_skill.bank_consulter_skill import BankConsulterSkill
 from personal_assistant_skills.weather_skill import WeatherSkill
 from personal_assistant_skills.alarm_setter_skill import AlarmSkill
 

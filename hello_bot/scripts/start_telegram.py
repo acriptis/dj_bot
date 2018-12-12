@@ -16,7 +16,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 import django
 django.setup()
 
-from bank_consulter_skill.bank_consult_skill import BankConsulterSkill
+from bank_consulter_skill.bank_consulter_skill import BankConsulterSkill
 from components.agent import AgentSkillInitializer
 from root_skill.root_skill import RootSkill
 from personal_assistant_skills.weather_skill import WeatherSkill
