@@ -1,1 +1,1 @@
-Here we put modules that are shared between multiple skills
+Here we put components that are shared between multiple skills
