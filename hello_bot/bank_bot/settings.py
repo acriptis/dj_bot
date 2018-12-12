@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'interactions.apps.InteractionsConfig',
     'bank_consulter_skill.apps.BankConsulterSkillConfig',
     'personal_assistant_skills.apps.PersonalAssistantSkillsConfig',
@@ -53,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'hello_bot.urls'
+ROOT_URLCONF = 'bank_bot.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'hello_bot.wsgi.application'
+WSGI_APPLICATION = 'bank_bot.wsgi.application'
 
 
 # Database

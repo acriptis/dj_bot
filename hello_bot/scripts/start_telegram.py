@@ -3,6 +3,9 @@ from telegram.ext import CommandHandler, MessageHandler, Filters
 ################# Universal Import ###################################################
 import sys
 import os
+
+
+
 SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SELF_DIR)
 PREROOT_DIR = os.path.dirname(ROOT_DIR)
@@ -13,8 +16,12 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bank_bot.settings")
 import django
 django.setup()
 
-from components.skills.bank_consult_skill import BankConsulterSkill, AgentSkillInitializer, WeatherSkill, AlarmSkill
+from bank_consulter_skill.bank_consult_skill import BankConsulterSkill
+from components.agent import AgentSkillInitializer
 from root_skill.root_skill import RootSkill
+from personal_assistant_skills.weather_skill import WeatherSkill
+from personal_assistant_skills.alarm_setter_skill import AlarmSkill
+
 
 if __name__ == '__main__':
     """
