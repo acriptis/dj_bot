@@ -1,4 +1,4 @@
-from bank_interactions.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
+from bank_consulter_skill.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
     ClientServiceRegionSlot, ClientIsResidentRFSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot, \
     ClientOkToSelfServiceSlot, ClientIsReadyToGiveDocsSlot, ClientWantsNearestOfficeRecomendation
 from personal_assistant_skills.models import AlarmDateTimeSlot

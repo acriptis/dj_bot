@@ -6,11 +6,11 @@ import django.dispatch
 
 from interactions.models.user_slot_process import UserSlotProcess
 
-from bank_interactions.models import DocumentsListSupplyInteraction, IntentRetrievalInteraction, \
+from bank_consulter_skill.models import DocumentsListSupplyInteraction, IntentRetrievalInteraction, \
     BusinessOfferingInteraction, ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, \
     OfficeRecommendationInteraction, DialogTerminationInteraction, OperatorSwitchInteraction
-from bank_interactions.models.greeting import GreetingInteraction
-from bank_interactions.models.interactions import DesiredCurrencyInteraction
+from bank_consulter_skill.models.greeting import GreetingInteraction
+from bank_consulter_skill.models.interactions import DesiredCurrencyInteraction
 from personal_assistant_skills.models import WeatherForecastInteraction, AlarmSetterInteraction
 
 

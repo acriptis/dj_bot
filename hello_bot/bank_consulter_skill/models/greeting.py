@@ -4,7 +4,7 @@ from django.db import models
 from components.matchers.matchers import TrainigPhrasesMatcher
 from interactions.models import Interaction, AbstractInteraction, SendTextOperation, UserInteraction
 
-from bank_interactions.models.slots import DesiredCurrencySlot
+from bank_consulter_skill.models.slots import DesiredCurrencySlot
 
 
 class GreetingInteraction(Interaction):

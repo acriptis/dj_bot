@@ -1,4 +1,4 @@
-from bank_interactions.models import IntentRetrievalInteraction, DesiredCurrencyInteraction, \
+from bank_consulter_skill.models import IntentRetrievalInteraction, DesiredCurrencyInteraction, \
     DocumentsListSupplyInteraction, PrivateInfoFormInteraction, BusinessOfferingInteraction, GreetingInteraction, \
     ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, OfficeRecommendationInteraction, \
     DialogTerminationInteraction, OperatorSwitchInteraction
