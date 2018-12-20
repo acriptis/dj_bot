@@ -1,5 +1,4 @@
 from django.db import models
-# from hello_bot.hello_bot.settings import SYSTEM_USER_NAME
 from bank_bot.settings import SYSTEM_USER_NAME
 
 
@@ -33,8 +32,11 @@ class UserDialog(models.Model):
 
     def print_dialog(self):
         zipped_messages = list(zip(self.dialog_speakers, self.dialog_acts))
+        counter = 0
         for each_author, each_message in zipped_messages:
-            print("%10s: %s" % (each_author, each_message ))
+
+            print("%d. %10s: %s" % (counter, each_author, each_message ))
+            counter+=1
 
     def send_message_to_user(self, message):
         """
