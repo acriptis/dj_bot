@@ -1,4 +1,4 @@
-from interactions.models import UserSlotProcess, UserInteraction, UserSlot
+from interactions.models import UserInteraction
 
 
 class BaseTask():
@@ -82,6 +82,9 @@ class Agenda():
 
         self.interactions_in_queue = {}
 
+        # list of urgent tasks, they must be started before reaskings:
+        self.urgent_slot_tasks = []
+
     def find_task_by_interaction(self, interaction_obj):
         """
         returns first match
@@ -95,8 +98,7 @@ class Agenda():
 
     def find_the_highest_priority(self):
         """
-
-        :return: Interaction with the highest priority
+        :return: Task with the highest priority
         """
         max_priority_value = 0
         max_priority_task = None
@@ -131,14 +133,38 @@ class Agenda():
             return None
 
     def push_interaction_task_by_attrs(self, interaction_obj, priority, callback_fn):
-        itask = InteractionTask(interaction_obj, priority, callback_fn)
+        priority_numerical = self._priority_normalizer(priority)
+        itask = InteractionTask(interaction_obj, priority_numerical, callback_fn)
         self.queue_of_tasks.append(itask)
         return itask
 
     def push_slot_task_by_attrs(self, slot_obj, priority, callback_fn, **kwargs):
-        s_task = SlotTask(slot_obj, priority, callback_fn)
-        self.queue_of_tasks.append(s_task)
+
+        priority_numerical = self._priority_normalizer(priority)
+        s_task = SlotTask(slot_obj, priority_numerical, callback_fn)
+        if priority == "URGENT":
+            self.urgent_slot_tasks.append(s_task)
+            self.queue_of_tasks.append(s_task)
+        else:
+            # normal queue
+            self.queue_of_tasks.append(s_task)
         return s_task
+
+    def _priority_normalizer(self, priority_obj):
+        """Priority may be numerical or URGENT
+        in case of Urgent we must set numerical priority higher than current max
+        """
+        if priority_obj == "URGENT":
+            max_priority_task = self.find_the_highest_priority()
+            # just increase it
+            if max_priority_task:
+                final_priority = max_priority_task.priority + 1
+            else:
+                # TODO remove hardcode
+                final_priority = 1
+        else:
+            final_priority = priority_obj
+        return final_priority
 
 
 class DialogPlanner():
@@ -153,21 +179,21 @@ class DialogPlanner():
         # list of tasks to be done in dialog
         self.agenda = Agenda()
 
-        # here we put Interactions to be done in future
-        # self.queue = []
-
-        # # queue is a list of tuples (Interaction, priority)
-        # # separate queue for slots
-        # self.slots_queue = []
-        # # slots queue is higher priority than Interactions queue?
-
-        # here we put decisions which are processed or started processing
-        self.done_or_doing = []
-
         # slots asked to user but not percepted (waiting answer):
         # questions under discussion stack (the newest are on top):
         self.questions_under_discussion = []
         # we restrict the system to have only one pending-asked question (to reduce ambiguity in recepted answers)
+
+        # question (slot instance) asked to the user on current system step, nullifies after each user's response
+        # helps to avoid double questioning
+        self.current_step_active_question = None
+
+        # # the list of Processes which *want* to resume when Active Topic will be completed
+        # # This is the list of processes that was ignored by User-counter-question-or-intent command
+        # self.processes_waiting_to_resume = []
+
+        ############################################
+        # TODO Agenda loop DOCumentation
 
         # dictionary for callback functions which must be called after particular interactions completed
         self.callbacks_on_completion_of_interactions = {}
@@ -473,7 +499,6 @@ class DialogPlanner():
             print("Im not in Agenda???? Why???")
 
         else:
-            self.done_or_doing.append(task.interaction_obj)
             print("Moved completed interaction %s from queue into done_list" % task.interaction_obj)
         print("DialogPlanner.COMPLETED INTERACTION: %s/%s" % (interaction_obj, exit_gate))
 
@@ -485,16 +510,10 @@ class DialogPlanner():
         :param callback_fn:
         :return:
         """
-        self.done_or_doing.append(interaction_obj)
-
-        # make abstraction of all process types (Slots and Interactions)
-        # TODO add support of Slot Processes ?
         # ASIS instant launching of interaction:
         # TODO: clarify best practice of how to initilize interactions
         #   when should we initialize it from class spec?
         #   when should we retrieve prepared instance from registry
-        # interaction_obj = next_element.initialize(self.ic)
-
         print("Next Task is interaction_obj: %s" % interaction_obj)
 
         ui, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
@@ -512,13 +531,27 @@ class DialogPlanner():
         1. There is exist a question on discussion
         2. There is no more tasks in Agenda
 
-        :return: None
+        :return: None when all tasks for current step are done
         """
+        if self.current_step_active_question:
+            # we asked something at this step. Don't overload the User, wait his response
+            return
+
+        if self.agenda.urgent_slot_tasks:
+            # ask them first
+            urgent_task_slot = self.agenda.urgent_slot_tasks.pop(0)
+            self.agenda.queue_of_tasks.remove(urgent_task_slot)
+            self._launch_task(urgent_task_slot)
+            return
 
         if len(self.questions_under_discussion)>0:
-            # should we check when there is a question on discussion but passive strategy avoids reasking?
-            # we may drown in silent loop
+            # we have no active_question at current step, but have questions_under_discussion (Ignored Slots)
+            #   re-ask a question in ReAsk queue
+            slot_to_ask = self.questions_under_discussion[0]
+            user_slot = self.ic.uspm.find_user_slot_process(slot_to_ask)
+            user_slot.reasking_process()
             return
+
         if len(self.agenda.queue_of_tasks) == 0:
             return
         else:

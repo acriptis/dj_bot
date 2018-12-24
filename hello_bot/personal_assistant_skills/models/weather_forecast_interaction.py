@@ -65,76 +65,19 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         :return:
         """
         # ##########################################################################################################
-        # construct LocationSlot
-        from components.slots.slots import DictionarySlotReceptorMixin
-        from interactions.models import UserSlotProcess
-        from components.slots.slots import DictionaryBasedSlotField
-        # self.location_slot_instance = DictionaryBasedSlotField(
-        #     # reference name for registry
-        #     name="DynamicLocationSlot",
-        #
-        #     # for dictionary based slots we need to specify domain of values and their synonyms:
-        #     domain_of_values_synsets={
-        #         "moscow": ["МОСКВА", "МСК", "ДЕФОЛТ-СИТИ", "МОСКВЕ"],
-        #         "bobruisk": ["БОБРУЙСК", "БОБ"]
-        #     },
-        #     # UserMessageReceptor specification:
-        #     # mixin class for recepting slot
-        #     receptor_spec=DictionarySlotReceptorMixin,
-        #
-        #     # value that is used if no information was provided by user initiative (or default value)
-        #     silent_value=None,
-        #     # should slot process request confirmation from user about silent value (if user have not provided value explicitly)
-        #     confirm_silent_value=False,
-        #
-        #     # question string:
-        #     questioner="В каком городе?",
-        #
-        #     # END UserMessageReceptor specification:
-        #
-        #     # slot process specifies ReAskingStrategy, PreHistory analysis
-        #     slot_process_specification_class=UserSlotProcess
-        # )
+        # LOCATION SLOT
         self.location_slot_instance = WeatherForecastCitySlot()
-
         # first we need to register the slot by name:
         self.ic.sm.register_slot(self.location_slot_instance)
-        # import ipdb; ipdb.set_trace()
 
-        # END construct LocationSlot
-        # ##########################################################################################################
         # ##########################################################################################################
         # # DATERANGE SLOT
-        # self.date_slot_instance = DictionaryBasedSlotField(
-        #     # reference name for registry
-        #     name="DynamicDateSlot",
-        #
-        #     # for dictionary based slots we need to specify domain of values and their synonyms:
-        #     domain_of_values_synsets={
-        #         "СЕГОДНЯ": ["СЕГОДНЯ", "сегодня"],
-        #         "ЗАВТРА": ["ЗАВТРА", "завтра"]
-        #     },
-        #     # UserMessageReceptor specification:
-        #     # mixin class for recepting slot
-        #     receptor_spec=DictionarySlotReceptorMixin,
-        #     # prehistory_extractor_spec=DateTimeSlot,
-        #     # value that is used if no information was provided by user initiative (or default value)
-        #     silent_value="завтра",
-        #     # should slot process request confirmation from user about silent value (if user have not provided value explicitly)
-        #     confirm_silent_value=False,
-        #
-        #     # question string:
-        #     questioner="Когда?",
-        #
-        #     # END UserMessageReceptor specification:
-        #
-        #     # slot process specifies ReAskingStrategy, PreHistory analysis
-        #     slot_process_specification_class=UserSlotProcess
-        # )
         self.date_slot_instance = WeatherForecastDateSlot()
         self.ic.sm.register_slot(self.date_slot_instance)
 
     def start(self, *args, **kwargs):
+        # inits UserInteraction
+        super(self.__class__, self).start(*args, **kwargs)
         # if we here means we catched command to get weather forecast.
         # So we need to goalize slots of Location and Date
         # Both slots may have default values (or preloaded from user profile)
@@ -144,18 +87,11 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         # self.ic.remind_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=self.location_slot_instance.get_name(),
                                                    target_uri=self.location_slot_instance.get_name(),
-                                                   callback=self.on_some_slots_filled)
-
-        #
-        # self.ic.remind_or_retrieve_slot(self.date_slot_instance,
-        #                                 target_uri=self.date_slot_instance.name,
-        #                                 callback=self.on_some_slots_filled)
-        # import ipdb; ipdb.set_trace()
+                                                   callback=self.on_some_slots_filled, priority="URGENT")
 
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=self.date_slot_instance.get_name(),
                                                    target_uri=self.date_slot_instance.get_name(),
-                                                   callback=self.on_some_slots_filled)
-        pass
+                                                   callback=self.on_some_slots_filled, priority="URGENT")
 
     def on_some_slots_filled(self, *args, **kwargs):
         """
@@ -170,20 +106,21 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
             return
         else:
             self.weather_request()
+            self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
     def weather_request(self, *args, **kwargs):
-        # import ipdb; ipdb.set_trace()
         # TODO normalize dates
         # TODO normalize cities slot
 
         date_raw = self.ic.MemoryManager.get_slot_value_quite(self.date_slot_instance.name)
         loc_raw = self.ic.MemoryManager.get_slot_value_quite(self.location_slot_instance.name)
-        forecast_text = "I've checked weather in %s %s: Weather will be okay!" % (loc_raw[0], date_raw["value"])
+        # forecast_text = "Weather Forecast in %s %s: " % (loc_raw[0], date_raw["value"])
         # Uncomment the next code if you want to enable remote HTTP weather service:
-        # forecast_text = self._weather_service_now(loc_raw)
+        forecast_text = "Weather will be okay."
+        forecast_text = self._weather_service_now(loc_raw)
 
         if forecast_text:
-            self.ic.DialogPlanner.sendText("Weather report for %s %s:\n%s" % (loc_raw[0], date_raw["value"], forecast_text))
+            self.ic.DialogPlanner.sendText("Weather Forecast in %s %s:\n%s" % (loc_raw[0], date_raw["value"], forecast_text))
         else:
             self.ic.DialogPlanner.sendText("Something goes wrong with weather service :(")
         return

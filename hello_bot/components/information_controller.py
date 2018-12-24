@@ -6,7 +6,7 @@ from components.interactions_manager import InteractionsManager
 from components.memory_manager import MemoryManager
 from components.slots.slots_manager import SlotsManager
 from components.user_slot_processes_manager import UserSlotProcessesManager
-from interactions.models import QuestionInteractionFactory, UserDialog
+from interactions.models import UserDialog
 
 
 class InformationController():
@@ -17,15 +17,17 @@ class InformationController():
     """
 
     # TODO design structure
-    def __init__(self, user=None):
+    def __init__(self, user):
         # we need to emulate user context:
-        if user:
-            self.user = user
-        else:
-            self.user = "Греф"
+
+        self.user = user
 
         # create user dialog and push the message
-        self.userdialog = UserDialog.objects.create()
+        # if you want unique dialog for each user uncomment this:
+        # self.userdialog, _ = UserDialog.objects.get_or_create(target_user=self.user)
+
+        # if you need new dialog for every session:
+        self.userdialog = UserDialog.objects.create(target_user=self.user)
 
         # list of callables which are called at each utterance
         # self.receptors = []
@@ -33,14 +35,8 @@ class InformationController():
         # initilize receptors registry
         self.active_receptors = []
 
-        self.global_memory = {}
-
-        # list of responses from interactions:
-        self.responses_list = []
-
         # signal emmitted when user message comes:
         self.user_message_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
-        self.system_production_signal = django.dispatch.dispatcher.Signal(providing_args=["production"])
 
         # init DialogPlanner
         self.DialogPlanner = DialogPlanner(self)

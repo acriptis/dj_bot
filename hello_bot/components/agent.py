@@ -1,5 +1,5 @@
 from components.information_controller import InformationController
-
+from bank_bot.settings import DEFAULT_USER_NAME
 
 class AgentSkillInitializer():
     """
@@ -13,7 +13,10 @@ class AgentSkillInitializer():
 
         # Agent Customization:
         # TODO implement user model
-        self.user = 'Иван Павлов'
+        # interlocutor
+        from interactions.models.userdialog import DPUserProfile
+
+        self.user = DPUserProfile.get_or_create_userprofile(DEFAULT_USER_NAME)
 
         # create information controller
         self.ic = InformationController(user=self.user)
@@ -38,6 +41,9 @@ class AgentSkillInitializer():
         # push user's utterance into userdialog container
         utterance = utterance.strip()
         self.ic.userdialog._push_dialog_act(self.user, utterance)
+
+        # drop active question (asked by system) because new User message came:
+        self.ic.DialogPlanner.current_step_active_question = None
         ############################################################################
 
         # now we have dialog and utterance preloaded

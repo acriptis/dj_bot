@@ -1,5 +1,7 @@
 from django.db import models
 import django.dispatch
+
+from interactions.models import DPUserProfile
 from .user_slot import UserSlot
 
 
@@ -30,7 +32,8 @@ class UserSlotProcess(models.Model):
 
     # ###################################################################################################
     # ######## ORM Attrs ################################################################################
-    user = models.CharField(max_length=200)
+    # user = models.CharField(max_length=200)
+    user = models.ForeignKey(DPUserProfile, on_delete=models.CASCADE)
 
     # we define slots as dynamic classes, so we put class name and then route it into dynamic object:
     slot_codename = models.CharField(max_length=200)
@@ -91,20 +94,32 @@ class UserSlotProcess(models.Model):
         # #################################################################################
         # ########## START ACTIVE QUESTIONING PHASE #######################################
         self.ic.userdialog.send_message_to_user(self.slot.asker_fn())
-        # now we should put the question under questions on dicsussion
-        if len(self.ic.DialogPlanner.questions_under_discussion)>0:
-            # second slot!
+
+        # tiny check that we don't ask two questions in one step
+        if self.ic.DialogPlanner.current_step_active_question:
+            # second slot at current step
             # Exceptional case adding the second slot. Is it context switch?
             print(self.ic.DialogPlanner.questions_under_discussion)
             import ipdb; ipdb.set_trace()
 
+        # now we should put the question under questions on dicsussio
         self.ic.DialogPlanner.questions_under_discussion.insert(0, self.slot)
+        self.ic.DialogPlanner.current_step_active_question = self.slot
 
         # connect particular Receptor to ActiveReceptors Pool
         self.ic.user_message_signal.connect(self.on_user_response)
         self.state = self.ACTIVE
         self.save()
         # #################################################################################
+
+    def reasking_process(self):
+        """
+        function called when ReAsking approved by dialog planner
+        :return:
+        """
+        self.ic.userdialog.send_message_to_user(self.slot.asker_fn())
+        self.ic.DialogPlanner.current_step_active_question = self.slot
+        # assert that usermessage connector is still connected
 
     def on_user_response(self, *args, **kwargs):
         """
@@ -128,6 +143,7 @@ class UserSlotProcess(models.Model):
             self.state = self.IGNORED
             self.save()
 
+
             # TODO refactor
             # #################################################################################
             # ########## Requestioning Strategy Exploitation ##################################
@@ -138,11 +154,12 @@ class UserSlotProcess(models.Model):
                 self.ic.userdialog.send_message_to_user(self.slot.asker_fn() + " (Greed ReAsk Strategy)")
 
                 # print("Slot Unhandled (Passive waiting Strategy)")
-            elif self.slot.requestioning_strategy == "RemindOn3rdFail":
-                if self.recept_fails_counter >= 3:
-                    print("Slot Unhandled (RemindOn3rdFail). ReAsking...")
-                    self.ic.userdialog.send_message_to_user(self.slot.asker_fn() + " (RemindOn3rdFail ReAsk Strategy)")
-
+            elif self.slot.requestioning_strategy == "ResumeOnIdle":
+                # self.ic.reaskers_queue.append(self)
+                # if self.recept_fails_counter >= 3:
+                #     print("Slot Unhandled (ResumeOnIdle). ReAsking...")
+                #     self.ic.userdialog.send_message_to_user(self.slot.asker_fn() + " (ResumeOnIdle ReAsk Strategy)")
+                pass
             elif self.slot.requestioning_strategy == "Passive":
                 # default behaviour?
                 print("Slot Unhandled (Passive Strategy)...")
@@ -176,6 +193,10 @@ class UserSlotProcess(models.Model):
         print("User response filled slot: %s!" % result)
 
     def fast_evaluation_process_attempt(self):
+        """
+        Attempt to evaluate slot without Interacting with User
+        :return:
+        """
         is_recepted, result = self._fast_evaluation_process_attempt_raw_output()
         if is_recepted and self.state != self.COMPLETED:
             # finlize userslot process (if it is not finalized yet)
@@ -244,3 +265,6 @@ class UserSlotProcess(models.Model):
                 return True, slot_spec_obj.silent_value
 
             return False, None
+
+    def __str__(self):
+        return "User: %s, slot: %s, state: %s" % (self.user, self.slot_codename, self.state)

@@ -59,6 +59,7 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
 
 
     def start(self, *args, **kwargs):
+        super(self.__class__, self).start(*args, **kwargs)
         # if we here means we catched command to get weather forecast.
         # So we need to goalize slots of Location and Date
         # Both slots may have default values (or preloaded from user profile)
@@ -72,8 +73,12 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         pass
 
     def when_alarm_time_ready(self, *args, **kwargs):
-        at_datetime = kwargs['results']['value']
+        datetime_raw = self.ic.MemoryManager.get_slot_value_quite(self.alarm_timestamp_at_slot.name)
+        at_datetime = datetime_raw['value']
         self._set_alarm(at_datetime)
+
+        # should we complete interaction  before alarm has triggered?
+        self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
     def _set_alarm(self, at_datetime, title=None):
 

@@ -142,10 +142,10 @@ class Interaction(models.Model):
         """
         # implement it in child class
         pass
-    # def class_router(self):
-    #     # given a name of interaction restores a BehaviourClass
-    #     # returns polymorphic object of concrete interaction class
-    #     pass
+
+    def __str__(self):
+        return self.name
+
 
 class QuestionInteractionFactory(Interaction, AbstractInteraction):
     # TODO allow generative template (GenericField)

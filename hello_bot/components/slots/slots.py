@@ -1,11 +1,12 @@
-REQUESTIONING_STRATEGY_DEFAULT = "Greed"
+# Startegies: "Greed", "ResumeOnIdle", "Passive",
+REQUESTIONING_STRATEGY_DEFAULT = "ResumeOnIdle"
 
 class BaseSlotField():
     """
     Base class for SlotFields
     """
 
-    # "Greed", "RemindOn3rdFail", "Passive", "ReAskIfNoControls"
+    # "Greed", "ResumeOnIdle", "Passive",
     # requestioning_strategy = "Passive"
     requestioning_strategy = REQUESTIONING_STRATEGY_DEFAULT
 
@@ -17,19 +18,6 @@ class BaseSlotField():
             return self.name
         else:
             return self.__class__.__name__
-
-    # def prehistory_recept(self, *args, **kwargs):
-    #     """
-    #     Method for retrieveing slot values that were provided by User initiative (without active questioning process)
-    #
-    #     In this case we may use the same methods of extraction as for recept, although in general case
-    #     Prehistory Analysis differs from ExplicitQuestioningAnswer Anslysis
-    #
-    #     :return: tuple (is_recepted, results_data) or (False, None) for absense of relevant information in prehistory
-    #     """
-    #     # raise Exception("Implement me in child (Receptor) class")
-    #     print("Not implemented prehistory recept, returning dummy result")
-    #     return False, None
 
 
 class DictionaryBasedSlotField(BaseSlotField):
@@ -50,7 +38,6 @@ class DictionaryBasedSlotField(BaseSlotField):
     def __init__(self, name, domain_of_values_synsets=None, receptor_spec=None, target_uri=None,
                  silent_value=None, confirm_silent_value=False, questioner=None,
                  slot_process_specification_class=None,
-                 # prehistory_extractor_spec=None,
                  requestioning_strategy=REQUESTIONING_STRATEGY_DEFAULT):
         """
         A factory method for dictionary based slots
@@ -68,7 +55,7 @@ class DictionaryBasedSlotField(BaseSlotField):
         :param prehistory_extractor_spec: class which may be called before explicit question is asked
             (for filling slot value from dialog prehistory, when user initiates slot filling without questioning,
             this method may implement different algorithm in comparison to ActiveQuestioningProcess Receptor)
-        :param requestioning_strategy: may be Greed, Passive, RemindOn3rdFail
+        :param requestioning_strategy: may be Greed, Passive, ResumeOnIdle
         :return: UsableSlot
 
         # TODO WARNING if you patch this class with complex prehistory receptors (which depends on other methods)
@@ -87,17 +74,12 @@ class DictionaryBasedSlotField(BaseSlotField):
         # receptor spec must provide methods recept(text, *, **) and can_recept(text, *, **)
         self.receptor_spec = receptor_spec
 
-        # for providing prehistory_recept(userdialog) method
-        # self.prehistory_extractor_spec = prehistory_extractor_spec
-
         self.requestioning_strategy = requestioning_strategy
 
         # # TODO in future:
         from interactions.models import UserSlotProcess
         if slot_process_specification_class != UserSlotProcess:
             raise Exception("Not implemented functionality (UserSlotProcess as slot_process_specification_class is supported only now!)")
-
-            # raise Exception("Not implemented functionality (prehistory_extractor_fn)")
 
         self.flat_norm = ReceptorFactory.synsets_to_flat_norm_index(self.domain_of_values_synsets)
 
@@ -118,6 +100,7 @@ class DictionaryBasedSlotField(BaseSlotField):
     #
     #     else:
     #         return False, None
+
 
 # Receptors Base Classes:
 class DictionarySlotReceptorMixin():

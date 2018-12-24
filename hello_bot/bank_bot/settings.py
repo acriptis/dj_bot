@@ -125,5 +125,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 ###################################################################################
-# just constant of author for system responses in chats:
-SYSTEM_USER_NAME = 'sys'
+# username of automatic system responses in chats:
+DIALOG_SYSTEM_USER_NAME = 'SYS'
+
+# username which is used for default user:
+DEFAULT_USER_NAME = 'USER'
