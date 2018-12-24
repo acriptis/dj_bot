@@ -69,7 +69,7 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
 
 
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(self.alarm_timestamp_at_slot.name, target_uri=self.alarm_timestamp_at_slot.name,
-                                        callback=self.when_alarm_time_ready)
+                                        callback=self.when_alarm_time_ready, priority="URGENT")
         pass
 
     def when_alarm_time_ready(self, *args, **kwargs):

@@ -37,6 +37,70 @@ class BotContextSwitchTest(unittest.TestCase):
         self.assertIn("В каком городе?", userdialog[6])
         # self.assertIn("Вавилова, 19", userdialog[39])
 
+    def test_double_cswitch(self):
+        """
+        Test fails if Prehistory receptor of DateTimeSlot alarm recepts by prehistory the text aimed for the WeatherDateTime slot
+        :return:
+        """
+        # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет ЗАВТРА?",
+        #                           "РУБЛИ и БАКСЫ", "ДА", "ОПЕРАТОР", "ДА", "МСК", "ИП",
+        #                           "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
+        user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет ЗАВТРА?", "УСТАНОВИ БУДИЛЬНИК",
+                                  "в МСК", "на 16:00 во вторник"]
+        userdialog = conjugate_agent_with_autouser(self.agent, user_messages_sequence)
+
+        # check non ruble currencies trigger non rub specific text:
+        # import ipdb; ipdb.set_trace()
+
+        self.assertIn("В каком городе?", userdialog[6])
+        # self.assertIn("Вавилова, 19", userdialog[39])
+
+    def test_double_cswitch2(self):
+        """
+        Test double context switch, from bank skill to weather skill, then to alarm skill
+        :return:
+        """
+        # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет ЗАВТРА?",
+        #                           "РУБЛИ и БАКСЫ", "ДА", "ОПЕРАТОР", "ДА", "МСК", "ИП",
+        #                           "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
+        user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет в Москве, МСК?",
+                                  "УСТАНОВИ БУДИЛЬНИК",
+                                  "на 16:00 во вторник"]
+
+        # TODO fix a bug when dateparser splits phrase "на 16:00 во вторник" into two separate datetime objects
+        userdialog = conjugate_agent_with_autouser(self.agent, user_messages_sequence)
+
+        # check non ruble currencies trigger non rub specific text:
+        # import ipdb; ipdb.set_trace()
+
+        self.assertIn("Погода на какой день интересует вас?", userdialog[6])
+        self.assertIn("На какое время установить будильник?", userdialog[8])
+        # self.assertIn("Вавилова, 19", userdialog[39])
+
+    def test_double_cswitch3(self):
+        """
+        Test double context switch, from bank skill to weather skill, then to alarm skill
+        :return:
+        """
+        # user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет ЗАВТРА?",
+        #                           "РУБЛИ и БАКСЫ", "ДА", "ОПЕРАТОР", "ДА", "МСК", "ИП",
+        #                           "ДА, согласен с условиями пакетов", "НЕТ", "ДА", "КЕК", "Ну ладно", "ДА", "Пока"]
+        user_messages_sequence = ["Приветик, Роботишка", "ОБЩАЯ, СЕКРЕТ", "А КАКАЯ ПОГОДА будет в Москве, МСК?",
+                                  "УСТАНОВИ БУДИЛЬНИК",
+                                  "вторник в 16:00"]
+
+        # TODO fix a bug when time of alarm is also grasped by DateTime slot of WeatherForecast
+        userdialog = conjugate_agent_with_autouser(self.agent, user_messages_sequence)
+
+        # check non ruble currencies trigger non rub specific text:
+        # import ipdb; ipdb.set_trace()
+
+        self.assertIn("Погода на какой день интересует вас?", userdialog[6])
+        self.assertIn("На какое время установить будильник?", userdialog[8])
+        self.assertIn("В какой валюте?", userdialog[4])
+        self.assertIn("В какой валюте?", userdialog[12])
+        # self.assertIn("Вавилова, 19", userdialog[39])
+
 
 class BankScenarioBotTest(unittest.TestCase):
 
