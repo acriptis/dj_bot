@@ -161,8 +161,7 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         def check_rule_2_1_NONRUB(currency_code):
             if currency_code != DesiredCurrencySlot.RUB:
                 return True
-            else:
-                return False
+            return False
 
         ###################################################
         assert isinstance(desired_currency_values, list), "Unexpected datatype for desired_currency_values: %s, %s" % (desired_currency_values, type(desired_currency_values))
@@ -722,7 +721,7 @@ class DialogTerminationInteraction(Interaction, AbstractInteraction):
         self.ic.DialogPlanner.sendText("На этом завершим разговор.")
 
 
-from components.matchers.matchers import TrainigPhrasesMatcher
+from components.matchers.matchers import PhrasesMatcher
 class OperatorSwitchInteraction(Interaction, AbstractInteraction):
     class Meta:
         proxy = True
@@ -735,8 +734,8 @@ class OperatorSwitchInteraction(Interaction, AbstractInteraction):
         :return:
         """
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["ОПЕРАТОР", "Переключите меня на оператора"],
-                                                                daemon_if_matched=self.start)
+        self.global_trigger_receptor = PhrasesMatcher(phrases=["ОПЕРАТОР", "Переключите меня на оператора"],
+                                                      daemon_if_matched=self.start)
         self.ic.user_message_signal.connect(self.global_trigger_receptor)
 
 

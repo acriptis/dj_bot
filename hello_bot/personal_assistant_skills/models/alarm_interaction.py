@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from components.matchers.matchers import TrainigPhrasesMatcher
+from components.matchers.matchers import PhrasesMatcher
 from interactions.models import Interaction, AbstractInteraction
 
 from personal_assistant_skills.models.slot_alarm_datetime import AlarmDateTimeSlot
@@ -26,15 +26,15 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         :return:
         """
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["MAKE ALARM",
+        self.global_trigger_receptor = PhrasesMatcher(phrases=["MAKE ALARM",
                                                                                   "SET REMINDER",
                                                                                   "SET ALARM",
                                                                                   "НАПОМИНАЛКА",
                                                                                   "НАПОМИНАЛКУ",
-                                                                                  "УСТАНОВИ БУДИЛЬНИК",
-                                                                                  "/SetAlarm"
-                                                                                  ],
-                                                                daemon_if_matched=self.start)
+                                                                        "УСТАНОВИ БУДИЛЬНИК",
+                                                               "/SetAlarm"
+                                                               ],
+                                                      daemon_if_matched=self.start)
 
         # TODO add support of triggers:
         # установи будильник на 16 20

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from components.matchers.matchers import TrainigPhrasesMatcher
+from components.matchers.matchers import PhrasesMatcher
 from components.slots.city_slot import CitySlot
 from components.slots.datetime_slot import DateTimeSlot
 
@@ -37,27 +36,20 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         Here we connect the interaction's Global Receptors with InformationController
         :return:
         """
+        ############### Prepare RECEPTOR #################################################
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["What is the weather in *",
+        self.global_trigger_receptor = PhrasesMatcher(phrases=["What is the weather in *",
                                                                                   "Gimme weather", "Will it rain?",
                                                                                   "Give me forecast for tomorrow",
                                                                                   "ПОГОДА",
                                                                                   "КАКАЯ ПОГОДА",
-                                                                                  "\Weather"
-                                                                                  ],
-                                                                daemon_if_matched=self.start)
+                                                               "\Weather"
+                                                               ],
+                                                      daemon_if_matched=self.start)
         # connect receptor:
         self.ic.user_message_signal.connect(self.global_trigger_receptor)
 
         self._prepare_slots()
-        # register slots:
-        # register LocationSlot with default value = Moscow
-        # register DateSlot with default value = now
-        # but slot processe must use following priorities for choosing the values:
-        # 1 if nothing provided use default slot value
-        # 2 if prehistory contains slot value choose preanswered slot value
-        # 3 as explicitly the value of slot for which case?
-        # register slots:
 
     def _prepare_slots(self):
         """
@@ -67,7 +59,7 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         # ##########################################################################################################
         # LOCATION SLOT
         self.location_slot_instance = WeatherForecastCitySlot()
-        # first we need to register the slot by name:
+        # first we need to register the slot in RunTime system
         self.ic.sm.register_slot(self.location_slot_instance)
 
         # ##########################################################################################################
@@ -76,15 +68,19 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         self.ic.sm.register_slot(self.date_slot_instance)
 
     def start(self, *args, **kwargs):
-        # inits UserInteraction
-        super(self.__class__, self).start(*args, **kwargs)
+        """
         # if we here means we catched command to get weather forecast.
         # So we need to goalize slots of Location and Date
         # Both slots may have default values (or preloaded from user profile)
         # Both slots may be featured with confirmation interaction
         # Both Slots must be autofilled if user has specified the information before
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        # inits UserInteraction
+        super(self.__class__, self).start(*args, **kwargs)
 
-        # self.ic.remind_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=self.location_slot_instance.get_name(),
                                                    target_uri=self.location_slot_instance.get_name(),
                                                    callback=self.on_some_slots_filled, priority="URGENT")
@@ -105,18 +101,13 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
         if date_raw is None or loc_raw is None:
             return
         else:
-            self.weather_request()
+            self.weather_request(date_raw, loc_raw)
             self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
-    def weather_request(self, *args, **kwargs):
-        # TODO normalize dates
-        # TODO normalize cities slot
-
-        date_raw = self.ic.MemoryManager.get_slot_value_quite(self.date_slot_instance.name)
-        loc_raw = self.ic.MemoryManager.get_slot_value_quite(self.location_slot_instance.name)
+    def weather_request(self, date_raw, loc_raw):
         # forecast_text = "Weather Forecast in %s %s: " % (loc_raw[0], date_raw["value"])
         # Uncomment the next code if you want to enable remote HTTP weather service:
-        forecast_text = "Weather will be okay."
+        # forecast_text = "Weather will be okay."
         forecast_text = self._weather_service_now(loc_raw)
 
         if forecast_text:

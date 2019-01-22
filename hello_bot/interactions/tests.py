@@ -46,7 +46,7 @@ def test_slot_processing():
     ic.user_message_signal = MagicMock(return_value=3)
     ###########################################################
     # def scenario():
-    from bank_interactions.models.slots import DesiredCurrencySlot
+    from bank_consulter_skill.models.slots import DesiredCurrencySlot
     curr_slot_spec = DesiredCurrencySlot()
 
     goal = {"requires": [curr_slot_spec]}

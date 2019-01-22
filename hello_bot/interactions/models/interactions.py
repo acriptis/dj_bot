@@ -11,7 +11,13 @@ class AbstractInteraction():
 
     Signal is available after initialization...
     """
+
+    # Exit Gates Default Speicification:
     EXIT_GATE_OK = "ExitGate_Ok"
+
+    base_EXIT_GATES_NAMES_LIST = [
+        EXIT_GATE_OK
+    ]
     #
     # def __init__(self, *args, **kwargs):
     #     self.exit_gate_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
@@ -19,6 +25,10 @@ class AbstractInteraction():
     #
     # def connect_exit_gate_with_fn(self, callback_fn):
     #     self.exit_gate_signal.connect(callback_fn)
+
+    @classmethod
+    def get_name(cls):
+        return cls.__name__
 
 
 class Interaction(models.Model):
@@ -58,9 +68,6 @@ class Interaction(models.Model):
     # EXIT_GATES_SIGNALS = {}
     # signals are created at stage of Interaction class initialization
 
-    @classmethod
-    def get_name(cls):
-        return cls.__name__
 
     @classmethod
     def initialize(cls, ic, name=None, *args, **kwargs):

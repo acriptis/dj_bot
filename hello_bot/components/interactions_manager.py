@@ -3,6 +3,8 @@ from bank_consulter_skill.models import IntentRetrievalInteraction, DesiredCurre
     ConsideringSelfServiceInteraction, OnlineReservingFinalizationInteraction, OfficeRecommendationInteraction, \
     DialogTerminationInteraction, OperatorSwitchInteraction
 from personal_assistant_skills.models import WeatherForecastInteraction, AlarmSetterInteraction
+from persons_skill.persons_interaction import PersonsInteraction
+
 from root_skill.models import ShowMemoryInteraction, ShowAgendaInteraction
 
 
@@ -35,10 +37,15 @@ class InteractionsManager():
             "OfficeRecommendationInteraction": OfficeRecommendationInteraction,
             "DialogTerminationInteraction": DialogTerminationInteraction,
             "OperatorSwitchInteraction": OperatorSwitchInteraction,
+
             "WeatherForecastInteraction": WeatherForecastInteraction,
+
             "AlarmSetterInteraction": AlarmSetterInteraction,
+
             "ShowMemoryInteraction": ShowMemoryInteraction,
-            "ShowAgendaInteraction":ShowAgendaInteraction
+            "ShowAgendaInteraction": ShowAgendaInteraction,
+
+            "PersonsInteraction": PersonsInteraction
         }
 
         # interactions instances registry
