@@ -1,4 +1,4 @@
-from components.matchers.matchers import TrainigPhrasesMatcher
+from components.matchers.matchers import PhrasesMatcher
 from interactions.models import Interaction, AbstractInteraction
 import django.dispatch
 import json
@@ -23,9 +23,9 @@ class ShowMemoryInteraction(Interaction, AbstractInteraction):
         :return:
         """
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["slots", "слоты"
-                                                                                  ],
-                                                                daemon_if_matched=self.start)
+        self.global_trigger_receptor = PhrasesMatcher(phrases=["slots", "слоты"
+                                                               ],
+                                                      daemon_if_matched=self.start)
         # connect receptor:
         self.ic.user_message_signal.connect(self.global_trigger_receptor)
 
@@ -66,9 +66,9 @@ class ShowAgendaInteraction(Interaction, AbstractInteraction):
         :return:
         """
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        self.global_trigger_receptor = TrainigPhrasesMatcher(training_phrases=["agenda", "план"
-                                                                                  ],
-                                                                daemon_if_matched=self.start)
+        self.global_trigger_receptor = PhrasesMatcher(phrases=["agenda", "план"
+                                                               ],
+                                                      daemon_if_matched=self.start)
         # connect receptor:
         self.ic.user_message_signal.connect(self.global_trigger_receptor)
 

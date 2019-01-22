@@ -31,7 +31,7 @@ django.setup()
 from components.skills.base_skill import MonopolySkill, MonopolyAgentSkill
 from components.matchers.matchers import RegExpMatcher
 
-from components.matchers.matchers import TrainigPhrasesMatcher, PhraseGroupsMatcherController
+from components.matchers.matchers import PhrasesMatcher, PhraseGroupsMatcherController
 
 
 def main2():

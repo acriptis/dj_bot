@@ -21,7 +21,7 @@ sys.path.append(ROOT_DIR)
 from components.skills.base_skill import MonopolySkill
 from components.matchers.matchers import RegExpMatcher
 
-from components.matchers.matchers import TrainigPhrasesMatcher, PhraseGroupsMatcherController
+from components.matchers.matchers import PhrasesMatcher, PhraseGroupsMatcherController
 from interactions.models import UserInteraction, SendTextOperation
 
 class InformationTree():
@@ -231,8 +231,8 @@ def test_fullname_questioning():
     print(chat_log)
 
 def phrase_matcher_hand_test():
-    hi = TrainigPhrasesMatcher(training_phrases=["Hello", "Kek", "Hi"])
-    bye = TrainigPhrasesMatcher(training_phrases=["Bye", "Lol", "Exit"])
+    hi = PhrasesMatcher(phrases=["Hello", "Kek", "Hi"])
+    bye = PhrasesMatcher(phrases=["Bye", "Lol", "Exit"])
     disjoint_matchers = [hi, bye]
     pgmc = PhraseGroupsMatcherController(disjoint_matchers)
 
