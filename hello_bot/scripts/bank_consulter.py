@@ -107,6 +107,6 @@ if __name__=="__main__":
     # agent = AgentSkillInitializer([WeatherSkill])
     # agent = AgentSkillInitializer([AlarmSkill])
     agent = AgentSkillInitializer([BankConsulterSkill, WeatherSkill, AlarmSkill])
-    main_user_emulated_replies(agent)
-    # main(agent)
+    # main_user_emulated_replies(agent)
+    main(agent)
     print("Fin.")
