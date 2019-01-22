@@ -7,7 +7,7 @@ from interactions.models import Interaction, AbstractInteraction, SendTextOperat
 from bank_consulter_skill.models.slots import DesiredCurrencySlot
 
 
-class GreetingInteraction(Interaction):
+class GreetingInteraction(Interaction, AbstractInteraction):
     """
     Says hello on start of dialog
 

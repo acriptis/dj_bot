@@ -18,17 +18,13 @@ class AbstractInteraction():
     base_EXIT_GATES_NAMES_LIST = [
         EXIT_GATE_OK
     ]
-    #
-    # def __init__(self, *args, **kwargs):
-    #     self.exit_gate_signal = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
-    #     # signal sent on completion? of interaction:
-    #
-    # def connect_exit_gate_with_fn(self, callback_fn):
-    #     self.exit_gate_signal.connect(callback_fn)
 
     @classmethod
     def get_name(cls):
         return cls.__name__
+
+    def start(self, *args, **kwargs):
+        raise Exception("NotImplemented")
 
 
 class Interaction(models.Model):
