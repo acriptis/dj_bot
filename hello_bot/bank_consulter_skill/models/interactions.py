@@ -22,10 +22,9 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
     def start(self, *args, **kwargs):
         super(self.__class__, self).start(*args, **kwargs)
         # 1. retrieve OptionIntentsSlot
-        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(OptionIntentsSlot.name, callback_fn=self.on_intents_ready)
-        # self.ic.DialogPlanner.sendText("IntentRetrievalInteraction.starts")
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(OptionIntentsSlot.name, callback=self.on_intents_ready)
-
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=OptionIntentsSlot.name,
+                                                                 target_uri=OptionIntentsSlot.name,
+                                                                 callback=self.on_intents_ready)
 
         # TODO consider
         # how to handle MultiGateness:
@@ -43,10 +42,7 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
         # implemented as functional component
         # if implement as class object then it must be listening to OptionIntentsSlot slot_filled signal
         print("INTENTS READY")
-
-        # TODO wrap it into better code snippet!
-        intents_opts = kwargs['user_slot_process'].result.value
-        intents_opts = self.ic.MemoryManager.put_slot_value(OptionIntentsSlot.name, intents_opts)
+        intents_opts = self.ic.MemoryManager.get_slot_value(OptionIntentsSlot.name)
 
         def check_rule_1_1_INTENTER(intents_opts):
 
@@ -132,11 +128,11 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         print("DesiredCurrencyInteraction.start(")
         super(self.__class__, self).start(*args, **kwargs)
         # 1. retrieve CurrencySlot
-        # check if it is not retrieved yet?
-
         # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(DesiredCurrencySlot.name, callback_fn=self.on_desired_currency_ready)
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(DesiredCurrencySlot.name, callback=self.on_desired_currency_ready)
-
+        # self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(DesiredCurrencySlot.name, callback=self.on_desired_currency_ready)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=DesiredCurrencySlot.name,
+                                                                 target_uri=DesiredCurrencySlot.name,
+                                                                 callback=self.on_desired_currency_ready)
     def on_desired_currency_ready(self, *args, **kwargs):
         """
         event handler which
@@ -145,9 +141,10 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         before completing the state of the interaction
         """
         print("DesiredCurrencyInteraction.on_desired_currency_ready(")
-        desired_currency_values = kwargs['user_slot_process'].result.value
-        desired_currency_values = self.ic.MemoryManager.put_slot_value(DesiredCurrencySlot.name,
-                                                                       desired_currency_values)
+        # desired_currency_values = kwargs['user_slot_process'].result.value
+        # desired_currency_values = self.ic.MemoryManager.put_slot_value(DesiredCurrencySlot.name,
+        #                                                                desired_currency_values)
+        desired_currency_values = self.ic.MemoryManager.get_slot_value(DesiredCurrencySlot.name)
 
         ######################### Busines Rule BR2.1 Block ##########################################
         # implemented as functional component
@@ -228,11 +225,9 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         print("Ready to go: DocumentsListSupplyInteraction.start")
         super(self.__class__, self).start(*args, **kwargs)
         self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
-        # 1. retrieve CurrencySlot
-        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(NeedListDocsAndTarifsSlot.name,
-        #                                                                     callback_fn=self.on_response_3_Q1_ready)
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(NeedListDocsAndTarifsSlot.name,
-                                                                 callback=self.on_response_3_Q1_ready)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=NeedListDocsAndTarifsSlot.name,
+                                                   target_uri=NeedListDocsAndTarifsSlot.name,
+                                                   callback=self.on_response_3_Q1_ready)
 
     def on_response_3_Q1_ready(self, *args, **kwargs):
         """
@@ -242,9 +237,7 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         :param kwargs:
         :return:
         """
-        needs_tarifs_and_docs = kwargs['user_slot_process'].result.value
-        needs_tarifs_and_docs = self.ic.MemoryManager.put_slot_value(NeedListDocsAndTarifsSlot.name,
-                                                                     needs_tarifs_and_docs)
+        needs_tarifs_and_docs = self.ic.MemoryManager.get_slot_value(NeedListDocsAndTarifsSlot.name)
         print(needs_tarifs_and_docs)
         print("on_response_3_Q1_ready method")
         if NeedListDocsAndTarifsSlot.ANSWER_YES in needs_tarifs_and_docs:
@@ -305,58 +298,35 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
         self.usp = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
         # TODO improve form filling process by abstraction of factory
         # start Slot filling process
-
-
-        # TODO UNDERSTAND WHY DEBUGGER FIXES MISSED SLOT CALL
-        # seems to be Garbage Collection related issue, But I don't know why
-        # import ipdb; ipdb.set_trace()
-
-        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientIsResidentRFSlot.name,
-        #                                                                     callback_fn=self.client_IsResidentRFSlot_is_filled)
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientIsResidentRFSlot.name,
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=ClientIsResidentRFSlot.name,
+                                                                 target_uri=ClientIsResidentRFSlot.name,
                                                                  callback=self.client_IsResidentRFSlot_is_filled)
 
     def client_IsResidentRFSlot_is_filled(self, *args, **kwargs):
-
-        # TODO improve mechanism of writing slot values?
-        # To enable feature to specify target URI in MemoryManager
-        # import ipdb; ipdb.set_trace()
-        # post-filled-actions:
-        clientisresidentrfslot_value = kwargs['user_slot_process'].result.value
-        clientisresidentrfslot_value = self.ic.MemoryManager.put_slot_value(ClientIsResidentRFSlot.name,
-                                                                            clientisresidentrfslot_value)
+        # unused value in dialog management:
+        # clientisresidentrfslot_value = self.ic.MemoryManager.get_slot_value(ClientIsResidentRFSlot.name)
         print("ClientIsResidentRFSlot_is_filled")
         # then plan next step
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientServiceRegionSlot.name,
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=ClientServiceRegionSlot.name,
+                                                                 target_uri=ClientServiceRegionSlot.name,
                                                                  callback=self.client_ServiceRegionSlot_is_filled)
 
     def client_ServiceRegionSlot_is_filled(self, *args, **kwargs):
-
-        # TODO improve mechanism of writing slot values?
-        # To enable feature to specify target URI in MemoryManager
-        # post-filled-actions:
-        clientserviceregionslot_value = kwargs['user_slot_process'].result.value
-        clientserviceregionslot_value = self.ic.MemoryManager.put_slot_value(ClientServiceRegionSlot.name,
-                                                                             clientserviceregionslot_value)
-
-        # then plan next step
-        # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientPropertyTypeSlot.name,
-        #                                                                     callback_fn=self.client_PropertyTypeSlot_is_filled)
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientPropertyTypeSlot.name,
+        # unused value in dialog management:
+        # clientserviceregionslot_value = self.ic.MemoryManager.get_slot_value(ClientServiceRegionSlot.name)
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=ClientPropertyTypeSlot.name,
                                                                  callback=self.client_PropertyTypeSlot_is_filled)
 
     def client_PropertyTypeSlot_is_filled(self, *args, **kwargs):
+        # unused value in dialog management:
+        # clientpropertytypeslot_value = self.ic.MemoryManager.get_slot_value(ClientPropertyTypeSlot.name)
+        # # post-filled-actions for explicit memory writing:
+        # clientpropertytypeslot_value = kwargs['user_slot_process'].result.value
+        # clientpropertytypeslot_value = self.ic.MemoryManager.put_slot_value(ClientPropertyTypeSlot.name,
+        #                                                                     clientpropertytypeslot_value)
 
-        # post-filled-actions:
-        clientpropertytypeslot_value = kwargs['user_slot_process'].result.value
-        clientpropertytypeslot_value = self.ic.MemoryManager.put_slot_value(ClientPropertyTypeSlot.name,
-                                                                            clientpropertytypeslot_value)
-
-        # then
-        # import ipdb; ipdb.set_trace()
-
+        # finalize form:
         self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
-        pass
 
 
 class BusinessOfferingInteraction(Interaction, AbstractInteraction):
@@ -407,7 +377,7 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
         self.ic.DialogPlanner.sendText(self.TEXT_BIG_OFFER)
         # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientAgreeWithServicePackConditionsSlot.name,
         #                                                                     callback_fn=self.on_user_decision_on_big_offer_ready)
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientAgreeWithServicePackConditionsSlot.name,
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=ClientAgreeWithServicePackConditionsSlot.name,
                                                                  callback=self.on_user_decision_on_big_offer_ready)
 
         print("Ready to go: BusinessOfferingInteraction.start")
@@ -423,15 +393,9 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
         :param kwargs:
         :return:
         """
-
-        big_offer_decision = kwargs['user_slot_process'].result.value
-        big_offer_decision = self.ic.MemoryManager.put_slot_value(ClientAgreeWithServicePackConditionsSlot.name,
-                                                                     big_offer_decision)
+        big_offer_decision = self.ic.MemoryManager.get_slot_value(ClientAgreeWithServicePackConditionsSlot.name)
         print(big_offer_decision)
         print("BusinessOfferingInteraction.on_user_decision_on_big_offer_ready method")
-
-
-        # import ipdb; ipdb.set_trace()
 
         ######################### Completion Busines Rule Block ##########################################
         if ClientAgreeWithServicePackConditionsSlot.ANSWER_YES in big_offer_decision:
@@ -515,7 +479,7 @@ class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
 
         # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientOkToSelfServiceSlot.name,
         #                                                                     callback_fn=self.when_client_responded_about_self_serving)
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientOkToSelfServiceSlot.name,
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=ClientOkToSelfServiceSlot.name,
                                                                  callback=self.when_client_responded_about_self_serving)
 
     def when_client_responded_about_self_serving(self, *args, **kwargs):
@@ -525,29 +489,18 @@ class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
         and precompletion behaviour
         before completing the state of the interaction
         """
-        # import ipdb; ipdb.set_trace()
-
         print("ConsideringSelfServiceInteraction.when_client_responded_about_self_serving(")
-        # import ipdb; ipdb.set_trace()
-
-        self_serving_answer = kwargs['user_slot_process'].result.value
-        self_serving_answer = self.ic.MemoryManager.put_slot_value(ClientOkToSelfServiceSlot.name,
-                                                                       self_serving_answer)
-
+        self_serving_answer = self.ic.MemoryManager.get_slot_value(ClientOkToSelfServiceSlot.name)
         ######################### Busines Rule BR5 Block ##########################################
 
         ######################### Completion Busines Rule Block ##########################################
         if ClientOkToSelfServiceSlot.ANSWER_YES in self_serving_answer:
             print("ClientOkToSelfServiceSlot.ANSWER_YES in self_serving_answer")
-
-            #     then complete self
             self.ic.DialogPlanner.sendText(self.TEXT_5_YES)
-            # self.ic.DialogPlanner.complete_user_interaction_proc(self, self.EXIT_GATE_OK)
 
         elif ClientOkToSelfServiceSlot.ANSWER_NO in self_serving_answer:
             print("ClientOkToSelfServiceSlot.ANSWER_NO in self_serving_answer")
             self.ic.DialogPlanner.sendText(self.TEXT_5_NO)
-            # self.ic.DialogPlanner.complete_user_interaction_proc(self, self.EXIT_GATE_OK)
 
         else:
             import ipdb;
@@ -632,9 +585,7 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
         :param kwargs:
         :return:
         """
-        ready_to_give_docs = kwargs['user_slot_process'].result.value
-        ready_to_give_docs = self.ic.MemoryManager.put_slot_value(ClientIsReadyToGiveDocsSlot.name,
-                                                                  ready_to_give_docs)
+        ready_to_give_docs = self.ic.MemoryManager.get_slot_value(ClientIsReadyToGiveDocsSlot.name)
         print(ready_to_give_docs)
         print("on_client_responded_if_docs_ready")
         if ClientIsReadyToGiveDocsSlot.ANSWER_YES in ready_to_give_docs:
@@ -687,10 +638,7 @@ class OfficeRecommendationInteraction(Interaction, AbstractInteraction):
         before completing the state of the interaction
         """
         print("OfficeRecommendationInteraction.on_answer_about_nearest_office_recomendation(")
-
-        answer = kwargs['user_slot_process'].result.value
-        answer = self.ic.MemoryManager.put_slot_value(ClientWantsNearestOfficeRecomendation.name,
-                                                      answer)
+        answer = self.ic.MemoryManager.get_slot_value(ClientWantsNearestOfficeRecomendation.name)
         if ClientWantsNearestOfficeRecomendation.ANSWER_YES in answer:
             # really we need to do here interaction with
             # 1. locatioon retrieval
@@ -714,10 +662,8 @@ class DialogTerminationInteraction(Interaction, AbstractInteraction):
         print("Ready to go: DialogTerminationInteraction.start")
         super(self.__class__, self).start(*args, **kwargs)
         self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
-
         # hack to announce that scenaric dialog is finished
         self.ic.MemoryManager.put_slot_value("bank_scenario.terminated", True)
-
         self.ic.DialogPlanner.sendText("На этом завершим разговор.")
 
 
