@@ -20,7 +20,7 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
         proxy = True
 
     def start(self, *args, **kwargs):
-        super(self.__class__, self).start(*args, **kwargs)
+        super().start(*args, **kwargs)
         # 1. retrieve OptionIntentsSlot
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=OptionIntentsSlot.name,
                                                                  target_uri=OptionIntentsSlot.name,
@@ -126,7 +126,7 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         print("DesiredCurrencyInteraction.start(")
-        super(self.__class__, self).start(*args, **kwargs)
+        super().start(*args, **kwargs)
         # 1. retrieve CurrencySlot
         # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(DesiredCurrencySlot.name, callback_fn=self.on_desired_currency_ready)
         # self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(DesiredCurrencySlot.name, callback=self.on_desired_currency_ready)
@@ -221,10 +221,8 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
     ]
 
     def start(self, *args, **kwargs):
-        # 1. retrieve CurrencySlot
         print("Ready to go: DocumentsListSupplyInteraction.start")
-        super(self.__class__, self).start(*args, **kwargs)
-        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.uip = super().start(*args, **kwargs)
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=NeedListDocsAndTarifsSlot.name,
                                                    target_uri=NeedListDocsAndTarifsSlot.name,
                                                    callback=self.on_response_3_Q1_ready)
@@ -294,8 +292,7 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         print("PrivateInfoFormInteraction.start")
-
-        self.usp = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.usp = super().start(*args, **kwargs)
         # TODO improve form filling process by abstraction of factory
         # start Slot filling process
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(slot_spec_name=ClientIsResidentRFSlot.name,
@@ -372,7 +369,7 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
     """
 
     def start(self, *args, **kwargs):
-        super(self.__class__, self).start(*args, **kwargs)
+        super().start(*args, **kwargs)
 
         self.ic.DialogPlanner.sendText(self.TEXT_BIG_OFFER)
         # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientAgreeWithServicePackConditionsSlot.name,
@@ -473,7 +470,7 @@ class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         print("ConsideringSelfServiceInteraction.start(")
-        super(self.__class__, self).start(*args, **kwargs)
+        super().start(*args, **kwargs)
         # 1. retrieve CurrencySlot
         # check if it is not retrieved yet?
 
@@ -542,8 +539,7 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         print("Ready to go: OnlineReservingFinalizationInteraction.start")
-        super(self.__class__, self).start(*args, **kwargs)
-        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.uip = super().start(*args, **kwargs)
 
         # TODO: design practice of slot retrieval (when self doesnt know wether slot is memorized or not elicited yet)
         # the slot retrieval for slots which following line should be async aware if slot is not exist
@@ -623,8 +619,7 @@ class OfficeRecommendationInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         print("Ready to go: OfficeRecommendationInteraction.start")
-        super(self.__class__, self).start(*args, **kwargs)
-        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.uip = super(self.__class__, self).start(*args, **kwargs)
         # self.ic.DialogPlanner.plan_process_retrieve_slot_value_by_slot_name(ClientWantsNearestOfficeRecomendation.name,
         #                                                                     callback_fn=self.on_answer_about_nearest_office_recomendation)
         self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(ClientWantsNearestOfficeRecomendation.name,
@@ -660,8 +655,8 @@ class DialogTerminationInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         print("Ready to go: DialogTerminationInteraction.start")
-        super(self.__class__, self).start(*args, **kwargs)
-        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.uip = super(self.__class__, self).start(*args, **kwargs)
+
         # hack to announce that scenaric dialog is finished
         self.ic.MemoryManager.put_slot_value("bank_scenario.terminated", True)
         self.ic.DialogPlanner.sendText("На этом завершим разговор.")
@@ -687,8 +682,7 @@ class OperatorSwitchInteraction(Interaction, AbstractInteraction):
 
     def start(self, *args, **kwargs):
         print("Ready to go: OperatorSwitchInteraction.start")
-        super(self.__class__, self).start(*args, **kwargs)
-        self.uip = self.ic.DialogPlanner.initialize_user_interaction_proc(self)
+        self.uip = super().start(*args, **kwargs)
         # hack to announce that scenaric dialog is finished
         self.ic.MemoryManager.put_slot_value("bank_scenario.terminated", True)
         self.ic.DialogPlanner.sendText("Переключаю Вас на оператора...")

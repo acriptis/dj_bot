@@ -435,17 +435,17 @@ class DialogPlanner():
     # #############################################################################################
     # USER INTERACTION management:
 
-    def initialize_user_interaction_proc(self, interaction_obj):
-        """
-        Interface method for starting User Interaction
-
-        called by Interaction usually when start method is launched?
-        :param interaction_obj: 
-        :return: 
-        """
-        # TODO move to ?
-        uip, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
-        return uip
+    # def initialize_user_interaction_proc(self, interaction_obj):
+    #     """
+    #     Interface method for starting User Interaction
+    #
+    #     called by Interaction usually when start method is launched?
+    #     :param interaction_obj:
+    #     :return:
+    #     """
+    #     # TODO move to ?
+    #     uip, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
+    #     return uip
     
     def complete_user_interaction_proc(self, interaction_obj, exit_gate):
         """
