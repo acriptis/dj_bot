@@ -53,6 +53,7 @@ class DPUserProfile(models.Model):
     def __str__(self):
         return "@%s" % self.user.username
 
+
 class Message(models.Model):
     """
     A message in some UserDialog
@@ -74,7 +75,7 @@ class UserDialog(models.Model):
     # user, with which we talk (interlocutor):
     target_user = models.ForeignKey(DPUserProfile, on_delete=models.CASCADE)
 
-    def __init__(self,*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.last_message = ""
@@ -107,7 +108,8 @@ class UserDialog(models.Model):
         # zipped_messages = list(zip(self.dialog_speakers, self.dialog_acts))
         counter = 0
         for each_message_obj in messages:
-            output_str += "%d. %10s: %s\n" % (counter, each_message_obj.author, each_message_obj.text)
+            output_str += "%d. %10s: %s\n" % (
+            counter, each_message_obj.author, each_message_obj.text)
             counter += 1
         return output_str
 
@@ -121,7 +123,8 @@ class UserDialog(models.Model):
         :return: self
         """
         if not message_txt:
-            import ipdb; ipdb.set_trace()
+            import ipdb;
+            ipdb.set_trace()
             print("empty message?")
         sys_user = DPUserProfile.get_or_create_userprofile(DIALOG_SYSTEM_USER_NAME)
         return self._push_dialog_act(sys_user, message_txt)
@@ -138,8 +141,8 @@ class UserDialog(models.Model):
 
     def filter_sys_messages_of_current_turn(self):
         """
-        Returns message objects of the dialog system at current step (everything after the latest user message
-        or the messages of the first step)
+        Return message objects of the dialog system at current step (everything after the latest
+        user message or the messages of the first step)
         :return:
         """
         recent_user_messages = self.message_set.filter(author=self.user).order_by('-created_at')
