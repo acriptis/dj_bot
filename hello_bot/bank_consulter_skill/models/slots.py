@@ -12,7 +12,7 @@ class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
 
     questioner = "Я могу рассказать Общие Сведения об открытии счетов для юридических лиц, " \
                  "а также Секретную Информацию для посвященных об открытии счетов. \n" \
-                 "Что вас интересует?"
+                 "Что вас интересует? hint:options(ОБЩ, СЕКРЕТ)"
 
     ######################################################
     # Slot's Values Domain Specification
@@ -28,7 +28,7 @@ class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
     # capitals for case insensitive pattern search
     synsets= {
         COMMON_INFO: [
-            "ОБЩАЯ"
+            "ОБЩ"
         ],
         SECRET_INFO: [
             "ДОПОЛНИТЕЛЬН", "СЕКРЕТ",
@@ -47,7 +47,7 @@ class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
     # TODO fix potential discrepancy between name of class and name of instance
     name = 'DesiredCurrencySlot'
 
-    questioner = "В какой валюте?"
+    questioner = "В какой валюте? (РУБ, ДОЛ)"
 
     ######################################################
     # Slot's Values Domain Specification
@@ -58,10 +58,10 @@ class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
     # synonyms set:
     synsets= {
         RUB: [
-            "РУБЛИ", "руб"
+            "РУБ", "РУБЛИ", "руб"
         ],
         USD: [
-            "БАКСЫ"
+            "ДОЛ", "БАКСЫ", "доллары"
         ]
 
     }
@@ -187,3 +187,4 @@ class ClientWantsNearestOfficeRecomendation(BaseSlotField, YesNoSlotReceptorMixi
         # Slot's Values Domain Specification
         # Don't need it because we use YesNo Receptors'
         ################################################################################################
+

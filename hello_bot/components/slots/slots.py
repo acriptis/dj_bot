@@ -107,6 +107,8 @@ class DictionarySlotReceptorMixin():
     """
     MixIn Class that helps dictionary-based slots to recept UserMessages (in natural language)
     Currently only case insensitive matching supported!
+
+    Mixin Requires `synset` attribute to be specified in instance
     """
     # children must specify domain of distinctive slot values classes
     CANONIC_DOMAIN = []
@@ -117,13 +119,17 @@ class DictionarySlotReceptorMixin():
     # # TODO add support of MultiCase, Stemming support etc
     # # def __init__(self, canonic_domain):
 
-    def __init__(self):
+    def _make_flat_norm(self):
         # construct flat norm
         # index object for translating synonyms into normalized categories:
+
         self.flat_norm = {}
         for canonic_name, synset in self.synsets.items():
             for each_syn in synset:
                 self.flat_norm[each_syn] = canonic_name
+
+    def __init__(self):
+        self._make_flat_norm()
 
     def can_recept(self, text, *args, **kwargs):
         """
@@ -166,7 +172,7 @@ class DictionarySlotReceptorMixin():
         Method launched after interaction triggering to consume User's directive about time without explicit question
 
         In this case we may use the same methods of extraction, although in general case
-        Prehistory Analysis differs from ExplicitQuestioningAnswer Anslysis
+        Prehistory Analysis differs from ExplicitQuestioningAnswer Analysis
 
         Returns only the most recent match!
 
@@ -272,3 +278,46 @@ class ReceptorFactory():
                 flat_norm[each_syn] = canonic_name
 
         return flat_norm
+
+
+class ReceptorInterface():
+    """
+    Class for description of scheme of Receptors
+    """
+    def can_recept(self, text, *args, **kwargs):
+        """
+
+        Args:
+            text:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
+        raise Exception("Implement me!")
+
+    def recept(self, text, *args, **kwargs):
+        """
+
+        Args:
+            text:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
+        raise Exception("Implement me!")
+
+    def prehistory_recept(self, userdialog):
+        """
+
+        Args:
+            userdialog:
+
+        Returns:
+
+
+        """
+        raise Exception("Implement me!")

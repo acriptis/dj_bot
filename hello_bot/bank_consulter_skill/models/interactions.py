@@ -1,11 +1,11 @@
 # coding=utf-8
-from interactions.models import Interaction, AbstractInteraction, SendTextOperation, UserInteraction
+from interactions.models import Interaction, SendTextOperation, UserInteraction
 from bank_consulter_skill.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
     ClientIsResidentRFSlot, ClientServiceRegionSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot, \
     ClientOkToSelfServiceSlot, ClientIsReadyToGiveDocsSlot, ClientWantsNearestOfficeRecomendation
 
 
-class IntentRetrievalInteraction(Interaction, AbstractInteraction):
+class IntentRetrievalInteraction(Interaction):
     """
     retrieves asks question user for his goal
 
@@ -92,7 +92,7 @@ class IntentRetrievalInteraction(Interaction, AbstractInteraction):
             return self.__class__.__name__
 
 
-class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
+class DesiredCurrencyInteraction(Interaction):
     """
     В какой валюте Клиент желает открыть счет?
         Если в рублях, перейди к шагу 3
@@ -174,7 +174,7 @@ class DesiredCurrencyInteraction(Interaction, AbstractInteraction):
         self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
 
-class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
+class DocumentsListSupplyInteraction(Interaction):
     """
     3.
 
@@ -278,7 +278,7 @@ class DocumentsListSupplyInteraction(Interaction, AbstractInteraction):
         self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_3_1)
 
 
-class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
+class PrivateInfoFormInteraction(Interaction):
     """
     PrivateInfoForm from DocumentsListSupplyInteraction (3rd step of the Scenario)
     """
@@ -326,7 +326,7 @@ class PrivateInfoFormInteraction(Interaction, AbstractInteraction):
         self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
 
-class BusinessOfferingInteraction(Interaction, AbstractInteraction):
+class BusinessOfferingInteraction(Interaction):
     """
     4.
     4 BusinessOfferingInteraction
@@ -410,7 +410,7 @@ class BusinessOfferingInteraction(Interaction, AbstractInteraction):
             import ipdb; ipdb.set_trace()
             raise Exception("BusinessOfferingInteraction.on_user_decision_on_big_offer_ready: unhandled case of user answer")
 
-class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
+class ConsideringSelfServiceInteraction(Interaction):
 
     """
         Удобно ли Клиенту самостоятельно ознакомиться с документами и тарифами на сайте Банка?
@@ -513,7 +513,7 @@ class ConsideringSelfServiceInteraction(Interaction, AbstractInteraction):
 
 # ###################################################################################################
 
-class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
+class OnlineReservingFinalizationInteraction(Interaction):
     """
     6 Шаг скрипта
     """
@@ -596,7 +596,7 @@ class OnlineReservingFinalizationInteraction(Interaction, AbstractInteraction):
             self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_6_RUB_UNREADY)
 
 
-class OfficeRecommendationInteraction(Interaction, AbstractInteraction):
+class OfficeRecommendationInteraction(Interaction):
     """
         Step 7
         Сообщи Клиенту: «Подобрать для Вас ближайший
@@ -649,7 +649,7 @@ class OfficeRecommendationInteraction(Interaction, AbstractInteraction):
             self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
 
-class DialogTerminationInteraction(Interaction, AbstractInteraction):
+class DialogTerminationInteraction(Interaction):
     class Meta:
         proxy = True
 
@@ -663,7 +663,7 @@ class DialogTerminationInteraction(Interaction, AbstractInteraction):
 
 
 from components.matchers.matchers import PhrasesMatcher
-class OperatorSwitchInteraction(Interaction, AbstractInteraction):
+class OperatorSwitchInteraction(Interaction):
     class Meta:
         proxy = True
 

@@ -3,7 +3,8 @@ from components.matchers.matchers import PhrasesMatcher
 from components.slots.city_slot import CitySlot
 from components.slots.datetime_slot import DateTimeSlot
 
-from interactions.models import Interaction, AbstractInteraction
+# from interactions.models import Interaction, AbstractInteraction
+from interactions.models import Interaction
 
 
 class WeatherForecastDateSlot(DateTimeSlot):
@@ -18,7 +19,7 @@ class WeatherForecastCitySlot(CitySlot):
     questioner = "В каком городе?"
 
 
-class WeatherForecastInteraction(Interaction, AbstractInteraction):
+class WeatherForecastInteraction(Interaction):
     """
     Interaction with GlobalReceptor Detecting the command about Weather Request
     """
@@ -27,7 +28,7 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
 
     def __init__(self, *args, **kwargs):
         super(Interaction, self).__init__(*args, **kwargs)
-        super(AbstractInteraction, self).__init__()
+        # super(AbstractInteraction, self).__init__()
 
     def post_init_hook(self):
         """
@@ -107,8 +108,8 @@ class WeatherForecastInteraction(Interaction, AbstractInteraction):
     def weather_request(self, date_raw, loc_raw):
         # forecast_text = "Weather Forecast in %s %s: " % (loc_raw[0], date_raw["value"])
         # Uncomment the next code if you want to enable remote HTTP weather service:
-        # forecast_text = "Weather will be okay."
-        forecast_text = self._weather_service_now(loc_raw)
+        forecast_text = "Weather will be okay."
+        # forecast_text = self._weather_service_now(loc_raw)
 
         if forecast_text:
             self.ic.DialogPlanner.sendText("Weather Forecast in %s %s:\n%s" % (loc_raw[0], date_raw["value"], forecast_text))

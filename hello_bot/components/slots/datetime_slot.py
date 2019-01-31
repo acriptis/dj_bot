@@ -70,7 +70,9 @@ class DateTimeSlot(BaseSlotField):
                 return True, {'raw_subtext': raw_subtext, 'value': datetime_obj}
             else:
                 # investigate
+                print("We have many datetime slot candidates in message we need to resolve this issue!")
+
                 print(list_of_result_tuples)
-                import ipdb;
-                ipdb.set_trace()
+                # import ipdb;
+                # ipdb.set_trace()
         return False, None

@@ -27,22 +27,16 @@ class AbstractInteraction():
         raise Exception("NotImplemented")
 
 
-class Interaction(models.Model):
+class Interaction(models.Model, AbstractInteraction):
     """
     Base ORM model for interaction specification
     """
     name = models.CharField(max_length=200)
 
-    EXIT_GATE_OK = "ExitGate_Ok"
-
     ##################################################################
     # Exit Gates declaration:
     # default_exit_gate = ExitGate(EXIT_GATE_OK)
 
-    #
-    base_EXIT_GATES_NAMES_LIST = [
-        EXIT_GATE_OK
-    ]
     # Exit Gates Specification Problem: how to specify exit gates?
     # requirements:
     # 1. derived classes should inherit base exit gates
@@ -150,7 +144,7 @@ class Interaction(models.Model):
         return self.name
 
 
-class QuestionInteractionFactory(Interaction, AbstractInteraction):
+class QuestionInteractionFactory(Interaction):
     # TODO allow generative template (GenericField)
     question = models.CharField(max_length=200)
 
@@ -299,7 +293,7 @@ class QuestionInteractionFactory(Interaction, AbstractInteraction):
 #############################################################################################################
 # Domain Specific Interactions
 # TODO move into sep module
-class GreetInteraction(Interaction, AbstractInteraction):
+class GreetInteraction(Interaction):
 
     class Meta:
         proxy = True
@@ -354,7 +348,7 @@ class GreetInteraction(Interaction, AbstractInteraction):
         self.do(*args, **kwargs)
 
 
-class ByeInteraction(Interaction, AbstractInteraction):
+class ByeInteraction(Interaction):
     class Meta:
         proxy = True
 

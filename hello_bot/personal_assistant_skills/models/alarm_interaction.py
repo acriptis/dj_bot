@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 from components.matchers.matchers import PhrasesMatcher
-from interactions.models import Interaction, AbstractInteraction
+from interactions.models import Interaction
 
 from personal_assistant_skills.models.slot_alarm_datetime import AlarmDateTimeSlot
 
 
-class AlarmSetterInteraction(Interaction, AbstractInteraction):
+class AlarmSetterInteraction(Interaction):
     """
     Interaction with GlobalReceptor Detecting the command about Setting Alarm
 
     Alarm has
     """
+
     class Meta:
         proxy = True
 
     def __init__(self, *args, **kwargs):
         super(Interaction, self).__init__(*args, **kwargs)
-        super(AbstractInteraction, self).__init__()
+        # super(AbstractInteraction, self).__init__()
 
     def post_init_hook(self):
         """
@@ -27,11 +28,11 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         """
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
         self.global_trigger_receptor = PhrasesMatcher(phrases=["MAKE ALARM",
-                                                                                  "SET REMINDER",
-                                                                                  "SET ALARM",
-                                                                                  "НАПОМИНАЛКА",
-                                                                                  "НАПОМИНАЛКУ",
-                                                                        "УСТАНОВИ БУДИЛЬНИК",
+                                                               "SET REMINDER",
+                                                               "SET ALARM",
+                                                               "НАПОМИНАЛКА",
+                                                               "НАПОМИНАЛКУ",
+                                                               "УСТАНОВИ БУДИЛЬНИК",
                                                                "/SetAlarm"
                                                                ],
                                                       daemon_if_matched=self.start)
@@ -57,7 +58,6 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         # 3 as explicitly the value of slot for which case?
         # register slots:
 
-
     def start(self, *args, **kwargs):
         super(self.__class__, self).start(*args, **kwargs)
         # if we here means we catched command to get weather forecast.
@@ -67,9 +67,10 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         # Both Slots must be autofilled if user has specified the information before
         # self.ic.remind_retrospect_or_retrieve_slot(self.location_slot_instance, target_uri=self.location_slot_instance.name)
 
-
-        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(self.alarm_timestamp_at_slot.name, target_uri=self.alarm_timestamp_at_slot.name,
-                                        callback=self.when_alarm_time_ready, priority="URGENT")
+        self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(self.alarm_timestamp_at_slot.name,
+                                                                 target_uri=self.alarm_timestamp_at_slot.name,
+                                                                 callback=self.when_alarm_time_ready,
+                                                                 priority="URGENT")
         pass
 
     def when_alarm_time_ready(self, *args, **kwargs):
@@ -81,7 +82,6 @@ class AlarmSetterInteraction(Interaction, AbstractInteraction):
         self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
 
     def _set_alarm(self, at_datetime, title=None):
-
         self.ic.DialogPlanner.sendText("Я устанавливаю будильник на %s" % (at_datetime))
         return
 
