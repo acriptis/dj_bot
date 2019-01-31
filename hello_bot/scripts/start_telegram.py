@@ -50,10 +50,10 @@ if __name__ == '__main__':
         agent = humans[chat_id]
 
         bot_resp = agent(user_msg)
-        one_resp = bot_resp[0]
-        print('{} <<< {}'.format(chat_id, one_resp))
+        for each_resp in bot_resp:
+            print('{} <<< {}'.format(chat_id, each_resp))
 
-        bot.send_message(chat_id=chat_id, text=one_resp)
+            bot.send_message(chat_id=chat_id, text=each_resp)
 
 
     updater = Updater(token=os.environ['TG_BOT_TOKEN'])
