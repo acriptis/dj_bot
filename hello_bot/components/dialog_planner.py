@@ -27,7 +27,8 @@ class BaseTask():
         :return:
         """
         if not cb_fn:
-            import ipdb; ipdb.set_trace()
+            import ipdb;
+            ipdb.set_trace()
             print("Palundra")
         self.callback_fns.append(cb_fn)
 
@@ -41,6 +42,7 @@ class InteractionTask(BaseTask):
 
     #TODO do abstraction refactoring for managing Slots as Tasks as well
     """
+
     def __init__(self, interaction_obj, priority, callback_fn):
         super().__init__(interaction_obj, priority, callback_fn)
 
@@ -66,6 +68,7 @@ class SlotTask(BaseTask):
     Process may be active... in this case we need to wait the completion of slot and then trigger callback
         (add callback to listeners pool)
     """
+
     def __init__(self, slot_obj, priority, callback_fn, **kwargs):
         super().__init__(slot_obj, priority, callback_fn)
         self.kwargs = kwargs
@@ -75,6 +78,7 @@ class Agenda():
     """
     Class for storing the plan of future processing tasks
     """
+
     # TODO make agenda user specific and persistent
     def __init__(self):
 
@@ -93,7 +97,8 @@ class Agenda():
         """
         for each_task in self.queue_of_tasks:
             # TODO improve code to avoid type checks?
-            if isinstance(each_task, InteractionTask) and interaction_obj == each_task.interaction_obj:
+            if isinstance(each_task,
+                          InteractionTask) and interaction_obj == each_task.interaction_obj:
                 return each_task
 
     def find_the_highest_priority(self):
@@ -172,6 +177,7 @@ class DialogPlanner():
     Manager for Dialog Session planning. It allows to enqueue Interactions, SlotProcesses for future execution and
     subscribing for results of the completed Processes
     """
+
     # tasks queue collector
     def __init__(self, ic):
         self.ic = ic
@@ -209,7 +215,8 @@ class DialogPlanner():
         self._callbacks_storage = []
 
     # #### SLOT PROCESS ###############################################################################################
-    def remind_retrospect_or_retrieve_slot(self, slot_spec_name, target_uri=None, callback=None, priority=10):
+    def remind_retrospect_or_retrieve_slot(self, slot_spec_name, target_uri=None, callback=None,
+                                           priority=10):
         """
         Interface method for domain interactions which encapsulates slots management as knowledge-agnostic interface
         (Callers of method don't know if the value exist already or must be retrieved through interactive process).
@@ -254,13 +261,14 @@ class DialogPlanner():
             # ###### User Slot Retrieval Process #####################################
             # enqueue Active Questioning Process
             self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj,
-                                                                                        priority=priority,
-                                                                                        callback_fn=callback,
-                                                                                        target_uri=target_uri,
-                                                                                        duplicatable=False)
+                                                                          priority=priority,
+                                                                          callback_fn=callback,
+                                                                          target_uri=target_uri,
+                                                                          duplicatable=False)
 
-    def plan_process_retrieve_slot_value_by_slot_name(self, slot_name, priority=10, callback_fn=None,
-                                         duplicatable=False):
+    def plan_process_retrieve_slot_value_by_slot_name(self, slot_name, priority=10,
+                                                      callback_fn=None,
+                                                      duplicatable=False):
         """
         Given a string of slot name it runs the process of slot-filling with ActiveQuestioning
         :param slot_name:
@@ -270,10 +278,15 @@ class DialogPlanner():
         :return:
         """
         slot_spec_obj = self.ic.sm.get_or_create_instance_by_slotname(slot_name)
-        self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj, priority=priority, callback_fn=callback_fn, duplicatable=duplicatable)
+        self.plan_process_retrieve_slot_value_with_slot_spec_instance(slot_spec_obj,
+                                                                      priority=priority,
+                                                                      callback_fn=callback_fn,
+                                                                      duplicatable=duplicatable)
 
-    def plan_process_retrieve_slot_value_with_slot_spec_instance(self, slot_spec_obj, priority=10, callback_fn=None,
-                                                      duplicatable=False, target_uri=None):
+    def plan_process_retrieve_slot_value_with_slot_spec_instance(self, slot_spec_obj, priority=10,
+                                                                 callback_fn=None,
+                                                                 duplicatable=False,
+                                                                 target_uri=None):
         """
         Infrastructure method for appending slot process to Agenda
 
@@ -301,7 +314,8 @@ class DialogPlanner():
 
         """
 
-        self.agenda.push_slot_task_by_attrs(slot_spec_obj, priority, callback_fn, duplicatable=duplicatable, target_uri=target_uri)
+        self.agenda.push_slot_task_by_attrs(slot_spec_obj, priority, callback_fn,
+                                            duplicatable=duplicatable, target_uri=target_uri)
 
         # # TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # if slot_spec_obj.name not in self.callbacks_on_completion_of_interactions:
@@ -340,7 +354,8 @@ class DialogPlanner():
 
         usp = self.ic.uspm.find_user_slot_process(slot_spec_obj)
         if not usp:
-            import ipdb; ipdb.set_trace()
+            import ipdb;
+            ipdb.set_trace()
             raise Exception("Why there is no USP for slot: %s" % slot_spec_obj)
 
         assert hasattr(usp, 'ic')
@@ -348,7 +363,7 @@ class DialogPlanner():
         if is_recepted:
             # announce listeners
             if callback_fns:
-                import ipdb;ipdb.set_trace()
+                # import ipdb;ipdb.set_trace()
                 for each_cb_fn in callback_fns:
                     each_cb_fn(sender=self, user_slot_process=usp, results=result)
             return
@@ -356,9 +371,11 @@ class DialogPlanner():
             # not recepted
             print("Slot is not recepted from prehistory")
         self._force_start_slot_value_retrieval_process(slot_spec_obj, priority=priority,
-                                                       callback_fns=callback_fns, target_uri=target_uri)
+                                                       callback_fns=callback_fns,
+                                                       target_uri=target_uri)
 
-    def _force_start_slot_value_retrieval_process(self, curr_slot_spec_obj, target_uri, priority=10, callback_fns=None):
+    def _force_start_slot_value_retrieval_process(self, curr_slot_spec_obj, target_uri, priority=10,
+                                                  callback_fns=None):
         """
         Method which actually starts slot process in system and attaches callback on its completion
         (1.2.3.1.DialogUserSlotRetrievalProcess or 1.2.SlotFillingProcess?)
@@ -375,7 +392,8 @@ class DialogPlanner():
         #     import ipdb; ipdb.set_trace()
         if created:
             # raise Exception("found existing user slot process, while expecting creation of new one!")
-            import ipdb; ipdb.set_trace()
+            import ipdb;
+            ipdb.set_trace()
 
         if target_uri and usp.target_uri != target_uri:
             usp.target_uri = target_uri
@@ -401,10 +419,17 @@ class DialogPlanner():
         :param kwargs:
         :return:
         """
-        print("SLOT PROCESS FINISHED")
-        #TODO do we need to do something here?
+        if 'user_slot_process' in kwargs:
+            usp = kwargs['user_slot_process']
+            print("SLOT PROCESS (%s) FINISHED" % usp)
+        else:
+            import ipdb;
+            ipdb.set_trace()
+            print("UNRECOGNIZED SLOT PROCESS FINISHED")
+        # TODO do we need to do something here?
 
         # We may write the slot results into persistent memory
+
     # #### END SLOT PROCESS ##########################################################################################
 
     # Interactions Management ########################################################################################
@@ -429,7 +454,7 @@ class DialogPlanner():
         """
         # TODO make interactions registry!!!!!
         # resolve interaction obj from name:
-        interaction_obj= self.ic.im.get_or_create_instance_by_name(interaction_name)
+        interaction_obj = self.ic.im.get_or_create_instance_by_name(interaction_name)
         self.enqueue_interaction(interaction_obj, priority=priority, callback_fn=callback_fn)
 
     # #############################################################################################
@@ -446,7 +471,7 @@ class DialogPlanner():
     #     # TODO move to ?
     #     uip, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
     #     return uip
-    
+
     def complete_user_interaction_proc(self, interaction_obj, exit_gate):
         """
         Completes UserInteraction process given Interaction obj
@@ -463,18 +488,29 @@ class DialogPlanner():
         # hack if interaction is not saved yet
         # interaction_obj.save()
         # TODO if someoine wants to be announced about interaction completion?
-        ui, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
+        # import ipdb; ipdb.set_trace()
+        ##############################################################################
+        # TODO remove Django dependent block!!
+        ##############################################################################
+        interaction_obj.save()
+        ui, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj,
+                                                      userdialog=self.ic.userdialog)
+
+        # ui = UserInteraction(interaction=interaction_obj, userdialog=self.ic.userdialog)
         if ui.state != UserInteraction.COMPLETED:
             ui.state = UserInteraction.COMPLETED
             ui.save()
             # interaction_obj.exit_gate_signal.send(sender=self, userdialog=self.ic.userdialog)
             # import ipdb; ipdb.set_trace()
 
-            self.ic.im.get_or_create_instance_by_class(interaction_obj.__class__).EXIT_GATES_SIGNALS[exit_gate].send(sender=self, userdialog=self.ic.userdialog)
+            interaction_obj.EXIT_GATES_SIGNALS[exit_gate].send(sender=self,
+                                                               userdialog=self.ic.userdialog)
+            # self.ic.im.get_or_create_instance_by_class(interaction_obj.__class__).EXIT_GATES_SIGNALS[exit_gate].send(sender=self, userdialog=self.ic.userdialog)
             # interaction_obj.EXIT_GATES_SIGNALS[exit_gate].send(sender=self, userdialog=self.ic.userdialog)
 
         else:
-            print('DialogPlanner.complete_interaction: Interaction %s already completed!' % interaction_obj)
+            print(
+                'DialogPlanner.complete_interaction: Interaction %s already completed!' % interaction_obj)
             print("Investigate me!")
 
         # Callbacks routing:
@@ -482,12 +518,14 @@ class DialogPlanner():
         print("self.callbacks_on_completion_of_interactions")
         print(self.callbacks_on_completion_of_interactions)
 
-        if interaction_obj.name in self.callbacks_on_completion_of_interactions and len(self.callbacks_on_completion_of_interactions[interaction_obj.name]) > 0:
+        if interaction_obj.name in self.callbacks_on_completion_of_interactions and len(
+                self.callbacks_on_completion_of_interactions[interaction_obj.name]) > 0:
             # run callbacks:
             for each_cb_fn in self.callbacks_on_completion_of_interactions[interaction_obj.name]:
                 # import ipdb; ipdb.set_trace()
 
                 each_cb_fn(userinteraction=ui)
+        ##############################################################################
 
         # finally we need to drop interaction from queue (if it exists there)
         # if interaction_obj
@@ -515,8 +553,10 @@ class DialogPlanner():
         #   when should we initialize it from class spec?
         #   when should we retrieve prepared instance from registry
         print("Next Task is interaction_obj: %s" % interaction_obj)
-
-        ui, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj, userdialog=self.ic.userdialog)
+        # import ipdb; ipdb.set_trace()
+        interaction_obj.save()
+        ui, _ = UserInteraction.objects.get_or_create(interaction=interaction_obj,
+                                                      userdialog=self.ic.userdialog)
         interaction_obj.start()
 
     # END USER Interactions Management ########################################################################################
@@ -544,7 +584,7 @@ class DialogPlanner():
             self._launch_task(urgent_task_slot)
             return
 
-        if len(self.questions_under_discussion)>0:
+        if len(self.questions_under_discussion) > 0:
             # we have no active_question at current step, but have questions_under_discussion (Ignored Slots)
             #   re-ask a question in ReAsk queue
             slot_to_ask = self.questions_under_discussion[0]
@@ -562,7 +602,8 @@ class DialogPlanner():
                 return
             else:
                 # Exception?
-                import ipdb; ipdb.set_trace()
+                import ipdb;
+                ipdb.set_trace()
                 print("Investigate me!")
 
     def launch_next_task(self):
@@ -588,7 +629,7 @@ class DialogPlanner():
             interaction_obj = task.interaction_obj
             self._force_start_interaction_process(interaction_obj)
         elif isinstance(task, SlotTask):
-            slot_obj= task.item
+            slot_obj = task.item
             # slots must be carefully started! with check if they already completed, or in process so we neeed to call
             # import ipdb; ipdb.set_trace()
             # lets investigate the case
@@ -605,7 +646,8 @@ class DialogPlanner():
 
         :return:
         """
-        import ipdb; ipdb.set_trace()
+        import ipdb;
+        ipdb.set_trace()
 
         responses_list = self.ic.userdialog.show_latest_sys_responses()
 
@@ -624,7 +666,7 @@ class DialogPlanner():
                 print("Launched task")
 
 
-            elif len(self.questions_under_discussion)==0 :
+            elif len(self.questions_under_discussion) == 0:
                 # here we have two cases:
                 # 1. we said him something from one interaction, but don't wait any questions,
                 # although we have some tasks in plan that may have questions to discuss
@@ -648,21 +690,23 @@ class DialogPlanner():
                         # Exceptional case
                         # investigate
                         print("investigate me")
-                        import ipdb; ipdb.set_trace()
+                        import ipdb;
+                        ipdb.set_trace()
                         print("investigate me")
                 pass
             else:
                 # nothing to say, nothing to do...
-                #TODO templatize
+                # TODO templatize
                 self.ic.userdialog.send_message_to_user("Простите, я не знаю, что Вам ответить ;)")
         else:
             # nothing to do anymore for this step
             # if we have no active questions, but have pending we may ask them now
-            if len(self.questions_under_discussion)==0:
+            if len(self.questions_under_discussion) == 0:
                 print("MNo questions on discussion may be we can start some interaction?")
                 self.launch_next_task()
             else:
-                import ipdb; ipdb.set_trace()
+                import ipdb;
+                ipdb.set_trace()
                 print("We have questrion on discussion")
             return
 
