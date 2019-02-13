@@ -170,10 +170,8 @@ class AlarmSetterBot(unittest.TestCase):
         user_messages_sequence = ["Приветик, Роботишка", "УСТАНОВИ БУДИЛЬНИК на завтра 16:00", "Чак Норрис бы не задавал такие вопросы", "ЗАВТРА", "ДА"]
         userdialog = conjugate_agent_with_autouser(self.agent, user_messages_sequence)
 
-        # self.assertIn(self.test_phrase, userdialog[6])
-#
 
-
+# from tests.test_introduction_skill import IntroductionBotTest
 
 # class PersonsReceptorTest(unittest.TestCase):
 #     def setUp(self):
