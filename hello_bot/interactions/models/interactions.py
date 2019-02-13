@@ -26,6 +26,53 @@ class AbstractInteraction():
     def start(self, *args, **kwargs):
         raise Exception("NotImplemented")
 
+    @classmethod
+    def initialize(cls, ic, name=None, *args, **kwargs):
+        """
+        Interaction initialization requres:
+        1. specify its name (And register it in the Interactions Registry)
+        2. initilize EXIT GATES of the interaction.
+            EXIT GATES are declared in implementation class, if not then default set of exit gates is assumed
+            (the only: ExitGate_Ok)
+
+        :param ic:
+        :param name:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if not name:
+            # default name is a name of class
+            name = cls.__name__
+        # import ipdb; ipdb.set_trace()
+
+        intrctn = cls()
+
+        intrctn.ic = ic
+
+        # #########################################################################################
+        # # Exit Gate Signals and Registry initialization
+        intrctn.EXIT_GATES_SIGNALS = {}
+
+        if not hasattr(intrctn, 'EXIT_GATES_NAMES_LIST'):
+            # TODO fix to support inheritance of ExitGates!
+            # then import default Gates :
+            intrctn.EXIT_GATES_NAMES_LIST = cls.base_EXIT_GATES_NAMES_LIST
+
+        # now init signal objects for each exit gate:
+        for each_exit_gate_name in intrctn.EXIT_GATES_NAMES_LIST:
+            # create a signal object for each exit gate
+            intrctn.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(
+                providing_args=["userdialog"])
+
+        intrctn._anti_garbage_collector_callbacks_list = []
+        # END ExitGate Signals Initialization
+
+        ########################################################################################
+        intrctn.post_init_hook()
+
+        return intrctn
+
 
 class Interaction(models.Model, AbstractInteraction):
     """

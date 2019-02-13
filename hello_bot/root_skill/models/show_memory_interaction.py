@@ -23,7 +23,7 @@ class ShowMemoryInteraction(Interaction, AbstractInteraction):
         :return:
         """
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        self.global_trigger_receptor = PhrasesMatcher(phrases=["slots", "слоты"
+        self.global_trigger_receptor = PhrasesMatcher(phrases=["slots", "слоты", "Memory"
                                                                ],
                                                       daemon_if_matched=self.start)
         # connect receptor:

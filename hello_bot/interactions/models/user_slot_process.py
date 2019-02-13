@@ -190,7 +190,7 @@ class UserSlotProcess(models.Model):
 
         self.slot_filled_signal.send(sender=self, user_slot_process=self, results=result)
         self.save()
-        print("User response filled slot: %s!" % result)
+        print("User response filled slot %s: %s!" % (self.slot, result))
 
     def fast_evaluation_process_attempt(self):
         """
@@ -237,7 +237,7 @@ class UserSlotProcess(models.Model):
             # #########################################################################
             # ###### PreHistory Filling Process #####################################
             if hasattr(slot_spec_obj, 'prehistory_recept'):
-                print("Retrieving slot value from PreHistory")
+                print("Retrieving slot %s value from PreHistory" % slot_spec_obj)
                 # asserting it is callable method!
 
                 is_recepted, results = slot_spec_obj.prehistory_recept(self.ic.userdialog)

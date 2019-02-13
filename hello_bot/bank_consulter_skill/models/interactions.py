@@ -1,5 +1,5 @@
 # coding=utf-8
-from interactions.models import Interaction, SendTextOperation, UserInteraction
+from interactions.models import Interaction
 from bank_consulter_skill.models.slots import DesiredCurrencySlot, OptionIntentsSlot, NeedListDocsAndTarifsSlot, \
     ClientIsResidentRFSlot, ClientServiceRegionSlot, ClientPropertyTypeSlot, ClientAgreeWithServicePackConditionsSlot, \
     ClientOkToSelfServiceSlot, ClientIsReadyToGiveDocsSlot, ClientWantsNearestOfficeRecomendation

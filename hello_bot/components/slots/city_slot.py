@@ -1,9 +1,9 @@
 
 # TODO refactor with real city gazetter
-from components.slots.slots import BaseSlotField, DictionarySlotReceptorMixin
+from components.slots.slots import BaseSlotField, CategoricalReceptorMixin
 
 
-class CitySlot(BaseSlotField, DictionarySlotReceptorMixin):
+class CitySlot(BaseSlotField, CategoricalReceptorMixin):
     name = 'CitySlot'
 
     questioner = "В каком городе?"

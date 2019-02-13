@@ -8,3 +8,4 @@ from .user_slot_process import *
 from .user_slot import *
 # from .slots import *
 # from .second_models import *
+from .forms_factory import *

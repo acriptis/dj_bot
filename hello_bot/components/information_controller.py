@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import django.dispatch
 
-from components.dialog_planner import DialogPlanner
+from components.dialog_management.dialog_planner import DialogPlanner
 from components.interactions_manager import InteractionsManager
 from components.memory_manager import MemoryManager
 from components.slots.slots_manager import SlotsManager

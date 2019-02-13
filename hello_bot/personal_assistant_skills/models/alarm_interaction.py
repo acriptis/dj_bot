@@ -94,9 +94,8 @@ class AlarmSetterInteraction(Interaction):
         self.ic.sm.register_slot(self.alarm_timestamp_at_slot)
         # ##########################################################################################################
         # construct LocationSlot
-        from components.slots.slots import DictionarySlotReceptorMixin
+        from components.slots.slots import CategoricalReceptorMixin
         from interactions.models import UserSlotProcess
-        from components.slots.slots import DictionaryBasedSlotField
 
         # # Experimental code
         # self.alarm_title_slot_instance = FreeTextSlotField(

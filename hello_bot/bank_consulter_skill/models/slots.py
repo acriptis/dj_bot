@@ -1,8 +1,8 @@
 from components.slots.city_slot import CitySlot
-from components.slots.slots import BaseSlotField, DictionarySlotReceptorMixin, YesNoSlotReceptorMixin
+from components.slots.slots import BaseSlotField, CategoricalReceptorMixin, YesNoReceptorMixin
 
 
-class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
+class OptionIntentsSlot(BaseSlotField, CategoricalReceptorMixin):
     """
     1 Шаг Сценрия запрашивает у пользователя инфомрацию о намерении, ожидая получить
      выбор опций:
@@ -38,7 +38,7 @@ class OptionIntentsSlot(BaseSlotField, DictionarySlotReceptorMixin):
     ################################################################################################
 
 
-class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
+class DesiredCurrencySlot(BaseSlotField, CategoricalReceptorMixin):
     """
     Slot for requesting desired currency of user.
 
@@ -72,7 +72,7 @@ class DesiredCurrencySlot(BaseSlotField, DictionarySlotReceptorMixin):
 # NeedListDocsAndTarifsSlot
 # if user needs information about documents and tarifs
 
-class NeedListDocsAndTarifsSlot(BaseSlotField, YesNoSlotReceptorMixin):
+class NeedListDocsAndTarifsSlot(BaseSlotField, YesNoReceptorMixin):
     """
     Slot for requesting if user needs a list of docs and tarifs
 
@@ -90,7 +90,7 @@ class NeedListDocsAndTarifsSlot(BaseSlotField, YesNoSlotReceptorMixin):
 
 # #################################################################################
 # part of PrivateInfoForm:
-class ClientIsResidentRFSlot(BaseSlotField, YesNoSlotReceptorMixin):
+class ClientIsResidentRFSlot(BaseSlotField, YesNoReceptorMixin):
     name = 'ClientIsResidentRFSlot'
 
     questioner = "Вы резидент РФ?"
@@ -102,7 +102,7 @@ class ClientServiceRegionSlot(CitySlot):
     questioner = "В каком регионе обитаете?"
 
 
-class ClientPropertyTypeSlot(BaseSlotField, DictionarySlotReceptorMixin):
+class ClientPropertyTypeSlot(BaseSlotField, CategoricalReceptorMixin):
     name = 'ClientPropertyTypeSlot'
 
     questioner = "Какой у вас тип собственности?"
@@ -125,7 +125,7 @@ class ClientPropertyTypeSlot(BaseSlotField, DictionarySlotReceptorMixin):
     }
 
 
-class ClientAgreeWithServicePackConditionsSlot(BaseSlotField, YesNoSlotReceptorMixin):
+class ClientAgreeWithServicePackConditionsSlot(BaseSlotField, YesNoReceptorMixin):
     """
     Slot for requesting if user approves Big Offer (see: 4 BusinessOfferingInteraction)
 
@@ -144,7 +144,7 @@ class ClientAgreeWithServicePackConditionsSlot(BaseSlotField, YesNoSlotReceptorM
 #################################################################################
 
 
-class ClientOkToSelfServiceSlot(BaseSlotField, YesNoSlotReceptorMixin):
+class ClientOkToSelfServiceSlot(BaseSlotField, YesNoReceptorMixin):
     """
     Slot for requesting if user step5 question
 
@@ -159,7 +159,7 @@ class ClientOkToSelfServiceSlot(BaseSlotField, YesNoSlotReceptorMixin):
     ################################################################################################
 
 
-class ClientIsReadyToGiveDocsSlot(BaseSlotField, YesNoSlotReceptorMixin):
+class ClientIsReadyToGiveDocsSlot(BaseSlotField, YesNoReceptorMixin):
         """
         Slot for requesting user step6's question
 
@@ -174,7 +174,7 @@ class ClientIsReadyToGiveDocsSlot(BaseSlotField, YesNoSlotReceptorMixin):
         ################################################################################################
 
 
-class ClientWantsNearestOfficeRecomendation(BaseSlotField, YesNoSlotReceptorMixin):
+class ClientWantsNearestOfficeRecomendation(BaseSlotField, YesNoReceptorMixin):
         """
         Slot for requesting user step7's question
 

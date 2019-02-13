@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bank_consulter_skill.apps.BankConsulterSkillConfig',
     'personal_assistant_skills.apps.PersonalAssistantSkillsConfig',
     'root_skill.apps.RootSkillConfig',
+    'introduction_skill.apps.IntroductionSkillConfig',
 ]
 
 MIDDLEWARE = [
