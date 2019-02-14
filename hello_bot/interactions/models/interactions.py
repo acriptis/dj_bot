@@ -170,11 +170,7 @@ class Interaction(models.Model, AbstractInteraction):
             # if exit gate is not provided assert that the default exit gate is used:
             exit_gate = self.EXIT_GATE_OK
         print("connecting Exit Gate: %s, cb_fn: %s" % (self, callback_fn))
-        # self.exit_gate_signal.connect(callback_fn)
-        # import ipdb; ipdb.set_trace()
-
         # to avoid garbage collecting the functions we make hacky list:
-        # self.ic.DialogPlanner._callbacks_storage.append(callback_fn)
         self._anti_garbage_collector_callbacks_list.append(callback_fn)
         self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn)
 
