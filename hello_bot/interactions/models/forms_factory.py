@@ -86,10 +86,16 @@ class SlottyFormInteraction(Interaction):
             print("UNFILLED SLOTS:")
             print(unfilled_slots)
             next_slot = unfilled_slots[0]
+            # self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(
+            #     slot_spec_name=next_slot.get_name(),
+            #     target_uri=next_slot.get_name(),
+            #     callback=self.on_some_slots_filled, priority="URGENT")
+
+            # Dont connect callbacks twice!
             self.ic.DialogPlanner.remind_retrospect_or_retrieve_slot(
                 slot_spec_name=next_slot.get_name(),
                 target_uri=next_slot.get_name(),
-                callback=self.on_some_slots_filled, priority="URGENT")
+                priority="URGENT")
         else:
             # import ipdb; ipdb.set_trace()
             # discponnect all slots?
