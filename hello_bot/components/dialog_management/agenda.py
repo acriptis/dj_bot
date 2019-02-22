@@ -11,8 +11,6 @@ class Agenda():
 
         self.queue_of_tasks = []
 
-        self.interactions_in_queue = {}
-
         # list of urgent tasks, they must be started before reaskings:
         self.urgent_slot_tasks = []
 

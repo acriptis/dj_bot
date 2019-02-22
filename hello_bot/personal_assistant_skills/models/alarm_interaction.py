@@ -6,10 +6,7 @@ from personal_assistant_skills.models.slot_alarm_datetime import AlarmDateTimeSl
 
 
 class AlarmSetterInteraction(Interaction):
-    """
-    Interaction with GlobalReceptor Detecting the command about Setting Alarm
-
-    Alarm has
+    """Interaction with GlobalReceptor Detecting the command about Setting Alarm
     """
 
     class Meta:
@@ -17,14 +14,14 @@ class AlarmSetterInteraction(Interaction):
 
     def __init__(self, *args, **kwargs):
         super(Interaction, self).__init__(*args, **kwargs)
-        # super(AbstractInteraction, self).__init__()
 
     def post_init_hook(self):
-        """
-        The post-initialize hook  for attaching global receptors.
+        """The post-initialize hook for attaching global receptors.
 
         Here we connect the interaction's Global Receptors with InformationController
-        :return:
+
+        Returns:
+
         """
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
         self.global_trigger_receptor = PhrasesMatcher(phrases=["MAKE ALARM",
@@ -46,7 +43,7 @@ class AlarmSetterInteraction(Interaction):
         # установи напоминалку сходить в бассейн в субботу вечером
         # установи напоминалку сходить в бассейн на 4 апреля
 
-        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
 
         self._prepare_slots()
         # register slots:

@@ -60,7 +60,7 @@ class IntroductionInteraction(Interaction):
         self.global_trigger_receptor = PhrasesMatcher(phrases=["ПОЗНАКОМИМСЯ", "ЗНАКОМСТВО"],
                                                       daemon_if_matched=self.start)
         # connect receptor:
-        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
         slots_factory = SlotsFactory()
         self.username_slot = slots_factory.produce_free_text_slot('username_slot', "Как вас зовут?")
         self.ic.sm.register_slot(self.username_slot)

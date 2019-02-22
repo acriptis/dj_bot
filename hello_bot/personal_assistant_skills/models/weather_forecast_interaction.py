@@ -48,7 +48,7 @@ class WeatherForecastInteraction(Interaction):
                                                                ],
                                                       daemon_if_matched=self.start)
         # connect receptor:
-        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
 
         self._prepare_slots()
 

@@ -27,7 +27,7 @@ class ShowMemoryInteraction(Interaction, AbstractInteraction):
                                                                ],
                                                       daemon_if_matched=self.start)
         # connect receptor:
-        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
 
         # self._prepare_slots()
         # # register slots:
@@ -70,7 +70,7 @@ class ShowAgendaInteraction(Interaction, AbstractInteraction):
                                                                ],
                                                       daemon_if_matched=self.start)
         # connect receptor:
-        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
 
     def start(self, *args, **kwargs):
         data_raw = self.ic.DialogPlanner.agenda.queue_of_tasks
@@ -102,7 +102,7 @@ class ShowAgendaInteraction(Interaction, AbstractInteraction):
 #                                                                                   ],
 #                                                                 daemon_if_matched=self.start)
 #         # connect receptor:
-#         self.ic.user_message_signal.connect(self.global_trigger_receptor)
+#         self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
 #
 #     def start(self, *args, **kwargs):
 #         data_raw = self.ic.DialogPlanner.agenda.queue_of_tasks

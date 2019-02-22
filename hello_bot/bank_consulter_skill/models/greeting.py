@@ -30,7 +30,7 @@ class GreetingInteraction(Interaction, AbstractInteraction):
 
         # here we connect the interaction's Global Receptors with InformationController's UserMessageEvent
         # (IC helps to adapt user-agnostic Interaction specification for particular User Case)
-        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
 
     def start(self, *args, **kwargs):
         """

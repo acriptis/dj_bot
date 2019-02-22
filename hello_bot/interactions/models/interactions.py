@@ -169,10 +169,17 @@ class Interaction(models.Model, AbstractInteraction):
         if not exit_gate:
             # if exit gate is not provided assert that the default exit gate is used:
             exit_gate = self.EXIT_GATE_OK
+
+        # import inspect
+        # import ipdb;
+        # ipdb.set_trace()
+        # inspect.getmembers(inspect.getmembers(callback_fn)[7][1])[24][1]
+        # inspect.getmembers(callback_fn)[22][1]
+        # inspect.getmembers(callback_fn)[7][1]
         print("connecting Exit Gate: %s, cb_fn: %s" % (self, callback_fn))
         # to avoid garbage collecting the functions we make hacky list:
         self._anti_garbage_collector_callbacks_list.append(callback_fn)
-        self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn)
+        self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn, weak=False)
 
     def post_init_hook(self):
         """
@@ -250,7 +257,7 @@ class QuestionInteractionFactory(Interaction):
         print("START")
         self.active_user_interaction = UserInteraction.objects.get_or_create(interaction=self, userdialog=kwargs['userdialog'], state=UserInteraction.ACTIVE)
         self.ask_question(kwargs['userdialog'])
-        # self.ic.user_message_signal.connect(self.response_receptor)
+        # self.ic.user_message_signal.connect(self.response_receptor, weak=False)
         # self.ic.active_receptors.append(self.response_receptor)
         # import ipdb; ipdb.set_trace()
         # print(active_interaction)
@@ -258,12 +265,7 @@ class QuestionInteractionFactory(Interaction):
     def ask_question(self, userdialog):
         # send text operation
         userdialog.send_message_to_user(self.question)
-        self.ic.user_message_signal.connect(self.response_receptor, dispatch_uid=self.dispatch_id)
-        # now we must attach self for listening further responses or the next one
-
-
-        # userdialog.signals["UserMessage"].connect(self.response_receptor)
-        # userdialog.agenda.append(self)
+        self.ic.user_message_signal.connect(self.response_receptor, dispatch_uid=self.dispatch_id, weak=False)
 
     def response_receptor(self, message, userdialog, *args, **kwargs):
         """
@@ -361,7 +363,7 @@ class GreetInteraction(Interaction):
         self.ic = ic
 
         # self.exit_gate_signal = django.dispatch.Signal(providing_args=["userdialog"])
-        ic.user_message_signal.connect(self.global_trigger_receptor)
+        ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
         # ic.active_receptors.append(self.global_trigger_receptor)
 
     def do(self, *args, **kwargs):
@@ -413,7 +415,7 @@ class ByeInteraction(Interaction):
         """
         # ic.receptors
         self.ic = ic
-        ic.user_message_signal.connect(self.global_trigger_receptor)
+        ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
         # ic.active_receptors.append(self.global_trigger_receptor)
 
     def do(self, *args, **kwargs):

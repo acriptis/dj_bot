@@ -99,6 +99,7 @@ class UserSlotProcess(models.Model):
         if self.ic.DialogPlanner.current_step_active_question:
             # second slot at current step
             # Exceptional case adding the second slot. Is it context switch?
+            print("Exceptional case adding the second slot. Is it context switch?")
             print(self.ic.DialogPlanner.questions_under_discussion)
             import ipdb; ipdb.set_trace()
 
@@ -107,7 +108,7 @@ class UserSlotProcess(models.Model):
         self.ic.DialogPlanner.current_step_active_question = self.slot
 
         # connect particular Receptor to ActiveReceptors Pool
-        self.ic.user_message_signal.connect(self.on_user_response)
+        self.ic.user_message_signal.connect(self.on_user_response, weak=False)
         self.state = self.ACTIVE
         self.save()
         # #################################################################################

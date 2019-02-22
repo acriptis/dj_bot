@@ -677,7 +677,7 @@ class OperatorSwitchInteraction(Interaction):
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
         self.global_trigger_receptor = PhrasesMatcher(phrases=["ОПЕРАТОР", "Переключите меня на оператора"],
                                                       daemon_if_matched=self.start)
-        self.ic.user_message_signal.connect(self.global_trigger_receptor)
+        self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
 
 
     def start(self, *args, **kwargs):

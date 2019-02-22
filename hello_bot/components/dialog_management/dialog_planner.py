@@ -245,8 +245,8 @@ class DialogPlanner(BaseDialogPlanner):
             # connect signals
             # import ipdb; ipdb.set_trace()
             for each_cb_fn in callback_fns:
-                usp.slot_filled_signal.connect(each_cb_fn)
-            usp.slot_filled_signal.connect(self._slot_process_fin)
+                usp.slot_filled_signal.connect(each_cb_fn, weak=False)
+            usp.slot_filled_signal.connect(self._slot_process_fin, weak=False)
 
         usp.start(self.ic)
 
