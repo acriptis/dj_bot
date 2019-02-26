@@ -1,3 +1,4 @@
 Django
 deeppavlov
 dateparser
+django_rest_framework
