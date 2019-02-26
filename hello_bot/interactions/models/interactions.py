@@ -65,7 +65,7 @@ class AbstractInteraction():
             intrctn.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(
                 providing_args=["userdialog"])
 
-        intrctn._anti_garbage_collector_callbacks_list = []
+        # intrctn._anti_garbage_collector_callbacks_list = []
         # END ExitGate Signals Initialization
 
         ########################################################################################
@@ -144,7 +144,7 @@ class Interaction(models.Model, AbstractInteraction):
             intrctn.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
 
 
-        intrctn._anti_garbage_collector_callbacks_list = []
+        # intrctn._anti_garbage_collector_callbacks_list = []
         # END ExitGate Signals Initialization
 
         ########################################################################################
@@ -178,7 +178,7 @@ class Interaction(models.Model, AbstractInteraction):
         # inspect.getmembers(callback_fn)[7][1]
         print("connecting Exit Gate: %s, cb_fn: %s" % (self, callback_fn))
         # to avoid garbage collecting the functions we make hacky list:
-        self._anti_garbage_collector_callbacks_list.append(callback_fn)
+        # self._anti_garbage_collector_callbacks_list.append(callback_fn)
         self.EXIT_GATES_SIGNALS[exit_gate].connect(callback_fn, weak=False)
 
     def post_init_hook(self):

@@ -14,9 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import path
+from dp_assistant_rest.skill_interactor_api_view import SkillInteractor
 
 urlpatterns = [
-    # path('polls/', include('polls.urls')),
     path('admin/', admin.site.urls),
+    path('ruler_call/', SkillInteractor.as_view()),
+
 ]

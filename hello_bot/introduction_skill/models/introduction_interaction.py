@@ -100,7 +100,7 @@ class IntroductionInteraction(Interaction):
             self.sfi.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(
                 providing_args=["userdialog"])
 
-        self.sfi._anti_garbage_collector_callbacks_list = []
+        # self.sfi._anti_garbage_collector_callbacks_list = []
         # END ExitGate Signals Initialization
 
 

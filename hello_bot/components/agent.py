@@ -3,8 +3,12 @@ from bank_bot.settings import DEFAULT_USER_NAME
 
 class AgentSkillInitializer():
     """
-    Agent that initializes skills
-    Instead of basic agent which requires skills
+    Agent that initializes skills.
+    This Agent works only as personal Agent (means for each User we need to create a new Agent
+    instance and keep it alive until dialog ends, otherwise connections between actions will be
+    forgotten by Agent...).
+
+    Problem of persistency and better multiuser support will be implemented in ruler_bot framework.
     """
     def __init__(self, skills_spec):
         self.skills_spec = skills_spec
@@ -32,12 +36,18 @@ class AgentSkillInitializer():
 
     def __call__(self, utterance, *args, **kwargs):
         """
+
         Framework enterpoint
-        :param utterance: what user said
-        :param args:
-        :param kwargs:
-        :return:
+
+        Args:
+            utterance: what user said
+            *args:
+            **kwargs:
+
+        Returns:
+
         """
+
         # push user's utterance into userdialog container
         utterance = utterance.strip()
         self.ic.userdialog._push_dialog_act(self.user, utterance)
@@ -64,10 +74,18 @@ class AgentSkillInitializer():
         # polling listeners (receptors/skills) with new message:
         self.ic.user_message_signal.send(sender=self, message=utterance, userdialog=self.ic.userdialog)
 
-        # TODO show pending receptors
-
         self.ic.DialogPlanner.process_agenda()
 
         responses_list = self.ic.userdialog.show_latest_sys_responses()
 
-        return responses_list
+        # merge utterances for discrete Dialog System
+        bot_resp = ". ".join(responses_list)
+
+        if len(bot_resp)>0:
+            # bot answered something
+
+            # response for the state is utterance+confidence. We mark confidence as 0.75
+            state_resp = {'text': bot_resp, 'confidence': 0.75}
+        else:
+            state_resp = {'text': "Даже не знаю, что ответить...", 'confidence': 0.25}
+        return state_resp

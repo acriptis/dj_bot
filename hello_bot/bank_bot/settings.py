@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+
     'interactions.apps.InteractionsConfig',
     'bank_consulter_skill.apps.BankConsulterSkillConfig',
     'personal_assistant_skills.apps.PersonalAssistantSkillsConfig',

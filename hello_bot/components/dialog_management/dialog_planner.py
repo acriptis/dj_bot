@@ -11,8 +11,13 @@ class DialogPlanner(BaseDialogPlanner):
     """
 
     # tasks queue collector
-    def __init__(self, ic):
-        self.ic = ic
+    def __init__(self, user_domain_controller):
+        """
+
+        Args:
+            user_domain_controller: UserDomainController
+        """
+        self.ic = user_domain_controller
 
         # list of tasks to be done in dialog
         self.agenda = Agenda()
