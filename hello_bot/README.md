@@ -9,7 +9,7 @@ Available Skills (drafts):
 1. Introduction Skill. Collects personal slots and after slotfilling provides a recomendation. Use `ЗНАКОМСТВО` keyword in chat to trigger the scenraio.
 2. WeatherForecast Skill. Responds for commands with `ПОГОДА` keyword by providing weather
 3. AlarmSetterSkill. Sets alarm at specified time. triggering keyword: `НАПОМИНАЛКА`
-4. Bank Consulter Skill. Interacts with user for complex Scenario.
+4. Bank Consulter Skill. Interacts with user for complex Scenario. keyword: `БАНК`
 5. Root Skill. Exposes state of slots and agenda (use `план` and `слоты` keywords in chat)
 # Deployment
 0. create a folder for server and virtualenv (change `temp_hellobot` to your folder name):  

@@ -1,10 +1,5 @@
-import django
-from django.db import models
-
 from components.matchers.matchers import PhrasesMatcher
 from interactions.models import Interaction, AbstractInteraction, SendTextOperation, UserInteraction
-
-from bank_consulter_skill.models.slots import DesiredCurrencySlot
 
 
 class GreetingInteraction(Interaction, AbstractInteraction):
@@ -14,7 +9,7 @@ class GreetingInteraction(Interaction, AbstractInteraction):
     """
 
     # TODO translatable?
-    out_text = "Здравствуйте, это помощник СберБанка"
+    out_text = "Здравствуйте, это помощник Банка"
 
     def post_init_hook(self):
 
@@ -25,7 +20,7 @@ class GreetingInteraction(Interaction, AbstractInteraction):
         # this Interaction may be activated by Receptor
         # TODO templatize
         self.global_trigger_receptor = PhrasesMatcher(
-            phrases=["Привет", "Здравствуйте", "Hello", "Kek", "Hi", "Приветик"],
+            phrases=["Привет", "Здравствуйте", "Hello", "Kek", "Hi", "Приветик", "БАНК", "КОНСУЛЬТАЦИЯ"],
             daemon_if_matched=self.start)
 
         # here we connect the interaction's Global Receptors with InformationController's UserMessageEvent
