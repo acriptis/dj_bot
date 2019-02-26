@@ -29,14 +29,52 @@ Available Skills (drafts):
 Fin! Now you can start server and use it!
 
 # Starting Skill REST API Server:
-6. Now we can 
+6. Now we can start Django server for REST API:  
 `python manage.py runserver 127.0.0.1:8000`
-7. Now you can test REST API in 
 
 ## Agent-Skill REST API interaction
 Endpoint for POST requests from Agent to Skill: `/ruler_call/` 
-Example: `http://127.0.0.1:8000/ruler_call/`
-Endpoint expects to receive serialized Batch of States as specified: 
+
+Example: 
+
+`http://127.0.0.1:8000/ruler_call/`
+
+Minimal Payload sent by POST method: 
+```{
+  "dialogs": [
+    {
+      "utterances": [
+        {
+          "id": "5c65706b0110b377e17eba3f",
+          "text": "давай устроим ЗНАКОМСТВО дорогой ботик",
+          "user_id": "5c65706b0110b377e17eba37",
+          "date_time": "2019-02-14 13:43:07.595000"
+        }
+      ],
+      "user": {
+        "id": "5c65706b0110b377e17eba37",
+        "user_telegram_id": "0801e781-0b76-43fa-9002-fcdc147d35af"
+      }
+    },
+    {
+      "utterances": [
+        {
+          "id": "5c65706b0110b377e17eba43",
+          "text": "Когда началась Вторая Мировая?",
+          "user_id": "5c65706b0110b377e17eba37"
+        }
+      ],
+      "user": {
+        "id": "5c65706b0110b377e17eba42"
+      }
+    }
+  ]
+}
+```
+
+ref: `hello_bot/dp_assistant_rest/input_post__request_example_minimal.json`
+
+Endpoint expects to receive serialized Batch of States as specified in [DeepPavlov Agent State API](https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5mri8Q/edit#heading=h.iolifv6pxre8). 
 
 # Settings
 There is a lot of hardcode in this version.
