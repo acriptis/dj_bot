@@ -13,17 +13,17 @@ Available Skills (drafts):
 5. AlarmSetterSkill. Sets alarm at specified time.
 
 # Deployment
-0. create a folder for server and virtualenv (change `temp_hellobot` to your folder name):
+0. create a folder for server and virtualenv (change `temp_hellobot` to your folder name):  
 `mkdir temp_hellobot; cd temp_hellobot/`
-1. download the source code:
+1. download the source code:  
 `git clone https://github.com/acriptis/dj_bot`
-2. create a virtual environment:
+2. create a virtual environment:  
 `virtualenv .venv3 -p python3`
-3. activate virtualenvironment:
+3. activate virtualenvironment:  
 `source .venv3/bin/activate`
-4. install requirements:
+4. install requirements:  
 `cd hello_bot; pip install -r requirements.txt`
-5. Make SQLite3 database migrations:
+5. Make SQLite3 database migrations:  
 `python manage.py migrate`
 
 Fin! Now you can start server and use it!
