@@ -6,12 +6,11 @@ REST API to communicate with DeepPavlov agent system.
 See: https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5mri8Q/edit#heading=h.iolifv6pxre8 
  
 Available Skills (drafts):
-1. Introduction Skill. Collects personal slots and after slotfilling provides a recomendation
-2. Bank Consulter Skill. Interacts with user for complex Scenario.
-3. WeatherForecast Skill. Responds for commands with `Weather` keyword by providing weather
-4. Root Skill. Exposes state of slots
-5. AlarmSetterSkill. Sets alarm at specified time.
-
+1. Introduction Skill. Collects personal slots and after slotfilling provides a recomendation. Use `ЗНАКОМСТВО` keyword in chat to trigger the scenraio.
+2. WeatherForecast Skill. Responds for commands with `ПОГОДА` keyword by providing weather
+3. AlarmSetterSkill. Sets alarm at specified time. triggering keyword: `НАПОМИНАЛКА`
+4. Bank Consulter Skill. Interacts with user for complex Scenario.
+5. Root Skill. Exposes state of slots and agenda (use `план` and `слоты` keywords in chat)
 # Deployment
 0. create a folder for server and virtualenv (change `temp_hellobot` to your folder name):  
 `mkdir temp_hellobot; cd temp_hellobot/`
@@ -33,9 +32,11 @@ Fin! Now you can start server and use it!
 `python manage.py runserver 127.0.0.1:8000`
 
 ## Agent-Skill REST API interaction
-Endpoint for POST requests from Agent to Skill: `/ruler_call/` 
+Endpoint for POST requests from Agent Server is `<HOSTNAME>/ruler_call/`.
+ 
+Endpoint expects to receive serialized Batch of States as specified in [DeepPavlov Agent State API](https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5mri8Q/edit#heading=h.iolifv6pxre8).
 
-Example: 
+### Example: 
 
 `http://127.0.0.1:8000/ruler_call/`
 
@@ -74,14 +75,26 @@ Minimal Payload sent by POST method:
 
 ref: `hello_bot/dp_assistant_rest/input_post__request_example_minimal.json`
 
-Endpoint expects to receive serialized Batch of States as specified in [DeepPavlov Agent State API](https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5mri8Q/edit#heading=h.iolifv6pxre8). 
+Example output:
+```
+[
+    {
+        "text": "Как вас зовут?",
+        "confidence": 0.75
+    },
+    {
+        "text": "Даже не знаю, что ответить...",
+        "confidence": 0.25
+    }
+]
+``` 
 
 # Settings
 There is a lot of hardcode in this version.
 But you can look into `bank_bot/settings.py` for Django settings.
 URLs are specified in `bank_bot/urls.py`
 
-## Domain code
+# Domain code
 Domain code is placed in skill folders: 
 - introduction_skill
 - bank_consulter_skill
