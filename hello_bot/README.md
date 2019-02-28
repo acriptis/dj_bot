@@ -21,7 +21,7 @@ Available Skills (drafts):
 3. activate virtualenvironment:  
 `source .venv3/bin/activate`
 4. install requirements:  
-`cd hello_bot; pip install -r requirements.txt`
+`cd dj_bot/hello_bot; pip install -r requirements.txt`
 5. Make SQLite3 database migrations:  
 `python manage.py migrate`
 
