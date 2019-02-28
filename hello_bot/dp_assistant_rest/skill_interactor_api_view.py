@@ -118,5 +118,9 @@ class SkillInteractor(APIView):
                 reactions_proposals.append(state_resp)
         else:
             Response("Unsupported format! Need `dialog` attribute!")
-        return Response(reactions_proposals)
+
+        # just to align api spec:
+        # https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5mri8Q/edit#heading=h.85j9g7xx30oo
+        responses_dict = {'responses': reactions_proposals}
+        return Response(responses_dict)
 
