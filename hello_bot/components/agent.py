@@ -88,4 +88,29 @@ class AgentSkillInitializer():
             state_resp = {'text': bot_resp, 'confidence': 0.75}
         else:
             state_resp = {'text': "Даже не знаю, что ответить...", 'confidence': 0.25}
+
+        personal_info_dict = self.slots_serialization()
+        if personal_info_dict:
+            state_resp.update(personal_info_dict)
         return state_resp
+
+    def slots_serialization(self):
+        """
+        Serializes internal slots into AgentState API
+        # https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5mri8Q/edit#heading=h.85j9g7xx30oo
+        Returns:
+
+        """
+        # TODO refactor me
+        # entail slots from internal representation into AgentState API
+        # https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5mri8Q/edit#heading=h.85j9g7xx30oo
+        username_slot_value = self.ic.MemoryManager.get_slot_value_quite('username_slot')
+        personal_info_dict = {}
+        if username_slot_value:
+            personal_info_dict['name'] = username_slot_value
+
+        interests_slot_value = self.ic.MemoryManager.get_slot_value_quite('interests_slot')
+        if interests_slot_value:
+            personal_info_dict['interests'] = interests_slot_value
+
+        return personal_info_dict
