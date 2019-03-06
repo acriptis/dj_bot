@@ -94,6 +94,10 @@ There is a lot of hardcode in this version.
 But you can look into `bank_bot/settings.py` for Django settings.
 URLs are specified in `bank_bot/urls.py`
 
+## Enabled skills in REST API
+Enabled skills for REST API are specified in `dp_assistant_rest/skill_interactor_api_view.py`. 
+They are hardcoded in AgentRouter class.
+
 # Domain code
 Domain code is placed in skill folders: 
 - introduction_skill
