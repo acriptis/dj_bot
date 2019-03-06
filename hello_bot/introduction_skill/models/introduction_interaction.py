@@ -57,7 +57,7 @@ class IntroductionInteraction(Interaction):
         """
         ############### Prepare RECEPTOR #################################################
         # this Interaction may be activated by Receptor (actually it is binary intent classifier here)
-        self.global_trigger_receptor = PhrasesMatcher(phrases=["ПОЗНАКОМИМСЯ", "ЗНАКОМСТВО"],
+        self.global_trigger_receptor = PhrasesMatcher(phrases=["ПОЗНАКОМИМСЯ", "ЗНАКОМСТВО", "/start"],
                                                       daemon_if_matched=self.start)
         # connect receptor:
         self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
