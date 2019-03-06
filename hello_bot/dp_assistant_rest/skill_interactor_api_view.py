@@ -28,9 +28,9 @@ class AgentRouter():
             # create new Agent for the user
             print("Create new USER!")
 
-            personal_agents_idx[user_id] = AgentSkillInitializer(
-                [IntroductionSkill, BankConsulterSkill, WeatherSkill, AlarmSkill, RootSkill])
-            # personal_agents_idx[user_id] = AgentSkillInitializer([IntroductionSkill, RootSkill])
+            # personal_agents_idx[user_id] = AgentSkillInitializer(
+            #     [IntroductionSkill, BankConsulterSkill, WeatherSkill, AlarmSkill, RootSkill])
+            personal_agents_idx[user_id] = AgentSkillInitializer([IntroductionSkill, WeatherSkill])
 
         bot_resp = personal_agents_idx[user_id](utterance_str)
 
