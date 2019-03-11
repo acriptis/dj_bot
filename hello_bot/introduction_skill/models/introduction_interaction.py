@@ -7,33 +7,6 @@ from interactions.models.forms_factory import SlottyFormInteraction
 from interactions.models import Interaction
 from components.slots.slots_factory import SlotsFactory
 
-# class UserNameSlot(FreeTextSlot):
-#     name = 'UserNameSlot'
-#
-#     questioner = "Как к вам можно обращаться?"
-#
-#     # RECEPTOR specification:
-
-#
-# class UserInterestsSlot(CitySlot):
-#     name = 'UserInterestsSlot'
-#
-#     questioner = "Что вас интересует? (животные, компьютеры, неживая материя, абстрактные концепции)"
-#
-#
-# class UserOccupationSlot(CitySlot):
-#     name = 'UserOccupationSlot'
-#
-#     questioner = "Какая ваша профессия?"
-#
-#
-# class UserFavAnimalSlot(CitySlot):
-#     name = 'UserFavAnimalSlot'
-#
-#     questioner = "Какое у вас любимое животное?"
-#
-
-
 
 class IntroductionInteraction(Interaction):
 # class IntroductionInteraction(AbstractInteraction):
@@ -62,11 +35,11 @@ class IntroductionInteraction(Interaction):
         # connect receptor:
         self.ic.user_message_signal.connect(self.global_trigger_receptor, weak=False)
         slots_factory = SlotsFactory()
-        self.username_slot = slots_factory.produce_free_text_slot('username_slot', "Как вас зовут?")
+        self.username_slot = slots_factory.produce_free_text_slot('username_slot', "Как тебя зовут?")
         self.ic.sm.register_slot(self.username_slot)
 
         self.interests_slot = slots_factory.produce_categorical_slot(name='interests_slot',
-                                                                questioner="Какие у вас хобби?",
+                                                                questioner="Какие имеешь увлечения?",
                                                                 categories_domain_specification={
                                                                     "MOVIES": ["Кино", "Фильм"],
                                                                     "MUSIC": ["Музык", "Гитар"],
