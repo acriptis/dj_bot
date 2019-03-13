@@ -43,9 +43,11 @@ class Signal():
                 # previous reflexes (on /start event)
                 # ok
                 return
+
             else:
+                print("Exception!")
                 print(e)
-                import ipdb; ipdb.set_trace()
+                # import ipdb; ipdb.set_trace()
                 print(e)
                 raise e
 
