@@ -116,4 +116,7 @@ Then you can run:
 `python scripts/start_telegram.py`
 
 # Run tests
-`python tests/test_bots.py`
+`python tests/test_introduction_skill.py`
+`python tests/test_translator_skill.py`
+`python tests/test_currency_converter_skill.py`
+
