@@ -1,0 +1,7 @@
+django
+mongoengine
+django_rest_framework
+django_rest_framework_mongoengine
+djongo
+deeppavlov
+ipdb
