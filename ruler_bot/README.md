@@ -99,9 +99,8 @@ They are hardcoded in AgentRouter class.
 # Domain code
 Domain code is placed in skill folders: 
 - introduction_skill
-- bank_consulter_skill
-- personal_assistant_skills
 - root_skill 
+-translator_skill
 
 # Setup Translator Skill
 Translator Skill requires BingTranslator token exported as environmental variable:
