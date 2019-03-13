@@ -1,7 +1,9 @@
-django
-mongoengine
-django_rest_framework
-django_rest_framework_mongoengine
-djongo
-deeppavlov
+Django==2.1.7
+django-mongoengine==0.3.1
+mongoengine==0.16.3
+djangorestframework==3.9.1
+django-rest-framework-mongoengine==3.3.1
+djongo==1.2.31
+-e git+https://github.com/deepmipt/DeepPavlov@0f0f1ec4cf33f817658ffb3d363cb84741a9e032#egg=deeppavlov
+pymongo==3.7.1
 ipdb

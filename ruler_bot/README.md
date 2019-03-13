@@ -10,8 +10,8 @@ Available Skills (drafts):
 2. Root Skill. Exposes state of slots and agenda (use `план` and `слоты` keywords in chat)
 3. Translator Skill. Helps to translate words and phrases from/to different languages (English, Russian, Portuguese, Spanish, Japanese)
 # Deployment
-0. create a folder for server and virtualenv (change `temp_hellobot` to your folder name):  
-`mkdir temp_ruler_bot; cd temp_ruler_bot/`
+0. create a folder for server and virtualenv (change `temp_rulerbot` to your folder name):  
+`mkdir temp_rulerbot; cd temp_rulerbot/`
 1. download the source code:  
 `git clone https://github.com/acriptis/dj_bot`
 2. create a virtual environment:  
@@ -100,7 +100,7 @@ They are hardcoded in AgentRouter class.
 Domain code is placed in skill folders: 
 - introduction_skill
 - root_skill 
--translator_skill
+- translator_skill
 
 # Setup Translator Skill
 Translator Skill requires BingTranslator token exported as environmental variable:
