@@ -22,7 +22,9 @@ Available Skills (drafts):
 `cd dj_bot/ruler_bot; pip install -r requirements.txt`
 5. Make SQLite3 database migrations:  
 `python manage.py migrate`
-
+6. If you need Translator Skill you need to provide environmental variable `TRANSLATOR_TEXT_KEY` with secret key for 
+BingTranslator API like:
+`export TRANSLATOR_TEXT_KEY="123PUTYOURKEY321""`
 Fin! Now you can start server and use it!
 
 # Starting Skill REST API Server:

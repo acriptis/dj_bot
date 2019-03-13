@@ -71,7 +71,7 @@ class SkillInteractor(APIView):
               "utterances": [
                 {
                   "id": "5c65706b0110b377e17eba43",
-                  "text": "Когда началась Вторая Мировая?",
+                  "text": "Как переводится слово mother?",
                   "user_id": "5c65706b0110b377e17eba37"
                 }
               ],
