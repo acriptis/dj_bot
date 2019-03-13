@@ -8,7 +8,8 @@ See: https://docs.google.com/document/d/1Z3ZWgyL6xj674Un_9JXIvEPpMjWlhl6ueZOlw5m
 Available Skills (drafts):
 1. Introduction Skill. Collects personal slots and after slotfilling provides a recomendation. Use `ЗНАКОМСТВО` keyword in chat to trigger the scenraio.
 2. Root Skill. Exposes state of slots and agenda (use `план` and `слоты` keywords in chat)
-3. Translator Skill. Helps to translate words and phrases from/to different languages (English, Russian, Portuguese, Spanish, Japanese)
+3. Translator Skill. Helps to translate words and phrases from/to different languages 
+(English, Russian, Portuguese, Spanish, Japanese). Requires Bing Translator Service keys in [microsoft azure](https://portal.azure.com/#home) 
 # Deployment
 0. create a folder for server and virtualenv (change `temp_rulerbot` to your folder name):  
 `mkdir temp_rulerbot; cd temp_rulerbot/`
