@@ -119,7 +119,8 @@ class UserDomain(Document):
             Exception: For multiple instances of the provided filter.
 
         """
-
+        if isinstance(user_id, int):
+            user_id = str(user_id)
         results = UserDomain.objects(user_id=user_id)
 
         if results:

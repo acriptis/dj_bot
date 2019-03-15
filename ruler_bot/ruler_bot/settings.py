@@ -184,3 +184,12 @@ DIALOG_SYSTEM_USER_NAME = 'SYS'
 
 # username which is used for default user:
 DEFAULT_USER_NAME = 'USER'
+
+
+# #######################################
+# local settings
+try:
+    from .local_settings import *
+except ImportError:
+    pass
+# #######################################

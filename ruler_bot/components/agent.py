@@ -90,6 +90,7 @@ class AgentSkillEmulator():
         # ####### Merge outputed utterances to adapt for descrete system #######################
         # we wrap responses into confidence format
         # interactions push their hypotheses with Dialog Planner
+        print("Collecting pending utterances")
         merged_answer = ""
         if hasattr(user_domain, 'pending_utterances'):
             pending_utterances = user_domain.pending_utterances
