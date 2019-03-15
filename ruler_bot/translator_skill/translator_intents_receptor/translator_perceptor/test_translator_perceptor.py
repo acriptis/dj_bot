@@ -86,9 +86,6 @@ class TestCurrencyConverterSkill(unittest.TestCase):
 
         # TODO
         lines = """
-                             
-                
-                
                 как будет по русски have
                 как по русски будет to
                 перевод слова дом на английский
@@ -163,8 +160,6 @@ class TestCurrencyConverterSkill(unittest.TestCase):
         self.assertFalse(receptor_out)
         receptor_out = self.perceptor("часто употребляемые английские слова с переводом")
         self.assertFalse(receptor_out)
-
-
 
 
 if __name__ == "__main__":
