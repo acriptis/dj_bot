@@ -4,6 +4,7 @@ import unittest
 import sys
 import os
 
+
 SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(os.path.dirname(SELF_DIR))
 PREROOT_DIR = os.path.dirname(ROOT_DIR)
@@ -15,7 +16,8 @@ import django
 
 django.setup()
 
-from translator_skill.translator_service.translator_service import BingTranslatorService
+from translator_skill.translator_service.bing_language_translator_service import \
+    BingTranslatorService
 
 if __name__=="__main__":
     bt = BingTranslatorService()

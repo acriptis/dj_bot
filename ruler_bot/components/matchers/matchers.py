@@ -144,8 +144,6 @@ class RegExpGroupMatcher(AbstractTextMatcher):
     """
     def __init__(self, regexp_str_list):
         self.regexp_str_list = regexp_str_list
-        # regexp_matcher_object = re.compile(regexp_str)
-        # self.regexp_matcher_obj = regexp_matcher_object
 
     def check_match(self, text, *args, **kwargs):
         """

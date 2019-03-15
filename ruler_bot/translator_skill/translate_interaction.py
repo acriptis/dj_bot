@@ -1,4 +1,6 @@
 from components.interactions.models import Interaction
+from translator_skill.translator_service.bing_language_translator_service import \
+            BingTranslatorService
 from translator_skill.translator_intents_receptor.translator_perceptor.translate_intent_perceptor import \
     TranslatePerceptor
 
@@ -33,18 +35,41 @@ class TranslatorInteraction(Interaction):
         print(kwargs)
         # import ipdb; ipdb.set_trace()
         assert 'phrase_to_translate' in kwargs
+        assert 'language_entities' in kwargs
+        assert 'target_language_code_candidates' in kwargs
 
-        translation = self.translate_phrase(kwargs['phrase_to_translate'], kwargs['language_entities'])
+        translation = self.translate_phrase(
+            phrase_to_translate=kwargs['phrase_to_translate'],
+            language_entities=kwargs['target_language_code_candidates'])
         if translation:
             kwargs['user_domain'].udm.DialogPlanner.sendText(translation)
+        else:
+            # write something like "I don't know how to translate this"?
+            pass
 
     def translate_phrase(self, phrase_to_translate, language_entities):
-        from translator_skill.translator_service.translator_service import BingTranslatorService
+        """
+        returns translation string or None
+        """
+
         bts = BingTranslatorService()
         if not language_entities:
             language_entities = ['ru', 'en']
-        translation = bts.translate(phrase_to_translate, language_entities)
-        return translation
+        # elif len(language_entities)==1:
+        #     # it often lacks russian language while being written in russian like:
+        #     #{'text': 'перевод с английского слова better', 'phrase_to_translate': 'better',...
+        #     if 'ru' not in language_entities:
+        #         language_entities.append("ru")
+        #     if 'en' not in language_entities:
+        #         language_entities.append("en")
+        try:
+            translation = bts.translate(phrase_to_translate, language_entities)
+            return translation
+        except Exception as e:
+            # translation exception may occur because of incorrect language entities
+            # when translation is from the same language
+            print(e)
+            return None
 
     def connect_to_dataflow(self, udc):
         """
