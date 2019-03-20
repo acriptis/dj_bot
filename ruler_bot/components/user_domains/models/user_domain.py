@@ -220,3 +220,6 @@ class UserDomain(Document):
         self.save()
 
         return True
+
+    def __str__(self):
+        return self.user_id
