@@ -101,23 +101,12 @@ class DialogPlanner():
             target_uri = slot_spec_obj.get_name()
 
         usp, created = self.ic.uspm.get_or_create_user_slot_process(slot_spec_obj, target_uri=target_uri)
+        if callback:
+            usp.slot_filled_signal_pattern.connect(callback)
         # usp.ic = self.ic
         is_recepted, result = usp.fast_evaluation_process_attempt()
-        if is_recepted:
-            if callback:
-                # announce callback
-                # TODO CONSIDER
-                # what if this is not first evaluation attempt of the slot and
-                # the slot process is already in the agenda?
-
-                # it may cause situation when some processes subscribed for the slot when prehistory had no answer,
-                # but during the waiting in the agenda chat went on and user has replied with providing the answer for
-                # a slot that is not actively asked yet.
-                # if we call only the latest callback, then we must gurantee that older listeners that are waiting since
-                # previous requests are not misinformed? (Very unlikely case)
-                callback(result)
-        else:
-            # can not retrieve slot withpout questioning
+        if not is_recepted:
+            # can not retrieve slot withpout active questioning
 
             # #########################################################################
             # ###### User Slot Retrieval Process #####################################

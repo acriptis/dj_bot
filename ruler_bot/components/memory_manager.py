@@ -5,8 +5,11 @@ class MemoryManager():
     def __init__(self, ic):
         self.ic=ic
 
+    @property
+    def memory(self):
         # key value data structure:
-        self.memory = self.ic.user_domain.memory
+        self.ic.user_domain.reload()
+        return self.ic.user_domain.memory
 
     def get_slot_value(self, slot_name_or_uri):
         """
