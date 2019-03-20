@@ -1,9 +1,9 @@
 from dateparser.search import search_dates
 
-from components.slots.slots import BaseSlotField
+from components.slots.slots import BaseSlot
 
 
-class DateTimeSlot(BaseSlotField):
+class DateTimeSlot(BaseSlot):
     """
     Slot functionality for retrieving DateTime entities
     Adapter from dateparselib

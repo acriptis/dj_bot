@@ -1,4 +1,4 @@
-from components.slots.slots import BaseSlotField, \
+from components.slots.slots import BaseSlot, \
     CategoricalReceptorMixin, YesNoReceptorMixin, FreeTextSlot
 
 
@@ -25,7 +25,7 @@ class SlotsFactory():
             TODO specify format
             requestioning_strategy:
         """
-        # cat_slot = BaseSlotField()
+        # cat_slot = BaseSlot()
         # cat_slot.name = name
         # cat_slot.questioner = questioner
         # cat_slot.requestioning_strategy = requestioning_strategy
@@ -63,7 +63,7 @@ class SlotsFactory():
             questioner:
             requestioning_strategy:
         """
-        cat_slot = BaseSlotField()
+        cat_slot = BaseSlot()
         cat_slot.name = name
         cat_slot.questioner = questioner
         cat_slot.requestioning_strategy = requestioning_strategy
@@ -180,7 +180,7 @@ class SlotsFactory():
     #         usable slot instance
     #     """
     #     # TODO finish me
-    #     slot = BaseSlotField()
+    #     slot = BaseSlot()
     #     slot.name = name
     #
     #     target_uri = target_uri or name

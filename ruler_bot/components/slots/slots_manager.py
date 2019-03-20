@@ -59,8 +59,8 @@ class SlotsManager():
             return self.slotname2instance[slotname]
         else:
             # TODO refactor hack:?
-            from components.slots.slots import BaseSlotField
-            res = BaseSlotField.objects(name=slotname)
+            from components.slots.slots import BaseSlot
+            res = BaseSlot.objects(name=slotname)
             if res:
                 return res[0]
             # get class spec by name

@@ -6,15 +6,13 @@ REQUESTIONING_STRATEGY_DEFAULT = "ResumeOnIdle"
 from mongoengine import DynamicDocument, StringField, Document, DynamicField, ListField
 
 
-class BaseSlotField(Document, MongoEngineGetOrCreateMixin):
+class BaseSlot(Document, MongoEngineGetOrCreateMixin):
     """
     Base class for SlotFields
 
 
     """
-    meta = {
-        "allow_inheritance": True
-    }
+
     # "Greed", "ResumeOnIdle", "Passive",
     # requestioning_strategy = "Passive"
     requestioning_strategy = REQUESTIONING_STRATEGY_DEFAULT
@@ -32,6 +30,9 @@ class BaseSlotField(Document, MongoEngineGetOrCreateMixin):
     # (silent value allows to avoid ActiveQuestioning for inferred slots)
     silent_value=DynamicField(required=False)
 
+    meta = {
+        "allow_inheritance": True
+    }
     # TODO finalize model
     # # value silently assumed when user hadn't initiated setting of the slot value
     # silent_value = DynamicField(required=False)
@@ -93,13 +94,17 @@ class BaseSlotField(Document, MongoEngineGetOrCreateMixin):
         raise Exception("Implement me!")
 
 
-class FreeTextSlot(BaseSlotField):
+class FreeTextSlot(BaseSlot):
     """Class for Slots which greedly absorb the text message after the intiation of
     ActiveQuestioningProcess.
 
     This class rejects prehistory recepting, because it does no validation to distinct right text
     from non relevant text
     """
+    meta = {
+        "allow_inheritance": True
+    }
+
     def can_recept(self, text, *args, **kwargs):
         """
         Method that checks if UserMessage can be recepted by Receptor
@@ -144,6 +149,10 @@ class PatternedTextSlot(FreeTextSlot):
     Slot which validates answer by patterns in regexp
     """
     patterns = ListField(DynamicField(required=False))
+
+    meta = {
+        "allow_inheritance": True
+    }
 
     def recept(self, text, *args, **kwargs):
         """
@@ -190,7 +199,7 @@ class PatternedTextSlot(FreeTextSlot):
             return False
 
 
-class CategoricalSlot(BaseSlotField):
+class CategoricalSlot(BaseSlot):
     """
     Slot which restricts domain of values of the slot to a set of nominal categories.
 
@@ -210,6 +219,10 @@ class CategoricalSlot(BaseSlotField):
     #
     #     ],
     # }
+
+    meta = {
+        "allow_inheritance": True
+    }
 
     def can_recept(self, text, *args, **kwargs):
         """
@@ -295,7 +308,7 @@ class CategoricalSlot(BaseSlotField):
 
 ########DEPRECATED##########################################################################################
 ##################################################################################################
-# class CategoricalSlotField(BaseSlotField):
+# class CategoricalSlotField(BaseSlot):
 #     """
 #     Abstraction of Categorical Slot
 #     """
@@ -509,7 +522,7 @@ class YesNoReceptorMixin(CategoricalReceptorMixin):
 
 ### Drafts:
 #
-# class DictionaryBasedSlotField(BaseSlotField):
+# class DictionaryBasedSlotField(BaseSlot):
 #     """
 #
 #         Dictionary based slot uses CANONIC_NAMES list as domain of distinct value classes.

@@ -1,12 +1,11 @@
 
 # TODO refactor with real city gazetter
-from components.slots.slots import BaseSlotField, CategoricalReceptorMixin
+from mongoengine import StringField, DynamicField
+
+from components.slots.slots import CategoricalSlot
 
 
-class CitySlot(BaseSlotField, CategoricalReceptorMixin):
-    name = 'CitySlot'
-
-    questioner = "В каком городе?"
+class CitySlot(CategoricalSlot):
 
     ######################################################
     # Slot's Values Domain Specification
@@ -25,3 +24,8 @@ class CitySlot(BaseSlotField, CategoricalReceptorMixin):
         ]
 
     }
+    name = StringField(default='CitySlot')
+
+    categories_synsets = DynamicField(default=synsets)
+
+    questioner = StringField(default="В каком городе?")
