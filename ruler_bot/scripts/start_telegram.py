@@ -30,14 +30,14 @@ if __name__ == '__main__':
     You need to export environmental variable TG_BOT_TOKEN with your Telegram token before start
     """
 
-    humans = {}
+    personal_agents = {}
 
     def init_agent():
         return AgentSkillEmulator([RootSkill, TranslatorSkill, IntroductionSkill])
 
     def start(bot, update):
         chat_id = update.message.chat_id
-        humans[chat_id] = init_agent()
+        personal_agents[chat_id] = init_agent()
         bot.send_message(chat_id=chat_id, text='Добрый день, человек. В чём ваша проблема?')
 
     def on_telegram_update(bot, update):
@@ -54,10 +54,10 @@ if __name__ == '__main__':
         chat_id = update.message.chat_id
         user_msg = update.message.text
         print('{} >>> {}'.format(chat_id, user_msg))
-        if chat_id not in humans:
-            humans[chat_id] = init_agent()
+        if chat_id not in personal_agents:
+            personal_agents[chat_id] = init_agent()
 
-        agent = humans[chat_id]
+        agent = personal_agents[chat_id]
 
         bot_resp_state = agent(user_msg, chat_id)
         print(bot_resp_state)
