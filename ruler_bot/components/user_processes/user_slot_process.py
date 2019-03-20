@@ -249,7 +249,7 @@ class UserSlotProcess(UserProcess, MongoEngineGetOrCreateMixin):
         self.state = self.COMPLETED
         if self.target_uri:
             # write the memory
-            self.ic.MemoryManager.put_slot_value(self.target_uri, result)
+            self.user_domain.udm.MemoryManager.put_slot_value(self.target_uri, result)
 
         # now we should remove question under discussion (if we are in active questioning process)
         # if self.slot in self.ic.DialogPlanner.questions_under_discussion:
