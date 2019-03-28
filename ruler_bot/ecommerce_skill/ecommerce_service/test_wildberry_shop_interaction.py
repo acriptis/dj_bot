@@ -13,19 +13,24 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ruler_bot.settings")
 import django
 django.setup()
 
-from ecommerce_skill.ecommerce_service.drugs_shop import DrugsShop
+# from ecommerce_skill.ecommerce_service.drugs_shop import DrugsShop
+from ecommerce_skill.ecommerce_service.wildberry_shop import WildberryShop
 
 if __name__=="__main__":
-    drugshop = DrugsShop()
-    results = drugshop.search_products("лыжи")
+    shop = WildberryShop()
+    results = shop.search_products("лыжи")
+    print("search results:")
     print(results)
-    import ipdb; ipdb.set_trace()
-    product_details = drugshop.detail_product(results[0]['id'])
+    # import ipdb; ipdb.set_trace()
+    product_details = shop.detail_product(results[0]['product_url'])
+    print("product_details:")
     print(product_details)
-    product_line = drugshop.add_product_to_cart(results[0]['id'], 2)
+    product_line = shop.add_product_to_cart(results[0]['product_url'], 2)
+    print("product_line:")
     print(product_line)
 
-    cart = drugshop.show_cart()
+    cart = shop.show_cart()
+    print("cart:")
     print(cart)
 
-    drugshop.checkout_cart(cart)
+    shop.checkout_cart(cart)

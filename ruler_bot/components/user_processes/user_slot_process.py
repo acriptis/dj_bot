@@ -59,7 +59,7 @@ class UserSlotProcess(UserProcess, MongoEngineGetOrCreateMixin):
         self.slot_filled_signal = Signal(signal_type="SlotFilledSignal", user_domain=self.user_domain)
         from components.signal_pattern_reflex.signal_pattern import SignalPattern
         self.slot_filled_signal_pattern, _ = SignalPattern.get_or_create_strict(
-            signal_type="SlotFilledSignal", user_domain=self.user_domain)
+            signal_type="SlotFilledSignal", user_domain=self.user_domain, slot=self.slot)
         # self.slot_filled_signal.save()
 
     @classmethod
@@ -247,6 +247,7 @@ class UserSlotProcess(UserProcess, MongoEngineGetOrCreateMixin):
             print(self)
 
         self.state = self.COMPLETED
+
         if self.target_uri:
             # write the memory
             self.user_domain.udm.MemoryManager.put_slot_value(self.target_uri, result)
