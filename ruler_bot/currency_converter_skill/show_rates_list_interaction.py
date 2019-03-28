@@ -13,22 +13,25 @@ class ShowRatesListInteraction(Interaction):
         # construct model of receptors, slots and subinteractions
         # ####################################################################################
         # # Set up Intent Receptor ###############################################################
-        from components.receptors.models import Receptor
-        # from components.signal_reflex_routes.models.signals import ReceptorTriggeredSignal
-        receptor, created = Receptor.get_or_create(
-            class_name='PhrasesMatcher', init_args={'phrases': ["Курсы валют", "курсы"]})
+        # from components.receptors.models import Receptor
+        # # from components.signal_reflex_routes.models.signals import ReceptorTriggeredSignal
+        # receptor, created = Receptor.get_or_create(
+        #     class_name='PhrasesMatcher', init_args={'phrases': ["Курсы валют", "курсы"]})
+        #
+        # from components.signal_pattern_reflex.signal_pattern import SignalPattern
+        # # pattern to connect for any user message (from any user domain)
+        # user_message_signal_pattern, _ = SignalPattern.get_or_create_strict(
+        #     signal_type="UserMessageSignal")
+        #
+        # user_message_signal_pattern.connect(receptor.__call__)
+        #
+        # # set up triggering receptor:
+        # self.receptor_trigger_signal_pattern, _ = SignalPattern.get_or_create_strict(
+        #     signal_type="ReceptorTriggeredSignal", receptor=receptor)
 
-        from components.signal_pattern_reflex.signal_pattern import SignalPattern
-        # pattern to connect for any user message (from any user domain)
-        user_message_signal_pattern, _ = SignalPattern.get_or_create_strict(
-            signal_type="UserMessageSignal")
-
-        user_message_signal_pattern.connect(receptor.__call__)
-
-        # set up triggering receptor:
-        self.receptor_trigger_signal_pattern, _ = SignalPattern.get_or_create_strict(
-            signal_type="ReceptorTriggeredSignal", receptor=receptor)
-
+        self._connect_receptor(receptor_type="PhrasesMatcher",
+                               init_args={'phrases': ["Курсы валют", "курсы"]},
+                               callback_fn=self.start)
 
     #
     #
@@ -58,7 +61,9 @@ class ShowRatesListInteraction(Interaction):
         """
         # we should connect receptor trigger to interaction start because in init interaction
         # is not saved yet
-        self.receptor_trigger_signal_pattern.connect(self.start)
+
+
+        # self.receptor_trigger_signal_pattern.connect(self.start)
         # import ipdb; ipdb.set_trace()
 
 

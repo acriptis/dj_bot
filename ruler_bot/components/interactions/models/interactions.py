@@ -235,3 +235,17 @@ class Interaction(Document, AbstractInteraction, MongoEngineGetOrCreateMixin):
 
         return self.name
 
+    def _connect_receptor(self, receptor_type, init_args, callback_fn):
+        """Connects receptor to the system"""
+        # ###########################################################
+        from components.receptors.models import Receptor
+        receptor, created = Receptor.get_or_create(class_name=receptor_type, init_args=init_args)
+
+        # udc.user_domain.user_message_signal.connect_receptor(receptor)
+        from components.signal_pattern_reflex.signal_pattern import SignalPattern
+        sp, _ = SignalPattern.get_or_create_strict(signal_type="UserMessageSignal")
+        sp.connect(receptor.__call__)
+
+        receptor_trigger_signal_pattern, _ = SignalPattern.get_or_create_strict(
+            signal_type="ReceptorTriggeredSignal", receptor=receptor)
+        receptor_trigger_signal_pattern.connect(callback_fn)

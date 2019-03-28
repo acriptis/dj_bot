@@ -17,19 +17,23 @@ class RestartUserDomainInteraction(Interaction):
 
         #
         # ############### Prepare RECEPTOR #################################################
-        from components.receptors.models import Receptor
-        # from components.signal_reflex_routes.models.signals import ReceptorTriggeredSignal
-        receptor, created = Receptor.get_or_create(
-            class_name='PhrasesMatcher', init_args={'phrases': ["/start"]})
+        # from components.receptors.models import Receptor
+        # # from components.signal_reflex_routes.models.signals import ReceptorTriggeredSignal
+        # receptor, created = Receptor.get_or_create(
+        #     class_name='PhrasesMatcher', init_args={'phrases': ["/start"]})
+        #
+        # from components.signal_pattern_reflex.signal_pattern import SignalPattern
+        # sp, _ = SignalPattern.get_or_create_strict(signal_type="UserMessageSignal")
+        # udc.user_domain.user_message_signal_pattern.connect(receptor.__call__)
+        #
+        # receptor_trigger_signal_pattern, _ = SignalPattern.get_or_create_strict(
+        #     signal_type="ReceptorTriggeredSignal", receptor=receptor)
+        #
+        # receptor_trigger_signal_pattern.connect(self.start)
 
-        from components.signal_pattern_reflex.signal_pattern import SignalPattern
-        sp, _ = SignalPattern.get_or_create_strict(signal_type="UserMessageSignal")
-        udc.user_domain.user_message_signal_pattern.connect(receptor.__call__)
-
-        receptor_trigger_signal_pattern, _ = SignalPattern.get_or_create_strict(
-            signal_type="ReceptorTriggeredSignal", receptor=receptor)
-
-        receptor_trigger_signal_pattern.connect(self.start)
+        self._connect_receptor(receptor_type="PhrasesMatcher",
+                               init_args={'phrases': ["/start"]},
+                               callback_fn=self.start)
 
     def start(self, *args, **kwargs):
         # inits UserInteraction
