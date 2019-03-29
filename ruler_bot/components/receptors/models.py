@@ -58,6 +58,11 @@ class Receptor(Document, MongoEngineGetOrCreateMixin):
         elif classname == "RegexpTranslatePerceptor":
             from translator_skill.translator_intents_receptor.translator_perceptor.translate_intent_perceptor import RegexpTranslatePerceptor
             return RegexpTranslatePerceptor
+        elif classname == "RegExpGroupMatcher":
+            from components.matchers.matchers import RegExpGroupMatcher
+            return RegExpGroupMatcher
+        else:
+            raise Exception(f"Unknown receptor type {classname}!")
 
     def __call__(self, *args, **kwargs):
         # if self._model_obj.check_match(*args, **kwargs):
