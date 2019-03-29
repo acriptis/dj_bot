@@ -1,4 +1,3 @@
-from components.dialog_management.base_dialog_planner import BaseDialogPlanner
 from components.dialog_management.agenda import Agenda
 from components.dialog_management.tasks import InteractionTask, SlotTask
 from components.user_processes.user_interaction_process import UserInteractionProcess
@@ -38,18 +37,18 @@ class DialogPlanner():
         ############################################
         # TODO Agenda loop DOCumentation
 
-        # dictionary for callback functions which must be called after particular interactions completed
-        self.callbacks_on_completion_of_interactions = {}
-        # ^^ TODO delegate task management to celery?
+        # # dictionary for callback functions which must be called after particular interactions completed
+        # self.callbacks_on_completion_of_interactions = {}
+        # # ^^ TODO delegate task management to celery?
 
-        self.callbacks_on_completion_of_slots = {}
-        # TODO delegate listeners functionality to EventProcessingBus?
-        # self.callbacks_on_completion_of_interactions = {
-        #     "<interaction_name>": [cb_fn1, cb_fn2...]
-        # }
+        # self.callbacks_on_completion_of_slots = {}
+        # # TODO delegate listeners functionality to EventProcessingBus?
+        # # self.callbacks_on_completion_of_interactions = {
+        # #     "<interaction_name>": [cb_fn1, cb_fn2...]
+        # # }
 
-        # hacky storage to avoid dead callbacks (garbage Collected)
-        self._callbacks_storage = []
+        # # hacky storage to avoid dead callbacks (garbage Collected)
+        # self._callbacks_storage = []
 
 
     # SendText Operation
@@ -177,7 +176,7 @@ class DialogPlanner():
         #     self.callbacks_on_completion_of_interactions[interaction_obj.name].append(callback_fn)
 
     def _evaluate_slot_task(self, slot_spec_obj, priority=10, callback_fns=None,
-                            duplicatable=False, target_uri=None):
+                            duplicatable=False, target_uri=None, **kwargs):
         """
         Slot Task Process
 
@@ -236,7 +235,9 @@ class DialogPlanner():
     def _force_start_slot_value_retrieval_process(self, curr_slot_spec_obj, target_uri, priority=10,
                                                   callback_fns=None):
         """
-        Method which actually starts slot process in system and attaches callback on its completion
+        Method which actually starts slot process
+        ( As Active Questioning Process and attaches callbacks to SPRR system)
+        in system and attaches callback on its completion
         (1.2.3.1.DialogUserSlotRetrievalProcess or 1.2.SlotFillingProcess?)
 
         :param curr_slot_spec_obj:
@@ -249,9 +250,7 @@ class DialogPlanner():
         # import ipdb; ipdb.set_trace()
 
         usp, created = self.ic.uspm.get_or_create_user_slot_process(curr_slot_spec_obj, target_uri=target_uri)
-        # if not created:
-        #     # raise Exception("found existing user slot process, while expecting creation of new one!")
-        #     import ipdb; ipdb.set_trace()
+
         if created:
             # raise Exception("found existing user slot process, while expecting creation of new one!")
             import ipdb;
@@ -261,8 +260,6 @@ class DialogPlanner():
             usp.target_uri = target_uri
 
         if callback_fns:
-            # hack:
-            self._callbacks_storage.append(callback_fns)
             # connect signals
             # import ipdb; ipdb.set_trace()
             for each_cb_fn in callback_fns:
@@ -308,14 +305,7 @@ class DialogPlanner():
 
         """
         print("DialogPlanner.Enqueue interaction: %s" % interaction_obj)
-        # self.queue.append((interaction_obj, priority))
-
         self.agenda.push_interaction_task_by_attrs(interaction_obj, priority, callback_fn)
-        if interaction_obj.name not in self.callbacks_on_completion_of_interactions:
-            self.callbacks_on_completion_of_interactions[interaction_obj.name] = []
-
-        if callback_fn:
-            self.callbacks_on_completion_of_interactions[interaction_obj.name].append(callback_fn)
 
     def enqueue_interaction_by_name(self, interaction_name, priority=10, callback_fn=None):
         """
@@ -376,20 +366,21 @@ class DialogPlanner():
 
         # Callbacks routing:
         # now cal callbacks:
-        print("self.callbacks_on_completion_of_interactions")
-        print(self.callbacks_on_completion_of_interactions)
+        # print("self.callbacks_on_completion_of_interactions")
+        # print(self.callbacks_on_completion_of_interactions)
 
-        if interaction_obj.name in self.callbacks_on_completion_of_interactions and len(
-                self.callbacks_on_completion_of_interactions[interaction_obj.name]) > 0:
-            # run callbacks:
-            for each_cb_fn in self.callbacks_on_completion_of_interactions[interaction_obj.name]:
-                # import ipdb; ipdb.set_trace()
-
-                each_cb_fn(userinteraction=ui)
+        # if interaction_obj.name in self.callbacks_on_completion_of_interactions and len(
+        #         self.callbacks_on_completion_of_interactions[interaction_obj.name]) > 0:
+        #     # run callbacks:
+        #     for each_cb_fn in self.callbacks_on_completion_of_interactions[interaction_obj.name]:
+        #         # import ipdb; ipdb.set_trace()
+        #
+        #         each_cb_fn(userinteraction=ui)
         ##############################################################################
 
         # finally we need to drop interaction from queue (if it exists there)
         # if interaction_obj
+        self.agenda.reload()
         task = self.agenda.pop_by_interaction_obj(interaction_obj)
         if not task:
             # import ipdb; ipdb.set_trace()
@@ -401,7 +392,7 @@ class DialogPlanner():
             print("Moved completed interaction %s from queue into done_list" % task.interaction_obj)
         print("DialogPlanner.COMPLETED INTERACTION: %s/%s" % (interaction_obj, exit_gate))
 
-    def _force_start_interaction_process(self, interaction_obj, priority=10, callback_fn=None):
+    def _force_start_interaction_process(self, interaction_obj, priority=10, callback_fns=None):
         """
         Actually starts Interaction Process
         :param interaction_obj:
@@ -409,6 +400,8 @@ class DialogPlanner():
         :param callback_fn:
         :return:
         """
+        # import ipdb; ipdb.set_trace()
+
         # ASIS instant launching of interaction:
         # TODO: clarify best practice of how to initilize interactions
         #   when should we initialize it from class spec?
@@ -417,6 +410,15 @@ class DialogPlanner():
         # interaction_obj.save()
         ui, _ = UserInteractionProcess.get_or_create(user_domain=self.ic.user_domain,
                                                      interaction=interaction_obj)
+        from components.interactions.models.interactions import AbstractInteraction
+        if callback_fns:
+            # connect signals
+            # import ipdb; ipdb.set_trace()
+            # TODO callbacks connected to default exit gate only!
+            for each_cb_fn in callback_fns:
+                # usp.slot_filled_signal.connect(each_cb_fn, weak=False)
+
+                ui.EXIT_GATES_SIGNAL_PATTERNS[AbstractInteraction.EXIT_GATE_OK].connect(each_cb_fn)
 
         interaction_obj.start(user_domain=self.ic.user_domain)
 
@@ -513,12 +515,14 @@ class DialogPlanner():
         """
         if isinstance(task, InteractionTask):
             interaction_obj = task.interaction_obj
-            self._force_start_interaction_process(interaction_obj)
+
+            self._force_start_interaction_process(interaction_obj, task.priority, task.callback_fns)
+
         elif isinstance(task, SlotTask):
             slot_obj = task.item
             # slots must be carefully started! with check if they already completed,
             # or in process so we neeed to call
             # import ipdb; ipdb.set_trace()
             # lets investigate the case
-            self._evaluate_slot_task(slot_obj, task.priority, task.callback_fns, task.kwargs)
+            self._evaluate_slot_task(slot_obj, task.priority, task.callback_fns, **task.kwargs)
         return

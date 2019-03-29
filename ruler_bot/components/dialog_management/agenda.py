@@ -76,7 +76,21 @@ class Agenda(Document):
 
     def push_interaction_task_by_attrs(self, interaction_obj, priority, callback_fn):
         priority_numerical = self._priority_normalizer(priority)
-        itask = InteractionTask(interaction_obj, priority_numerical, callback_fn)
+
+        # import ipdb; ipdb.set_trace()
+        # TODO fix code duplication in Interactions and slots
+        if callback_fn:
+            # Callback to Reflex conversion
+            # here we need to make resolving of callback function into Reflex
+            from components.signal_pattern_reflex.reflex import Reflex
+            reflex = Reflex.receiver_fn_into_reflex(callback_fn)
+            # reflex = self._callback_to_reflex_resolver(callback_fn)
+            # s_task = SlotTask(item=slot_obj, priority=priority_numerical, callback_fns=[reflex], kwargs=kwargs)
+            itask = InteractionTask(item=interaction_obj, priority=priority_numerical, callback_fns=[reflex])
+        else:
+            # s_task = SlotTask(item=slot_obj, priority=priority_numerical, callback_fns=[], kwargs=kwargs)
+            itask = InteractionTask(item=interaction_obj, priority=priority_numerical, callback_fns=[])
+
         itask.save()
         self.queue_of_tasks.append(itask)
         # import ipdb; ipdb.set_trace()
@@ -87,14 +101,16 @@ class Agenda(Document):
     def push_slot_task_by_attrs(self, slot_obj, priority, callback_fn, **kwargs):
         priority_numerical = self._priority_normalizer(priority)
         # import ipdb; ipdb.set_trace()
+        # TODO fix code duplication in Interactions and slots
         if callback_fn:
+            # Callback to Reflex conversion
             # here we need to make resolving of callback function into Reflex
             from components.signal_pattern_reflex.reflex import Reflex
             reflex = Reflex.receiver_fn_into_reflex(callback_fn)
             # reflex = self._callback_to_reflex_resolver(callback_fn)
-            s_task = SlotTask(item=slot_obj, priority=priority_numerical, callback_fns=[reflex])
+            s_task = SlotTask(item=slot_obj, priority=priority_numerical, callback_fns=[reflex], kwargs=kwargs)
         else:
-            s_task = SlotTask(item=slot_obj, priority=priority_numerical, callback_fns=[])
+            s_task = SlotTask(item=slot_obj, priority=priority_numerical, callback_fns=[], kwargs=kwargs)
         s_task.save()
         #s_task = SlotTask(slot_obj, priority_numerical, callback_fn)
         if priority == "URGENT":

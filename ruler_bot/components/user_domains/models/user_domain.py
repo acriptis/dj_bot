@@ -36,15 +36,15 @@ class UserDomain(Document):
     ############################################
     # TODO Agenda loop DOCumentation
 
-    # dictionary for callback functions which must be called after particular interactions completed
-    callbacks_on_completion_of_interactions = {}
-    # ^^ TODO delegate task management to celery?
+    # # dictionary for callback functions which must be called after particular interactions completed
+    # callbacks_on_completion_of_interactions = {}
+    # # ^^ TODO delegate task management to celery?
 
-    callbacks_on_completion_of_slots = {}
-    # TODO delegate listeners functionality to EventProcessingBus?
-    # self.callbacks_on_completion_of_interactions = {
-    #     "<interaction_name>": [cb_fn1, cb_fn2...]
-    # }
+    # callbacks_on_completion_of_slots = {}
+    # # TODO delegate listeners functionality to EventProcessingBus?
+    # # self.callbacks_on_completion_of_interactions = {
+    # #     "<interaction_name>": [cb_fn1, cb_fn2...]
+    # # }
 
     # hacky storage to avoid dead callbacks (garbage Collected)
     _callbacks_storage = []

@@ -80,6 +80,7 @@ class SlottyFormInteraction(Interaction):
             kwargs['user_slot_process'].user_domain.reload()
             self.ic = kwargs['user_slot_process'].user_domain.udm
 
+        # detect filled and unfilled slots
         for each_slot in self.declared_slots:
             slot_val = self.ic.MemoryManager.get_slot_value_quite(each_slot.name)
             if not slot_val:
@@ -112,52 +113,3 @@ class SlottyFormInteraction(Interaction):
             # run submit action?
             # print("COMPLETING SLOTTY FORM")
             self.ic.DialogPlanner.complete_user_interaction_proc(self, exit_gate=self.EXIT_GATE_OK)
-            # print("KEKEKEKEKEKE")
-
-
-    # @classmethod
-    # def initialize(cls, ic, name=None, *args, **kwargs):
-    #     """
-    #     Interaction initialization requres:
-    #     1. specify its name (And register it in the Interactions Registry)
-    #     2. initilize EXIT GATES of the interaction.
-    #         EXIT GATES are declared in implementation class, if not then default set of exit gates is assumed
-    #         (the only: ExitGate_Ok)
-    #
-    #     :param ic:
-    #     :param name:
-    #     :param args:
-    #     :param kwargs:
-    #     :return:
-    #     """
-    #
-    #     if not name:
-    #         # default name is a name of class
-    #         name = cls.__name__
-    #
-    #     intrctn, _ = cls.objects.get_or_create(name=name)
-    #
-    #     intrctn.ic = ic
-    #
-    #     # #########################################################################################
-    #     # # Exit Gate Signals and Registry initialization
-    #     intrctn.EXIT_GATES_SIGNALS = {}
-    #
-    #     if not hasattr(intrctn, 'EXIT_GATES_NAMES_LIST'):
-    #         # TODO fix to support inheritance of ExitGates!
-    #         # then import default Gates :
-    #         intrctn.EXIT_GATES_NAMES_LIST = cls.base_EXIT_GATES_NAMES_LIST
-    #
-    #     # now init signal objects for each exit gate:
-    #     for each_exit_gate_name in intrctn.EXIT_GATES_NAMES_LIST:
-    #         # create a signal object for each exit gate
-    #         intrctn.EXIT_GATES_SIGNALS[each_exit_gate_name] = django.dispatch.dispatcher.Signal(
-    #             providing_args=["userdialog"])
-    #
-    #     intrctn._anti_garbage_collector_callbacks_list = []
-    #     # END ExitGate Signals Initialization
-    #
-    #     ########################################################################################
-    #     intrctn.post_init_hook()
-    #
-    #     return intrctn
