@@ -13,6 +13,7 @@ class UserInteractionProcess(UserProcess):
         # create signal for each exit gate in interaction
         # Exit Gate Signals and Registry initialization
         self.EXIT_GATES_SIGNALS = {}
+        self.EXIT_GATES_SIGNAL_PATTERNS = {}
 
         if not hasattr(self.interaction, 'EXIT_GATES_NAMES_LIST'):
             # TODO fix to support inheritance of ExitGates!
@@ -25,19 +26,20 @@ class UserInteractionProcess(UserProcess):
         # now init signal objects for each exit gate:
         # from components.signal_reflex_routes.models.signals import InteractionProcessCompletedSignal
         from components.signal_pattern_reflex.signal import Signal
+        from components.signal_pattern_reflex.signal_pattern import SignalPattern
 
         for each_exit_gate_name in self.EXIT_GATES_NAMES_LIST:
-           # create a signal object for each exit gate
-           # self.EXIT_GATES_SIGNALS[each_exit_gate_name] =
-           # django.dispatch.dispatcher.Signal(providing_args=["userdialog"])
-           self.EXIT_GATES_SIGNALS[each_exit_gate_name] = Signal(
-               signal_type="InteractionProcessCompletedSignal", user_domain=self.user_domain,
-                                                               interaction=self.interaction,
-                                                               exit_gate=each_exit_gate_name)
-               # InteractionProcessCompletedSignal.get_or_create(user_domain=self.user_domain,
-               #                                                 interaction=self.interaction,
-               #                                                 exit_gate=each_exit_gate_name)
-
+            # create a signal object for each exit gate
+            self.EXIT_GATES_SIGNAL_PATTERNS[
+                each_exit_gate_name], _ = SignalPattern.get_or_create_strict(
+                signal_type="InteractionProcessCompletedSignal", user_domain=self.user_domain,
+                interaction=self.interaction,
+                exit_gate=each_exit_gate_name
+            )
+            self.EXIT_GATES_SIGNALS[each_exit_gate_name] = Signal(
+                signal_type="InteractionProcessCompletedSignal", user_domain=self.user_domain,
+                interaction=self.interaction,
+                exit_gate=each_exit_gate_name)
 
     def __str__(self):
         return "UserInteractionProcess: User:<%s> Interaction: %s" % (
