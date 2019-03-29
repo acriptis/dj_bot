@@ -213,21 +213,27 @@ class PhraseGroupsMatcherController:
         returns list of indexes of matched output gates
         :param text:
         :return:
+            tuple
+            if something matched then first tuple is a list of mathed matchers indexes,
+                the second tuple is a list of results from corresponding matchers
+
+            if nothing matched then
+                ([], []) is returned
         """
         matched_outputs = []
+        matched_results = []
         for idx, each_mathing_group in enumerate(self.matcher_groups):
-            if each_mathing_group.check_match(text):
+            matcher_result = each_mathing_group.check_match(text)
+            if matcher_result:
                 # matched
                 matched_outputs.append(idx)
+                matched_results.append(matcher_result)
 
-        if not matched_outputs:
-            # default output of NOMATCH
-            matched_outputs.append(len(self.matcher_groups))
+        # if not matched_outputs:
+        #     # default output of NOMATCH
+        #     matched_outputs.append(len(self.matcher_groups))
 
-        return matched_outputs
-
-    def __call__(self, text):
-        return self.process(text)
+        return matched_outputs, matched_results
 
     def add_matcher(self, matcher):
         """
