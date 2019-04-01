@@ -1,7 +1,10 @@
 The advanced Signal System.
 
-1. Specify Signal Patterns
-2. Connect Reflexes to Signal Patterns
-3. Call Signals
+Use cases:
+1. Specify Signal Patterns and
+2. Connect Reflexes to Signal Patterns via SignalPatternReflexRoutes
+3. Call Signals. The system will match emitted Signal to relevant SignalPatterns registered in the system
+    and will launch corresponding Reflexes.
+4. Reflex may be the function, or method of class with special initialization scenarios (stateful model)
 
  
