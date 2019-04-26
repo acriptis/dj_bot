@@ -1,7 +1,7 @@
 from mongoengine import *
 # from django.db.models import DateField, DateTimeField, sql
 from components.signal_pattern_reflex.signal_pattern_reflex_route import SignalPatternReflexRoute
-from components.signal_pattern_reflex.reflex import ReceptorReflex
+from components.signal_pattern_reflex.reflex import ReceptorReflex, DynamicObjectMethodReflex
 
 
 class SignalPattern(DynamicDocument):
@@ -231,6 +231,7 @@ class SignalPattern(DynamicDocument):
             return False
 
         return True
+
     # #####################################################################################
     def connect(self, receiver, sender=None, weak=True, dispatch_uid=None):
         """Connects function which may be wrapped into reflex object to the Signal Pattern
@@ -244,6 +245,10 @@ class SignalPattern(DynamicDocument):
         Returns:
 
         """
+        if weak:
+            # not persistent connection?
+
+            pass
         # 0. convert receiver into ReflexObject with introspection
         # make type switcher:
         from components.signal_pattern_reflex.reflex import ObjectMethodReflex
@@ -256,7 +261,16 @@ class SignalPattern(DynamicDocument):
 
         import types
         if isinstance(receiver, types.MethodType):
-            srr = self.connect_object_method(instance_locator=receiver.__self__, method_name=receiver.__name__)
+            try:
+                # how to differentiate runtime connection objects and persistent connections?
+                srr = self.connect_object_method(instance_locator=receiver.__self__,
+                                                 method_name=receiver.__name__)
+            except Exception as e:
+                # for dynamic objects:
+                from components.signal_pattern_reflex.reflex import DynamicObjectMethodReflex
+                reflex = DynamicObjectMethodReflex.reflex_from_receiver(receiver)
+                srr, _ = SignalPatternReflexRoute.get_or_create(signal_pattern=self,
+                                                                reflex=reflex)
             return srr
 
         print("Implement me in connect_<object_type> method!!!")
@@ -298,17 +312,13 @@ class SignalPattern(DynamicDocument):
         Returns: SignalReflexRoute specifying persistent connection
 
         """
-
-        # import ipdb; ipdb.set_trace()
-        # ??????:
-        user_domain = self.user_domain
-        # create Reflex for an Interaction's method
-        # from components.signal_reflex_routes.models.reflexes import ObjectMethodReflex
         from components.signal_pattern_reflex.reflex import ObjectMethodReflex
+
         object_method_reflex, _ = ObjectMethodReflex.get_or_create(
-            user_domain=user_domain,
+            # user_domain=user_domain,
             instance_locator=instance_locator,
             method_name=method_name)
+
 
         # now test Signal Reflex Route creation
         srr, _ = SignalPatternReflexRoute.get_or_create(signal_pattern=self,
@@ -343,7 +353,7 @@ class SignalPattern(DynamicDocument):
         instance = receiver.__self__
         # from components.signal_reflex_routes.models.reflexes import ObjectMethodReflex
         from components.signal_pattern_reflex.reflex import ObjectMethodReflex
-        omr = ObjectMethodReflex.objects(user_domain=instance.user_domain, instance_locator=instance,method_name=method_name)[0]
+        omr = ObjectMethodReflex.objects(instance_locator=instance,method_name=method_name)[0]
         if not omr:
             import ipdb; ipdb.set_trace()
 

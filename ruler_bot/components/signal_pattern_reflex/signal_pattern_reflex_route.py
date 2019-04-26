@@ -24,6 +24,9 @@ class SignalPatternReflexRoute(Document, MongoEngineGetOrCreateMixin):
         cb_fn(**signal_data)
         try:
             # reload model cb_fn may change state of the system!
+            # callback may be a receptor function which disconnects itself from data flow, so
+            # after disconnection route is deleted
+            # TODO maybe add state of route to make it disabled not deleted?
             self.reload()
             # increment calls counter
             self.execution_counter += 1
@@ -31,7 +34,7 @@ class SignalPatternReflexRoute(Document, MongoEngineGetOrCreateMixin):
         except Exception as e:
             print(e)
             print("Warning: callback deleted?")#
-            #import ipdb; ipdb.set_trace()
+            # import ipdb; ipdb.set_trace()
             print(e)
 
     def __str__(self):

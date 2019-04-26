@@ -21,6 +21,7 @@ class Signal():
             # import ipdb; ipdb.set_trace()
             signal_data.update(self.data)
 
+        # find relevant signal patterns that match
         sps = SignalPattern.filter_from_signal(**signal_data)
         print(f"Send Signal: {signal_data}")
         count = len(sps)
@@ -38,10 +39,14 @@ class Signal():
             # potentialy this occurs in 2 cases:
             # if we have exception in reflex functor or
             import mongoengine
+
             if e.__class__ == mongoengine.errors.DoesNotExist:
                 # when  reflex was deleted during the looping
                 # previous reflexes (on /start event)
                 # ok
+                print(each_srr.id)
+                print("Missed reflexRoute. Skipping silently")
+                print(e)
                 return
 
             else:

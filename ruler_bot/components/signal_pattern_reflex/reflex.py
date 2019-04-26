@@ -59,10 +59,13 @@ class Reflex(Document, MongoEngineGetOrCreateMixin):
 
 
 class ObjectMethodReflex(Reflex):
+    """
+    Persistent objects method reflex
+    """
     # meta = {"abstract": True}
     meta = {"allow_inheritance": True}
 
-    user_domain = ReferenceField(UserDomain, required=False)
+    # user_domain = ReferenceField(UserDomain, required=False)
 
     # Interaction object or UserSlotProcess object
     instance_locator = GenericReferenceField()
@@ -76,48 +79,22 @@ class ObjectMethodReflex(Reflex):
         Returns:
 
         """
-        # import ipdb; ipdb.set_trace()
-
         instance = self.instance_locator
         if isinstance(instance, Interaction):
-            # interaction
-            # import ipdb; ipdb.set_trace()
-
-            # user_domain_controller = UserDomainController(self.user_domain)
-            # user_domain_controller.im.
-            # instance.connect_to_dataflow(user_domain_controller)
             print("Interaction callback")
 
         elif isinstance(instance, UserSlotProcess):
             print("UserSlotProcess callback")
-            user_domain_controller = UserDomainController(self.user_domain)
             if not instance.slot:
-                import ipdb; ipdb.set_trace()
+                raise Exception(f"No slot instance in UserSlotProcess {instance}!")
 
-                # we must init slot element as active object from slot codename:
-
-                slot_codename = instance.slot_codename
-                instance.slot = user_domain_controller.sm.slotname2instance[slot_codename]
-                # import ipdb; ipdb.set_trace()
-
-            # instance.connect_to_dataflow(user_domain_controller)
         elif isinstance(instance, Receptor):
             print(f"Receptor {instance} recept function")
-            # print("Receptor recept function")
-            # user_domain_controller = UserDomainController(self.user_domain)
-            # import ipdb; ipdb.set_trace()
 
-            # instance.connect_to_dataflow(user_domain_controller)
-
-            # instance.connect_to_dataflow(user_domain_controller)
         elif isinstance(instance, AbstractTextMatcher):
             print("AbstractTextMatcher recept function")
-            user_domain_controller = UserDomainController(self.user_domain)
             import ipdb; ipdb.set_trace()
 
-            # instance.connect_to_dataflow(user_domain_controller)
-
-            # instance.connect_to_dataflow(user_domain_controller)
         else:
             raise Exception("Unknown Reflex Object!")
 
@@ -127,7 +104,8 @@ class ObjectMethodReflex(Reflex):
 
         return getattr(instance, self.method_name)
 
-
+    def __str__(self):
+        return f"ObjectMethodReflex[instance: {self.instance_locator}, method: {self.method_name}]"
 
 
 class ReceptorReflex(Reflex):
@@ -153,36 +131,40 @@ class ReceptorReflex(Reflex):
         return self.receptor.__call__
 
 
-class InteractionMethodReflex(ObjectMethodReflex):
+class DynamicObjectMethodReflex(Reflex):
     """
-        Reflex for launching Methods of InteractionProcesses
+    For reflexes which are restorable by module path, class name
     """
+    # module_locator = StringField()
+    # class_locator: 'aiml_skill.aimls_skill.AIMLSkill':
+    class_locator = StringField()
+    init_args = DictField(required=False)
+    method_name = StringField(required=False, default="__call__")
 
-    def __call__(self, *args, **kwargs):
-        # when reflex is called we need to retrieve an object and launch its method
-        raise Exception(f"{self.__class__.__name__}.__call__: Implement me!")
+    @classmethod
+    def reflex_from_receiver(cls, receiver):
+
+        clss = receiver.__self__.__class__
+        module = clss.__module__
+        class_locator = module +"." +clss.__name__
+
+        reflex, _ = cls.get_or_create(class_locator=class_locator,
+                                      method_name=receiver.__name__)
+        return reflex
 
     def return_prepared_callback(self, *args, **kwargs):
-        # user_domain_controller = UserDomainController(self.user_domain)
-        raise Exception(f"{self.__class__.__name__}.__call__: Implement me!")
+        """
+        Method is responsible for returning callback function from reflex persistent representation
+        Returns:
 
+        """
+        from pydoc import locate
+        class_of_obj = locate(self.class_locator)
+        if self.init_args:
+            instance = class_of_obj(**self.init_args)
+        else:
+            instance = class_of_obj()
+        return getattr(instance, self.method_name)
 
-class SlotProcessMethodReflex(ObjectMethodReflex):
-    """
-        Reflex for launching Methods of SlotProcesses
-
-    TODO merge with InteractionMethodReflex?
-    """
-
-    def __call__(self, *args, **kwargs):
-        # when reflex is called we need to retrieve an object and launch its method
-        raise Exception(f"{self.__class__.__name__}.__call__: Implement me!")
-
-
-class GenericFunctorReflex(Reflex):
-    """
-    Reflex that encapsulates any python function.
-    """
-    def __call__(self, *args, **kwargs):
-        # when reflex is called we need to retrieve an object and launch its functor
-        raise Exception(f"{self.__class__.__name__}.__call__: Implement me!")
+    def __str__(self):
+        return f"DynamicObjectMethodReflex[class_locator: {self.class_locator}, method: {self.method_name}, init_args={self.init_args}]"

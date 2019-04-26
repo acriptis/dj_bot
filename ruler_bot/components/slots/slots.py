@@ -306,6 +306,74 @@ class CategoricalSlot(BaseSlot):
             self._text2category_index = self._make_inverted_index()
         return self._text2category_index
 
+#
+# class CategoricalRegExpSlot(CategoricalSlot):
+#     """
+#     Categorical slot which allows regular expressions in synsets specification
+#     """
+#     def can_recept(self, text, *args, **kwargs):
+#         """
+#         Method that checks if UserMessage can be recepted by Receptor
+#
+#         :param text:
+#         :param args:
+#         :param kwargs:
+#         :return: True/False
+#         # TODO partial reception of the message!
+#         """
+#         for each_cur in self.text2category_index.keys():
+#             if each_cur.lower() in text.lower():
+#                 return True
+#
+#         else:
+#             return False
+#
+#     def recept(self, text, *args, **kwargs):
+#         """
+#         Method that actually recepts message and extracts Slot's Value from it
+#         :param text:
+#         :param args:
+#         :param kwargs:
+#         :return:
+#         """
+#         results = []
+#         for each_cur in self.text2category_index.keys():
+#             if each_cur.lower() in text.lower():
+#                 results.append(self.text2category_index[each_cur])
+#
+#         if results:
+#             # we have something in results
+#             print("DictionarySlotReceptorMixin.recept: %s grasped results: %s" % (self, results))
+#             # TODO make productions signals?
+#         return results
+#
+#     def prehistory_recept(self, userdialog):
+#         """
+#         Method launched after interaction triggering to consume User's directive about time without explicit question
+#
+#         In this case we may use the same methods of extraction, although in general case
+#         Prehistory Analysis differs from ExplicitQuestioningAnswer Analysis
+#
+#         Returns only the most recent match!
+#
+#         :return: tuple (is_recepted, results)
+#         """
+#         # get text of prehistory
+#         # grasp datetimes mentioned before, the most recent datetimes are more confident estimations
+#
+#         # import ipdb; ipdb.set_trace()
+#
+#         usermessages = userdialog.list_user_messages()
+#         # search for the recent slot setting (from recent messages to oldest):
+#         for each_msg in reversed(usermessages):
+#             can_rec = self.can_recept(each_msg)
+#             if can_rec:
+#                 results = self.recept(each_msg)
+#                 return can_rec, results
+#
+#         return False, None
+
+
 ########DEPRECATED##########################################################################################
 ##################################################################################################
 # class CategoricalSlotField(BaseSlot):
