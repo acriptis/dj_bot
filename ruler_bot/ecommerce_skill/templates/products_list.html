@@ -1,0 +1,4 @@
+{% for product_dict in products_list %}
+    Продукт {{ forloop.counter }}:
+    {% include "product_detail.html" %}
+{% endfor %}
