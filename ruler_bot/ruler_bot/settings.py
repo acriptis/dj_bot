@@ -31,6 +31,9 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+SKILLS_APPS = [
+    "ecommerce_skill",
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,19 +44,15 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework_mongoengine',
-    # "django_mongoengine",
-    # 'mongonaut'
-    #
     # 'interactions.apps.InteractionsConfig',
     # 'bank_consulter_skill.apps.BankConsulterSkillConfig',
     # 'personal_assistant_skills.apps.PersonalAssistantSkillsConfig',
     # 'root_skill.apps.RootSkillConfig',
     # 'introduction_skill.apps.IntroductionSkillConfig',
-    # 'quickstart',
-    # 'persona',
-    # "stateful_conversation"
-    'components.receptors'
-]
+    # 'components.receptors',
+    # 'components.receptors_djo',
+] + SKILLS_APPS
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -70,7 +69,9 @@ ROOT_URLCONF = 'ruler_bot.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            # "ecommerce_skill.templates",
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
