@@ -3,7 +3,7 @@ dateparser==0.7.0
 -e git+https://github.com/deepmipt/DeepPavlov@0f0f1ec4cf33f817658ffb3d363cb84741a9e032#egg=deeppavlov
 Django==2.1.7
 django-rest-framework-mongoengine==3.3.1
-djangorestframework==3.9.1
+djangorestframework==3.11.2
 djongo==1.2.31
 ipdb==0.11
 mongoengine==0.16.3
